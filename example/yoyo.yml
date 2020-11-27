@@ -1,0 +1,17 @@
+schema:
+  dialect: mysql
+  tables:
+    make:
+      columns:
+        id:
+          type: int
+          unsigned: true
+          nullable: false
+          primary_key: true
+          auto_increment: true
+        name:
+          type: varchar(16)
+          default: ""
+    model:
+      columns:
+        id:

@@ -1,0 +1,21 @@
+# This file can be used as an example, but its primary purpose is for config_test.go
+
+schema:
+  dialect: mysql
+  tables:
+    primary:
+      columns:
+        id:
+          type: int
+          primarykey: true
+          default: 0
+        secondary_id:
+          type: INT
+          reference:
+            table: secondary
+            column: id
+    secondary:
+      columns:
+        id:
+          type: INT
+          primarykey: true

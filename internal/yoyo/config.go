@@ -1,0 +1,72 @@
+package yoyo
+
+import (
+	"errors"
+	"fmt"
+	"github.com/dotvezz/yoyo/internal/schema"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+const (
+	filename              = "yoyo.yml"
+	defaultMigrationsPath = "yoyo/migrations"
+	defaultORMPath        = "yoyo/orm"
+)
+
+// LoadConfig searches for a yoyo.yml file, unmarshals it, and returns the unmarshaled struct.
+// It travels toward the filesystem root, searching for yoyo.yml in each directory until
+// it finds the file, or arrives at either / or <DriveLetter>:\
+func LoadConfig() (yml Config, err error) {
+	var (
+		dir string
+		f   []byte
+	)
+
+	dir, err = os.Getwd()
+	if err != nil {
+		return
+	}
+
+	for len(dir) >= 3 {
+		f, err = ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, filename))
+		if err == nil {
+			break
+		}
+		dir, _ = filepath.Split(strings.TrimRight(dir, "/"))
+		dir = strings.TrimRight(dir, "/")
+	}
+
+	// landed at filesystem root, or something close enough to root to assume it's wrong
+	if len(dir) <= 3 {
+		err = errors.New("unable to find config file")
+		return
+	}
+
+	err = yaml.Unmarshal(f, &yml)
+
+	if yml.Paths.Migrations == "" {
+		yml.Paths.Migrations = fmt.Sprintf("%s/%s", dir, defaultMigrationsPath)
+	}
+
+	if yml.Paths.ORM == "" {
+		yml.Paths.ORM = fmt.Sprintf("%s/%s", dir, defaultORMPath)
+	}
+
+	return
+}
+
+// Config is a struct which represents the yoyo.yml file
+type Config struct {
+	Paths  Paths
+	Schema schema.Database
+}
+
+// Paths defines the locations that Migrations and generated ORM code will be created in
+type Paths struct {
+	Migrations string
+	ORM        string // Soon...
+}
