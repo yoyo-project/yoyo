@@ -1,5 +1,10 @@
 # yoyo
 
+[![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dotvezz/yoyo)](https://goreportcard.com/report/github.com/dotvezz/yoyo)
+[![codecov](https://codecov.io/gh/dotvezz/yoyo/branch/main/graph/badge.svg)](https://codecov.io/gh/dotvezz/yoyo)
+[![CircleCI](https://circleci.com/gh/dotvezz/yoyo/tree/main.svg?style=shield)](https://circleci.com/gh/dotvezz/yoyo/tree/main)
+
 A Repository Generator for Go
 
 ## Usage
