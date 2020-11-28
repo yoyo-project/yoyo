@@ -2,6 +2,24 @@
 
 A Repository Generator for Go
 
+## Usage
+
+### yoyo generate repos
+
+Status: Concept (Pre-WIP)
+
+yoyo's main function is generating repositories
+
+### yoyo generate migration
+
+Status: WIP
+
+## Configuration
+
+Status: WIP
+
+Configuration for yoyo is kept in your project's `yoyo.yml` file.
+
 ## Managing Database Connections
 
 When running or generating migrations, Yoyo's connection to your database is environment-driven
