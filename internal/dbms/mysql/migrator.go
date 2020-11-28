@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
 	"github.com/dotvezz/yoyo/internal/datatype"
 	"github.com/dotvezz/yoyo/internal/dbms/base"
@@ -23,7 +24,7 @@ type migrator struct {
 
 func (d *migrator) TypeString(dt datatype.Datatype) (s string, err error) {
 	if dt&datatype.MySQL != datatype.MySQL {
-		return "", d.UnsupportedDatatype(dt)
+		return "", errors.New("unsupported datatype")
 	}
 	switch dt {
 	case datatype.Integer:

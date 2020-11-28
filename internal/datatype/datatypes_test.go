@@ -2,6 +2,7 @@ package datatype
 
 import (
 	"gopkg.in/yaml.v2"
+	"reflect"
 	"testing"
 )
 
@@ -116,6 +117,275 @@ func TestDatatype_UnmarshalYAML(t *testing.T) {
 
 			if tt.wantDatatype != ts.Datatype {
 				t.Errorf("UnmarshalYAML() Datatype = %s, wantDatatype = %s", ts.Datatype, tt.wantDatatype)
+			}
+		})
+	}
+}
+
+func TestDatatype_String(t *testing.T) {
+	tests := []struct {
+		dt   Datatype
+		want string
+	}{
+		{
+			dt:   Integer,
+			want: integer,
+		},
+		{
+			dt:   TinyInt,
+			want: tinyint,
+		},
+		{
+			dt:   SmallInt,
+			want: smallint,
+		},
+		{
+			dt:   MediumInt,
+			want: mediumint,
+		},
+		{
+			dt:   BigInt,
+			want: bigint,
+		},
+		{
+			dt:   Decimal,
+			want: decimal,
+		},
+		{
+			dt:   Varchar,
+			want: varchar,
+		},
+		{
+			dt:   Text,
+			want: text,
+		},
+		{
+			dt:   TinyText,
+			want: tinytext,
+		},
+		{
+			dt:   MediumText,
+			want: mediumtext,
+		},
+		{
+			dt:   LongText,
+			want: longtext,
+		},
+		{
+			dt:   Char,
+			want: char,
+		},
+		{
+			dt:   Blob,
+			want: blob,
+		},
+		{
+			dt:   Enum,
+			want: enum,
+		},
+		{
+			dt:   Boolean,
+			want: boolean,
+		},
+		{
+			dt:   123123,
+			want: "NONE",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			if got := tt.dt.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDatatype_IsInt(t *testing.T) {
+	tests := []struct {
+		dt   Datatype
+		want bool
+	}{
+		{
+			dt:   Integer,
+			want: true,
+		},
+		{
+			dt:   Text,
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.dt.String(), func(t *testing.T) {
+			if got := tt.dt.IsInt(); got != tt.want {
+				t.Errorf("IsInt() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDatatype_IsNumeric(t *testing.T) {
+	tests := []struct {
+		dt   Datatype
+		want bool
+	}{
+		{
+			dt:   Integer,
+			want: true,
+		},
+		{
+			dt:   Decimal,
+			want: true,
+		},
+		{
+			dt:   Text,
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.dt.String(), func(t *testing.T) {
+			if got := tt.dt.IsNumeric(); got != tt.want {
+				t.Errorf("IsNumeric() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDatatype_IsBinary(t *testing.T) {
+	tests := []struct {
+		dt   Datatype
+		want bool
+	}{
+		{
+			dt:   Integer,
+			want: false,
+		},
+		{
+			dt:   Decimal,
+			want: false,
+		},
+		{
+			dt:   Text,
+			want: false,
+		},
+		{
+			dt:   Blob,
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.dt.String(), func(t *testing.T) {
+			if got := tt.dt.IsBinary(); got != tt.want {
+				t.Errorf("IsNumeric() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDatatype_RequiresScale(t *testing.T) {
+	tests := []struct {
+		dt   Datatype
+		want bool
+	}{
+		{
+			dt:   Integer,
+			want: false,
+		},
+		{
+			dt:   Decimal,
+			want: true,
+		},
+		{
+			dt:   Text,
+			want: false,
+		},
+		{
+			dt:   Enum,
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.dt.String(), func(t *testing.T) {
+			if got := tt.dt.RequiresScale(); got != tt.want {
+				t.Errorf("IsNumeric() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDatatype_IsString(t *testing.T) {
+	tests := []struct {
+		dt   Datatype
+		want bool
+	}{
+		{
+			dt:   Integer,
+			want: false,
+		},
+		{
+			dt:   Decimal,
+			want: false,
+		},
+		{
+			dt:   Text,
+			want: true,
+		},
+		{
+			dt:   Enum,
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.dt.String(), func(t *testing.T) {
+			if got := tt.dt.IsString(); got != tt.want {
+				t.Errorf("IsNumeric() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDatatype_IsSignable(t *testing.T) {
+	tests := []struct {
+		dt   Datatype
+		want bool
+	}{
+		{
+			dt:   Integer,
+			want: true,
+		},
+		{
+			dt:   Decimal,
+			want: true,
+		},
+		{
+			dt:   Text,
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.dt.String(), func(t *testing.T) {
+			if got := tt.dt.IsSignable(); got != tt.want {
+				t.Errorf("IsNumeric() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDatatype_MarshalYAML(t *testing.T) {
+	tests := []struct {
+		dt      Datatype
+		want    string
+	}{
+		{
+			dt: Integer,
+			want: "integer",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.dt.String(), func(t *testing.T) {
+			got, _ := tt.dt.MarshalYAML()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MarshalYAML() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

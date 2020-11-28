@@ -13,7 +13,7 @@ func (d *Base) TypeString(dt datatype.Datatype) (string, error) {
 	s := dt.String()
 
 	if s == "NONE" {
-		return "", d.InvalidDatatype(dt)
+		return "", datatype.UnknownDatatype
 	}
 
 	return s, nil
