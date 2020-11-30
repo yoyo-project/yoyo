@@ -4,28 +4,28 @@ import "strings"
 
 // Datatype is used to encode information about types for use in generation or validation
 // The least-significant 8 bits are reserved for general metadata
-// The next 16 bits are reserved for DBMS support metadata
-// The next 8 bits are reserved for unique identification
+// The next 16 bits are not currently used. They were historically reserved for DBMS support in the early concept stage.
+// The next 8 bits are reserved for unique type identification
 // The last 32 bits are not currently used
 type Datatype uint64
 
-// These are the actual Datatypes with all the metadata and unique identifiers encoded into them
+// These are the actual Datatype constants with all the metadata and unique identifiers encoded into them
 const (
-	Integer    = idInteger | MySQL | PostgreSQL | metaNumeric | metaInteger | metaSignable
-	TinyInt    = idTinyInt | MySQL | metaNumeric | metaSignable
-	SmallInt   = idSmallInt | MySQL | PostgreSQL | metaNumeric | metaInteger | metaSignable
-	MediumInt  = idMediumInt | MySQL | PostgreSQL | metaNumeric | metaInteger | metaSignable
-	BigInt     = idBigInt | MySQL | PostgreSQL | metaNumeric | metaInteger | metaSignable
-	Decimal    = idDecimal | MySQL | PostgreSQL | metaNumeric | metaSignable | metaRequiresScale
-	Varchar    = idVarchar | MySQL | PostgreSQL | metaString
-	Text       = idText | MySQL | PostgreSQL | metaString
-	TinyText   = idTinyText | PostgreSQL | metaString
-	MediumText = idMediumText | PostgreSQL | metaString
-	LongText   = idLongText | PostgreSQL | metaString
-	Char       = idChar | PostgreSQL | metaString
-	Blob       = idBlob | MySQL | PostgreSQL | metaBinary
-	Enum       = idEnum | MySQL | PostgreSQL | metaString | metaRequiresScale
-	Boolean    = idBoolean | PostgreSQL
+	Integer    = idInteger | metaNumeric | metaInteger | metaSignable
+	TinyInt    = idTinyInt | metaNumeric | metaSignable
+	SmallInt   = idSmallInt | metaNumeric | metaInteger | metaSignable
+	MediumInt  = idMediumInt | metaNumeric | metaInteger | metaSignable
+	BigInt     = idBigInt | metaNumeric | metaInteger | metaSignable
+	Decimal    = idDecimal | metaNumeric | metaSignable | metaRequiresScale
+	Varchar    = idVarchar | metaString
+	Text       = idText | metaString
+	TinyText   = idTinyText | metaString
+	MediumText = idMediumText | metaString
+	LongText   = idLongText | metaString
+	Char       = idChar | metaString
+	Blob       = idBlob | metaBinary
+	Enum       = idEnum | metaString | metaRequiresScale
+	Boolean    = idBoolean
 )
 
 // These are the string representations of datatypes
@@ -181,13 +181,6 @@ const (
 	metaString
 	metaSignable
 	metaRequiresScale
-)
-
-// These metadata describe the support across different databases
-// 16 bits are reserved for this
-const (
-	MySQL Datatype = 1 << iota << 8
-	PostgreSQL
 )
 
 // These are the unique type identifiers

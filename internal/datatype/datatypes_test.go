@@ -373,11 +373,11 @@ func TestDatatype_IsSignable(t *testing.T) {
 
 func TestDatatype_MarshalYAML(t *testing.T) {
 	tests := []struct {
-		dt      Datatype
-		want    string
+		dt   Datatype
+		want string
 	}{
 		{
-			dt: Integer,
+			dt:   Integer,
 			want: "integer",
 		},
 	}

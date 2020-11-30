@@ -25,7 +25,7 @@ func TestBase_TypeString(t *testing.T) {
 			args: args{
 				dt: datatype.Integer,
 			},
-			want: "INTEGER",
+			want:    "INTEGER",
 			wantErr: false,
 		},
 		{
@@ -35,7 +35,7 @@ func TestBase_TypeString(t *testing.T) {
 			args: args{
 				dt: 0,
 			},
-			want: "",
+			want:    "",
 			wantErr: true,
 		},
 	}

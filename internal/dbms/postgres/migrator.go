@@ -12,15 +12,17 @@ func NewMigrator() *postgres {
 		Base: base.Base{
 			Dialect: dialect.PostgreSQL,
 		},
+		validator: validator{},
 	}
 }
 
 type postgres struct {
 	base.Base
+	validator
 }
 
 func (d *postgres) TypeString(dt datatype.Datatype) (s string, err error) {
-	if dt&datatype.PostgreSQL != datatype.PostgreSQL {
+	if !d.SupportsDatatype(dt) {
 		return "", fmt.Errorf("datatype %s is not supported in postgresql", dt)
 	}
 	switch dt {

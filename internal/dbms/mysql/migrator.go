@@ -15,15 +15,17 @@ func NewMigrator() *migrator {
 		Base: base.Base{
 			Dialect: dialect.MySQL,
 		},
+		validator: validator{},
 	}
 }
 
 type migrator struct {
 	base.Base
+	validator
 }
 
 func (d *migrator) TypeString(dt datatype.Datatype) (s string, err error) {
-	if dt&datatype.MySQL != datatype.MySQL {
+	if !d.SupportsDatatype(dt) {
 		return "", errors.New("unsupported datatype")
 	}
 	switch dt {
