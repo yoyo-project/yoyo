@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/dotvezz/lime"
 	"github.com/dotvezz/lime/cli"
 	"github.com/dotvezz/lime/options"
+	"github.com/dotvezz/yoyo/internal/dbms/mysql"
+	"github.com/dotvezz/yoyo/internal/dbms/postgres"
 	"os"
 )
 
@@ -23,7 +26,7 @@ func main() {
 		//},
 		lime.Command{
 			Keyword: "reverse",
-			Func:    initReverser(),
+			Func:    initReverser(mysql.InitNewReverser(sql.Open), postgres.InitNewReverser(sql.Open)),
 		},
 	)
 	err := c.Run()

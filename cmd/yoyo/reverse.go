@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"github.com/dotvezz/lime"
 	"github.com/dotvezz/yoyo/env"
+	"github.com/dotvezz/yoyo/internal/dbms/dialect"
 	"github.com/dotvezz/yoyo/internal/reverse"
 	"github.com/dotvezz/yoyo/internal/yoyo"
 )
 
-func initReverser() lime.Func {
+func initReverser(newMysqlReverser, newPostgresReverser func(host, userName, dbName, password, port string) (reverse.Reverser, error)) lime.Func {
 	return func(args []string) error {
 		var (
 			config   yoyo.Config
@@ -23,11 +24,19 @@ func initReverser() lime.Func {
 			dia = config.Schema.Dialect
 		}
 
-		if err != nil {
-			return fmt.Errorf("unable to initialize: %w", err)
+		if dia == "" {
+			return fmt.Errorf("no dialect given")
 		}
 
-		reverser, err = reverse.LoadReverser(dia, env.DBHost(), env.DBUser(), env.DBName(), env.DBPassword(), env.DBPort())
+		switch dia {
+		case dialect.MySQL:
+			reverser, err = newMysqlReverser(env.DBHost(), env.DBUser(), env.DBName(), env.DBPassword(), env.DBPort())
+		case dialect.PostgreSQL:
+			reverser, err = newPostgresReverser(env.DBHost(), env.DBUser(), env.DBName(), env.DBPassword(), env.DBPort())
+		default:
+			err = fmt.Errorf("unknown dialect `%s`", dia)
+		}
+
 		if err != nil {
 			return fmt.Errorf("unable to initialize: %w", err)
 		}

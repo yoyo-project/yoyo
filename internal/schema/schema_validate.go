@@ -38,7 +38,15 @@ func (c *Column) validate() error {
 	}
 
 	if c.AutoIncrement && !c.Datatype.IsInt() {
-		return fmt.Errorf("autoIncrement is set but '%s' is not incrementable (only ints allowed)", c.Datatype)
+		return fmt.Errorf("auto_ncrement is set but '%s' is not incrementable (only ints allowed)", c.Datatype)
+	}
+
+	if c.AutoIncrement && c.Default != nil {
+		return fmt.Errorf("auto_increment is set but the column has a default value")
+	}
+
+	if c.AutoIncrement && !c.PrimaryKey {
+		return fmt.Errorf("auto_increment is set but the column is not primary key")
 	}
 
 	if c.Default != nil {

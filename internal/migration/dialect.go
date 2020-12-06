@@ -2,7 +2,6 @@ package migration
 
 import (
 	"fmt"
-	"github.com/dotvezz/yoyo/internal/datatype"
 	"github.com/dotvezz/yoyo/internal/dbms/dialect"
 	"github.com/dotvezz/yoyo/internal/dbms/mysql"
 	"github.com/dotvezz/yoyo/internal/dbms/postgres"
@@ -11,11 +10,7 @@ import (
 
 // Dialect describes an internal dialect to be used by Yoyo for generating Migration code for a given DBMS.
 type Dialect interface {
-	// TypeString returns the string representation of a given type for the dialect.
-	// Returns an error if the type is unknown or not supported by the dialect.
-	TypeString(dt datatype.Datatype) (string, error)
-
-	// CreateTable returns a string query which creates a table
+	// CreateTable returns a string query which creates a full table with columns columns and primary key
 	CreateTable(table string, t schema.Table) string
 
 	// AddColumn returns a string query which adds the specified column to a table

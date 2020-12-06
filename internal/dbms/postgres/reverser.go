@@ -3,20 +3,23 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"github.com/dotvezz/yoyo/internal/reverse"
 	"github.com/dotvezz/yoyo/internal/schema"
 	_ "github.com/lib/pq"
 )
 
-func NewReverser(host, user, dbname, password, port string) (*reverser, error) {
-	reverser := reverser{}
+func InitNewReverser(open func(driver, dsn string) (*sql.DB, error)) func(host, user, dbname, password, port string) (reverse.Reverser, error) {
+	return func(host, user, dbname, password, port string) (reverse.Reverser, error) {
+		reverser := reverser{}
 
-	var err error
-	reverser.db, err = sql.Open("mysql", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname))
-	if err != nil {
-		return nil, fmt.Errorf("unable to open database connection for mysql reverser: %w", err)
+		var err error
+		reverser.db, err = open("postgresql", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname))
+		if err != nil {
+			return nil, fmt.Errorf("unable to open database connection for mysql reverser: %w", err)
+		}
+
+		return &reverser, nil
 	}
-
-	return &reverser, nil
 }
 
 type reverser struct {

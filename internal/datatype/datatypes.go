@@ -12,7 +12,7 @@ type Datatype uint64
 // These are the actual Datatype constants with all the metadata and unique identifiers encoded into them
 const (
 	Integer    = idInteger | metaNumeric | metaInteger | metaSignable
-	TinyInt    = idTinyInt | metaNumeric | metaSignable
+	TinyInt    = idTinyInt | metaNumeric | metaInteger | metaSignable
 	SmallInt   = idSmallInt | metaNumeric | metaInteger | metaSignable
 	MediumInt  = idMediumInt | metaNumeric | metaInteger | metaSignable
 	BigInt     = idBigInt | metaNumeric | metaInteger | metaSignable

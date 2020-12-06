@@ -21,8 +21,8 @@ type Column struct {
 	Unsigned      bool
 	Nullable      bool
 	Default       *string
-	Scale         int
 	Precision     int
+	Scale         int
 	Charset       string
 	Collation     string
 	PrimaryKey    bool `yaml:"primary_key"`

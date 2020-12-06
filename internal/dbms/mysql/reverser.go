@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/dotvezz/yoyo/internal/datatype"
+	"github.com/dotvezz/yoyo/internal/reverse"
 	"github.com/dotvezz/yoyo/internal/schema"
 	goMysql "github.com/go-sql-driver/mysql"
 	"strconv"
@@ -26,6 +27,14 @@ const listIndicesQuery = `SELECT INDEX_NAME FROM information_schema.STATISTICS
         AND INDEX_NAME != 'PRIMARY'
         AND REFERENCED_TABLE_NAME IS NULL
     GROUP BY INDEX_NAME`
+
+const listReferencesQuery = `SELECT REFERENCED_TABLE_NAME 
+	FROM information_schema.KEY_COLUMN_USAGE 
+	WHERE TABLE_NAME = %s 
+		AND TABLE_SCHEMA = DATABASE()`
+
+// TODO: Charset and Collation
+const getColumnQuery = "SHOW COLUMNS IN `%s` WHERE Field = '%s'"
 
 const getIndexQuery = `SELECT NOT NON_UNIQUE, COLUMN_NAME 
     FROM information_schema.STATISTICS
@@ -51,26 +60,28 @@ const getReferenceColumnsQuery = `SELECT kcu.COLUMN_NAME, NOT c.IS_NULLABLE
         AND kcu.REFERENCED_TABLE_NAME = '%s'
         AND kcu.CONSTRAINT_NAME = '%s'`
 
-func NewReverser(host, user, dbname, password, port string) (*reverser, error) {
-	reverser := reverser{}
-	cnf := goMysql.NewConfig()
+func InitNewReverser(open func(driver, dsn string) (*sql.DB, error)) func(host, user, dbname, password, port string) (reverse.Reverser, error) {
+	return func(host, user, dbname, password, port string) (reverse.Reverser, error) {
+		reverser := reverser{}
+		cnf := goMysql.NewConfig()
 
-	cnf.User = user
-	cnf.Passwd = password
-	cnf.Net = "tcp"
-	cnf.Addr = host
-	if port != "" {
-		cnf.Addr += port
+		cnf.User = user
+		cnf.Passwd = password
+		cnf.Net = "tcp"
+		cnf.Addr = host
+		if port != "" {
+			cnf.Addr += port
+		}
+		cnf.DBName = dbname
+
+		var err error
+		reverser.db, err = open("mysql", cnf.FormatDSN())
+		if err != nil {
+			return nil, fmt.Errorf("unable to open database connection for mysql reverser: %w", err)
+		}
+
+		return &reverser, nil
 	}
-	cnf.DBName = dbname
-
-	var err error
-	reverser.db, err = sql.Open("mysql", cnf.FormatDSN())
-	if err != nil {
-		return nil, fmt.Errorf("unable to open database connection for mysql reverser: %w", err)
-	}
-
-	return &reverser, nil
 }
 
 type reverser struct {
@@ -83,27 +94,19 @@ func (d *reverser) ListTables() ([]string, error) {
 		return nil, fmt.Errorf("unable to list tables: %w", err)
 	}
 
-	var colCount int
-	{
-		cols, err := rs.Columns()
-		if err != nil {
-			return nil, fmt.Errorf("unable to counte columns in result: %w", err)
-		}
-		colCount = len(cols)
-	}
-
-	tableNames := make([]string, 0)
-	var tempString string
-	scanDestination := make([]interface{}, colCount)
-	scanDestination[0] = &tempString
+	var (
+		tableNames []string
+		tempString string
+	)
 
 	for rs.Next() {
-		err := rs.Scan(scanDestination...)
+		err := rs.Scan(&tempString)
 		if err != nil {
 			return nil, fmt.Errorf("unable to scan table results: %w", err)
 		}
 		tableNames = append(tableNames, tempString)
 	}
+	_ = rs.Close()
 
 	return tableNames, nil
 }
@@ -148,12 +151,13 @@ func (d *reverser) ListColumns(table string) ([]string, error) {
 		}
 		columnNames = append(columnNames, tempString)
 	}
+	_ = rs.Close()
 
 	return columnNames, nil
 }
 
 func (d *reverser) ListReferences(table string) ([]string, error) {
-	rs, err := d.db.Query("SELECT REFERENCED_TABLE_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = ? AND TABLE_SCHEMA = DATABASE();", table)
+	rs, err := d.db.Query(fmt.Sprintf(listReferencesQuery, table))
 	if err != nil {
 		return nil, fmt.Errorf("unable to list indices: %w", err)
 	}
@@ -170,10 +174,12 @@ func (d *reverser) ListReferences(table string) ([]string, error) {
 			tableNames = append(tableNames, *scanDestination)
 		}
 	}
+	_ = rs.Close()
 
 	return tableNames, nil
 }
 
+// TODO: Charset and Collation
 func (d *reverser) GetColumn(tableName, colName string) (schema.Column, error) {
 	var (
 		dt         string
@@ -183,7 +189,7 @@ func (d *reverser) GetColumn(tableName, colName string) (schema.Column, error) {
 		extra      string
 		col        schema.Column
 	)
-	rs, err := d.db.Query(fmt.Sprintf("SHOW COLUMNS IN `%s` WHERE Field = '%s'", tableName, colName))
+	rs, err := d.db.Query(fmt.Sprintf(getColumnQuery, tableName, colName))
 	if err != nil {
 		return col, fmt.Errorf("unable to get column information for `%s`.`%s`: %w`", tableName, colName, err)
 	}
@@ -194,6 +200,11 @@ func (d *reverser) GetColumn(tableName, colName string) (schema.Column, error) {
 	err = rs.Scan(new(interface{}), &dt, &nullable, &key, &defaultVal, &extra)
 	if err != nil {
 		return col, fmt.Errorf("unable to scan result reading column `%s`.`%s`: %w", tableName, colName, err)
+	}
+
+	err = rs.Close()
+	if err != nil {
+		return col, fmt.Errorf("unable to close rows after getting column, too many rows: %w", err)
 	}
 
 	dts := strings.Split(strings.ToUpper(dt), " ")
@@ -250,6 +261,7 @@ func (d *reverser) GetIndex(tableName, indexName string) (schema.Index, error) {
 
 		columns = append(columns, tempColName)
 	}
+	_ = rs.Close()
 
 	index.Columns = columns
 	return index, nil
@@ -271,6 +283,7 @@ func (d *reverser) GetReference(tableName, referenceName string) (schema.Referen
 	for rs.Next() {
 		err = rs.Scan(&ref.OnUpdate, &ref.OnDelete, &constraintName)
 	}
+	_ = rs.Close()
 
 	rs, err = d.db.Query(fmt.Sprintf(getReferenceColumnsQuery, tableName, referenceName, constraintName))
 	if err != nil {
@@ -281,6 +294,7 @@ func (d *reverser) GetReference(tableName, referenceName string) (schema.Referen
 		err = rs.Scan(&tempString, &ref.Optional)
 		columnNames = append(columnNames, tempString)
 	}
+	_ = rs.Close()
 
 	switch len(columnNames) {
 	case 0:

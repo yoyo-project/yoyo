@@ -24,24 +24,24 @@ type migrator struct {
 	validator
 }
 
-func (d *migrator) TypeString(dt datatype.Datatype) (s string, err error) {
-	if !d.SupportsDatatype(dt) {
-		return "", errors.New("unsupported datatype")
-	}
+func (m *migrator) TypeString(dt datatype.Datatype) (s string, err error) {
 	switch dt {
 	case datatype.Integer:
 		s = "INT"
 	default:
-		s, err = d.Base.TypeString(dt)
+		s, err = m.Base.TypeString(dt)
+	}
+	if err == nil && !m.validator.SupportsDatatype(dt) {
+		err = errors.New("unsupported datatype")
 	}
 	return s, err
 }
 
 // CreateTable generates a query to create a given table.
-func (d *migrator) CreateTable(table string, t schema.Table) string {
+func (m *migrator) CreateTable(tName string, t schema.Table) string {
 	sb := strings.Builder{}
 
-	sb.WriteString(fmt.Sprintf("CREATE TABLE `%s` (\n", table))
+	sb.WriteString(fmt.Sprintf("CREATE TABLE `%s` (\n", tName))
 
 	var (
 		first = true
@@ -53,14 +53,15 @@ func (d *migrator) CreateTable(table string, t schema.Table) string {
 		} else {
 			first = false
 		}
-		sb.WriteString(d.generateColumn(colName, c))
+		sb.WriteString("    ")
+		sb.WriteString(m.generateColumn(colName, c))
 		if c.PrimaryKey {
 			pks = append(pks, colName)
 		}
 	}
 
 	if len(pks) > 0 {
-		sb.WriteString(fmt.Sprintf("\nPRIMARY KEY (%s)", strings.Join(pks, ",")))
+		sb.WriteString(fmt.Sprintf("\n    PRIMARY KEY (`%s`)", strings.Join(pks, ",")))
 	}
 
 	sb.WriteString("\n);")
@@ -68,35 +69,35 @@ func (d *migrator) CreateTable(table string, t schema.Table) string {
 	return sb.String()
 }
 
-func (d *migrator) AddColumn(table, column string, c schema.Column) string {
-	return fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN %s;", table, d.generateColumn(column, c))
+func (m *migrator) AddColumn(tName, cName string, c schema.Column) string {
+	return fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN %s;", tName, m.generateColumn(cName, c))
 }
 
 // AddIndex returns a string query which adds the specified index to a table
-func (d *migrator) AddIndex(table, index string, i schema.Index) string {
+func (m *migrator) AddIndex(tName, iName string, i schema.Index) string {
 	var indexType string
 
 	switch {
 	case i.Unique:
-		indexType = " UNIQUE INDEX"
+		indexType = "UNIQUE INDEX"
 	default:
-		indexType = " INDEX"
+		indexType = "INDEX"
 	}
 
 	cols := strings.Builder{}
 	firstCol := true
 	for _, col := range i.Columns {
 		if !firstCol {
-			cols.WriteRune(',')
+			cols.WriteString(", ")
 		}
 		firstCol = false
-		cols.WriteString(fmt.Sprintf("%s", col))
+		cols.WriteString(fmt.Sprintf("`%s`", col))
 	}
 
-	return fmt.Sprintf("ALTER TABLE `%s` ADD %s `%s` (%s);\n", table, indexType, index, cols.String())
+	return fmt.Sprintf("ALTER TABLE `%s` ADD %s `%s` (%s);", tName, indexType, iName, cols.String())
 }
 
-func (d *migrator) AddReference(table, referencedTable string, db schema.Database, r schema.Reference) (string, error) {
+func (m *migrator) AddReference(table, referencedTable string, db schema.Database, r schema.Reference) (string, error) {
 	sw := strings.Builder{}
 
 	if r.HasMany { // swap the tables if it's a HasMany
@@ -135,7 +136,7 @@ func (d *migrator) AddReference(table, referencedTable string, db schema.Databas
 		fknames = append(fknames, fkname)
 		fcols = append(fcols, cname)
 
-		sw.WriteString(d.AddColumn(table, fkname, col))
+		sw.WriteString(m.AddColumn(table, fkname, col))
 		sw.WriteRune('\n')
 	}
 
@@ -162,20 +163,21 @@ func (d *migrator) AddReference(table, referencedTable string, db schema.Databas
 	return sw.String(), nil
 }
 
-func (d *migrator) generateColumn(name string, c schema.Column) string {
+func (m *migrator) generateColumn(cName string, c schema.Column) string {
 	sb := strings.Builder{}
+	ts, _ := m.TypeString(c.Datatype)
 
 	if c.Datatype.RequiresScale() {
-		sb.WriteString(fmt.Sprintf("`%s` %s(%d, %d)", name, c.Datatype, c.Scale, c.Precision))
+		sb.WriteString(fmt.Sprintf("`%s` %s(%d, %d)", cName, ts, c.Scale, c.Precision))
 	} else {
 		if c.Scale > 0 {
 			if c.Precision > 0 {
-				sb.WriteString(fmt.Sprintf("`%s` %s(%d, %d)", name, c.Datatype, c.Scale, c.Precision))
+				sb.WriteString(fmt.Sprintf("`%s` %s(%d, %d)", cName, ts, c.Scale, c.Precision))
 			} else {
-				sb.WriteString(fmt.Sprintf("`%s` %s(%d)", name, c.Datatype, c.Scale))
+				sb.WriteString(fmt.Sprintf("`%s` %s(%d)", cName, ts, c.Scale))
 			}
 		} else {
-			sb.WriteString(fmt.Sprintf("`%s` %s", name, c.Datatype))
+			sb.WriteString(fmt.Sprintf("`%s` %s", cName, ts))
 		}
 	}
 
@@ -190,9 +192,9 @@ func (d *migrator) generateColumn(name string, c schema.Column) string {
 	if c.Default != nil {
 		sb.WriteString(` DEFAULT `)
 		if c.Datatype.IsString() {
-			sb.WriteString(fmt.Sprintf(`"%s" `, *c.Default))
+			sb.WriteString(fmt.Sprintf(`"%s"`, *c.Default))
 		} else {
-			sb.WriteString(fmt.Sprintf("%s ", *c.Default))
+			sb.WriteString(fmt.Sprintf("%s", *c.Default))
 		}
 	} else if c.Nullable {
 		sb.WriteString(` DEFAULT NULL`)
@@ -202,6 +204,10 @@ func (d *migrator) generateColumn(name string, c schema.Column) string {
 		sb.WriteString(" NOT")
 	}
 	sb.WriteString(" NULL")
+
+	if c.AutoIncrement {
+		sb.WriteString(" AUTO_INCREMENT")
+	}
 
 	return sb.String()
 }
