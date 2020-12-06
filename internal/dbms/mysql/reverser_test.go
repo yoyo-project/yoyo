@@ -1010,7 +1010,7 @@ func Test_reverser_GetReference(t *testing.T) {
 				t.Errorf("ListTables() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if  tt.wantErr == "" && !reflect.DeepEqual(got, tt.want) {
+			if tt.wantErr == "" && !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ListTables() got = %v, want %v", got, tt.want)
 			}
 		})

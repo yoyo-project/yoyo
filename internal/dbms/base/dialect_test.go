@@ -75,7 +75,7 @@ func TestBase_Panics(t *testing.T) {
 
 	t.Run("AddReference", func(t *testing.T) {
 		panicked := didPanic(func() {
-			_, _ = b.AddReference("", "", schema.Database{}, schema.Reference{})
+			_, _ = b.AddReference("", "", schema.Table{}, schema.Reference{})
 		})
 		if !panicked {
 			t.Errorf("Expected a panic but didn't see one")

@@ -19,7 +19,7 @@ func (d *Base) TypeString(dt datatype.Datatype) (string, error) {
 	return s, nil
 }
 
-func (d *Base) AddReference(table, reference string, db schema.Database, i schema.Reference) (string, error) {
+func (d *Base) AddReference(table, reference string, rt schema.Table, i schema.Reference) (string, error) {
 	panic("implement me")
 }
 

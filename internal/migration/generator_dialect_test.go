@@ -16,7 +16,7 @@ func (d *mockDialect) DataSourceName(host, username, schema, password, port stri
 	return ""
 }
 
-func (d *mockDialect) AddReference(table, referencedTable string, db schema.Database, i schema.Reference) (string, error) {
+func (d *mockDialect) AddReference(table, referencedTable string, rt schema.Table, i schema.Reference) (string, error) {
 	return "", nil
 }
 

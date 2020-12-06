@@ -147,6 +147,11 @@ func NewRefAdder(
 ) RefGenerator {
 	return func(localTable string, refs map[string]schema.Reference, sw io.StringWriter) error {
 		for foreignTable, ref := range refs {
+			if ref.HasMany { // swap the tables if it's a HasMany
+				localTable, foreignTable = foreignTable, localTable
+			}
+			ft, ok := db.Tables[foreignTable]
+
 			if options&AddMissing > 0 {
 				exists, err := hasReference(localTable, foreignTable)
 				if err != nil {
@@ -157,7 +162,11 @@ func NewRefAdder(
 					continue
 				}
 			}
-			s, err := d.AddReference(localTable, foreignTable, db, ref)
+
+			if !ok { // This should technically be caught by validation, but still
+				return fmt.Errorf("referenced table `%s` does not exist in dbms definition", foreignTable)
+			}
+			s, err := d.AddReference(localTable, foreignTable, ft, ref)
 			if err != nil {
 				return fmt.Errorf("unable to generate migration: %w", err)
 			}

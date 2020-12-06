@@ -97,27 +97,17 @@ func (m *migrator) AddIndex(tName, iName string, i schema.Index) string {
 	return fmt.Sprintf("ALTER TABLE `%s` ADD %s `%s` (%s);", tName, indexType, iName, cols.String())
 }
 
-func (m *migrator) AddReference(table, referencedTable string, db schema.Database, r schema.Reference) (string, error) {
-	sw := strings.Builder{}
-
-	if r.HasMany { // swap the tables if it's a HasMany
-		table, referencedTable = referencedTable, table
-	}
-
-	rt, ok := db.Tables[referencedTable]
-	if !ok { // This should technically be caught by validation, but still
-		return "", fmt.Errorf("referenced table `%s` does not exist in dbms definition", referencedTable)
-	}
+func (m *migrator) AddReference(table, referencedTable string, refTable schema.Table, ref schema.Reference) (string, error) {
 	var (
 		fcols       []string
 		fknames     []string
 		fkname      string
-		refColNames = r.ColumnNames
+		hasPK       bool
+		refColNames = ref.ColumnNames
+		sw          = strings.Builder{}
 	)
 
-	var hasPK bool
-
-	for cname, col := range rt.Columns {
+	for cname, col := range refTable.Columns {
 		if !col.PrimaryKey {
 			continue
 		}
@@ -127,8 +117,8 @@ func (m *migrator) AddReference(table, referencedTable string, db schema.Databas
 		switch {
 		case len(refColNames) > 0:
 			fkname, refColNames = refColNames[0], refColNames[1:len(refColNames)]
-		case len(r.ColumnName) > 0:
-			fkname = r.ColumnName
+		case len(ref.ColumnName) > 0:
+			fkname = ref.ColumnName
 		default:
 			fkname = fmt.Sprintf("fk_%s_%s", referencedTable, cname)
 		}
@@ -140,7 +130,7 @@ func (m *migrator) AddReference(table, referencedTable string, db schema.Databas
 		sw.WriteRune('\n')
 	}
 
-	if len(r.ColumnNames) > 0 && len(r.ColumnNames) != len(fcols) {
+	if len(ref.ColumnNames) > 0 && len(ref.ColumnNames) != len(fcols) {
 		return "", fmt.Errorf("cannot add reference from `%s` to `%s`: length of column_names does not match length of primary keys", table, referencedTable)
 	}
 
@@ -152,12 +142,12 @@ func (m *migrator) AddReference(table, referencedTable string, db schema.Databas
 		table, referencedTable, strings.Join(fknames, ", "), referencedTable, strings.Join(fcols, ", "),
 	))
 
-	if r.OnDelete != "" {
-		sw.WriteString(fmt.Sprintf(" ON DELETE %s", r.OnDelete))
+	if ref.OnDelete != "" {
+		sw.WriteString(fmt.Sprintf(" ON DELETE %s", ref.OnDelete))
 	}
 
-	if r.OnUpdate != "" {
-		sw.WriteString(fmt.Sprintf(" ON UPDATE %s", r.OnUpdate))
+	if ref.OnUpdate != "" {
+		sw.WriteString(fmt.Sprintf(" ON UPDATE %s", ref.OnUpdate))
 	}
 
 	return sw.String(), nil
