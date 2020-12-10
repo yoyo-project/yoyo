@@ -97,60 +97,51 @@ func (m *migrator) AddIndex(tName, iName string, i schema.Index) string {
 	return fmt.Sprintf("ALTER TABLE `%s` ADD %s `%s` (%s);", tName, indexType, iName, cols.String())
 }
 
-func (m *migrator) AddReference(table, referencedTable string, refTable schema.Table, ref schema.Reference) (string, error) {
+func (m *migrator) AddReference(tName, ftName string, fTable schema.Table, r schema.Reference) string {
 	var (
 		fcols       []string
 		fknames     []string
 		fkname      string
-		hasPK       bool
-		refColNames = ref.ColumnNames
+		refColNames = r.ColumnNames
 		sw          = strings.Builder{}
 	)
 
-	for cname, col := range refTable.Columns {
+	for cname, col := range fTable.Columns {
 		if !col.PrimaryKey {
 			continue
 		}
 
-		hasPK = true
-
 		switch {
 		case len(refColNames) > 0:
 			fkname, refColNames = refColNames[0], refColNames[1:len(refColNames)]
-		case len(ref.ColumnName) > 0:
-			fkname = ref.ColumnName
 		default:
-			fkname = fmt.Sprintf("fk_%s_%s", referencedTable, cname)
+			fkname = fmt.Sprintf("fk_%s_%s", ftName, cname)
 		}
 
 		fknames = append(fknames, fkname)
 		fcols = append(fcols, cname)
 
-		sw.WriteString(m.AddColumn(table, fkname, col))
+		col.Nullable = r.Optional
+
+		sw.WriteString(m.AddColumn(tName, fkname, col))
 		sw.WriteRune('\n')
 	}
 
-	if len(ref.ColumnNames) > 0 && len(ref.ColumnNames) != len(fcols) {
-		return "", fmt.Errorf("cannot add reference from `%s` to `%s`: length of column_names does not match length of primary keys", table, referencedTable)
-	}
-
-	if !hasPK { // This should technically be caught by validation, but still
-		return "", fmt.Errorf("referenced table `%s` does not have a primary key defined", referencedTable)
-	}
-
-	sw.WriteString(fmt.Sprintf("ALTER TABLE `%s` ADD CONSTRAINT `reference_%s` FOREIGN KEY (`%s`) REFERENCES %s(%s)",
-		table, referencedTable, strings.Join(fknames, ", "), referencedTable, strings.Join(fcols, ", "),
+	sw.WriteString(fmt.Sprintf("ALTER TABLE `%s` ADD CONSTRAINT `reference_%s` FOREIGN KEY (`%s`) REFERENCES %s(`%s`)",
+		tName, ftName, strings.Join(fknames, "`, `"), ftName, strings.Join(fcols, "`, `"),
 	))
 
-	if ref.OnDelete != "" {
-		sw.WriteString(fmt.Sprintf(" ON DELETE %s", ref.OnDelete))
+	if r.OnDelete != "" {
+		sw.WriteString(fmt.Sprintf(" ON DELETE %s", r.OnDelete))
 	}
 
-	if ref.OnUpdate != "" {
-		sw.WriteString(fmt.Sprintf(" ON UPDATE %s", ref.OnUpdate))
+	if r.OnUpdate != "" {
+		sw.WriteString(fmt.Sprintf(" ON UPDATE %s", r.OnUpdate))
 	}
 
-	return sw.String(), nil
+	sw.WriteRune(';')
+
+	return sw.String()
 }
 
 func (m *migrator) generateColumn(cName string, c schema.Column) string {

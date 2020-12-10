@@ -166,11 +166,8 @@ func NewRefAdder(
 			if !ok { // This should technically be caught by validation, but still
 				return fmt.Errorf("referenced table `%s` does not exist in dbms definition", foreignTable)
 			}
-			s, err := d.AddReference(localTable, foreignTable, ft, ref)
-			if err != nil {
-				return fmt.Errorf("unable to generate migration: %w", err)
-			}
-			_, err = sw.WriteString(s)
+			s := d.AddReference(localTable, foreignTable, ft, ref)
+			_, err := sw.WriteString(s)
 			if err != nil {
 				return fmt.Errorf("unable to generate migration: %w", err)
 			}

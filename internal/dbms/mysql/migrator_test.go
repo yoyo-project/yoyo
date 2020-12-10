@@ -343,3 +343,113 @@ func Test_migrator_generateColumn(t *testing.T) {
 		})
 	}
 }
+
+func Test_migrator_AddReference(t *testing.T) {
+	tests := map[string]struct {
+		tName  string
+		ftName string
+		fTable schema.Table
+		r      schema.Reference
+		wantS  string
+	}{
+		"simple single foreign key": {
+			tName:  "local",
+			ftName: "foreign",
+			fTable: schema.Table{
+				Columns: map[string]schema.Column{
+					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
+					"otherCol": {Datatype: datatype.Integer},
+				},
+			},
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
+		},
+		"optional single foreign key": {
+			tName:  "local",
+			ftName: "foreign",
+			fTable: schema.Table{
+				Columns: map[string]schema.Column{
+					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
+					"otherCol": {Datatype: datatype.Integer},
+				},
+			},
+			r: schema.Reference{
+				Optional: true,
+			},
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED DEFAULT NULL NULL;\n" +
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
+		},
+		"single foreign key with on delete": {
+			tName:  "local",
+			ftName: "foreign",
+			fTable: schema.Table{
+				Columns: map[string]schema.Column{
+					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
+					"otherCol": {Datatype: datatype.Integer},
+				},
+			},
+			r: schema.Reference{
+				OnDelete: "CASCADE",
+			},
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON DELETE CASCADE;",
+		},
+		"single foreign key with on update": {
+			tName:  "local",
+			ftName: "foreign",
+			fTable: schema.Table{
+				Columns: map[string]schema.Column{
+					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
+					"otherCol": {Datatype: datatype.Integer},
+				},
+			},
+			r: schema.Reference{
+				OnUpdate: "CASCADE",
+			},
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON UPDATE CASCADE;",
+		},
+		"dual foreign key": {
+			tName:  "local",
+			ftName: "foreign",
+			fTable: schema.Table{
+				Columns: map[string]schema.Column{
+					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
+					"id2":      {PrimaryKey: true, Datatype: datatype.Integer},
+					"otherCol": {Datatype: datatype.Integer},
+				},
+			},
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
+				"ALTER TABLE `local` ADD COLUMN `fk_foreign_id2` INT SIGNED NOT NULL;\n" +
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`, `fk_foreign_id2`) REFERENCES foreign(`id`, `id2`);",
+		},
+		"single foreign key with custom name": {
+			tName:  "local",
+			ftName: "foreign",
+			fTable: schema.Table{
+				Columns: map[string]schema.Column{
+					"id": {PrimaryKey: true, Datatype: datatype.Integer},
+				},
+			},
+			r: schema.Reference{
+				ColumnNames: []string{"fk"},
+			},
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk` INT SIGNED NOT NULL;\n" +
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk`) REFERENCES foreign(`id`);",
+		},
+	}
+
+	m := &migrator{
+		Base:      base.Base{Dialect: dialect.MySQL},
+		validator: validator{},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			gotS := m.AddReference(tt.tName, tt.ftName, tt.fTable, tt.r)
+			if gotS != tt.wantS {
+				t.Errorf("expected string `%s`, got string `%s`", tt.wantS, gotS)
+			}
+		})
+	}
+}

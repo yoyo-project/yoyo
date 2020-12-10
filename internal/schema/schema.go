@@ -33,7 +33,6 @@ type Reference struct {
 	HasOne      bool
 	HasMany     bool
 	Optional    bool
-	ColumnName  string
 	ColumnNames []string
 	OnDelete    string
 	OnUpdate    string

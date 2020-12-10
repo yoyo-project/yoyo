@@ -82,10 +82,6 @@ func (r *Reference) validate() error {
 		return fmt.Errorf("unknown action for OnUpdate: '%s'", r.OnUpdate)
 	}
 
-	if len(r.ColumnNames) > 0 && len(r.ColumnName) > 0 {
-		return fmt.Errorf("cannot set both column_name and column_names for reference")
-	}
-
 	return nil
 }
 
@@ -175,15 +171,18 @@ func (db *Database) validate() error {
 				ft, rName = t, tName
 			}
 
-			var hasPK bool
-
+			pkCount := 0
 			for _, c := range ft.Columns {
 				if c.PrimaryKey {
-					hasPK = true
+					pkCount++
 				}
 			}
 
-			if !hasPK {
+			if len(r.ColumnNames) > 0 && len(r.ColumnNames) != pkCount {
+				return fmt.Errorf("cannot add reference from `%s` to `%s`: length of column_names does not match length of primary keys", tName, rName)
+			}
+
+			if pkCount == 0 {
 				return fmt.Errorf("table `%s` has no primary key but needs it for a defined reference", rName)
 			}
 		}

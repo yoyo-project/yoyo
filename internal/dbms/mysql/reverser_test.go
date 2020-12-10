@@ -854,10 +854,10 @@ func Test_reverser_GetReference(t *testing.T) {
 				}(),
 			},
 			want: schema.Reference{
-				OnUpdate:   "RESTRICT",
-				OnDelete:   "RESTRICT",
-				ColumnName: "foreign_id",
-				Optional:   false,
+				OnUpdate:    "RESTRICT",
+				OnDelete:    "RESTRICT",
+				ColumnNames: []string{"foreign_id"},
+				Optional:    false,
 			},
 		},
 		{
@@ -905,10 +905,10 @@ func Test_reverser_GetReference(t *testing.T) {
 				}(),
 			},
 			want: schema.Reference{
-				OnUpdate:   "RESTRICT",
-				OnDelete:   "RESTRICT",
-				ColumnName: "foreign_id",
-				Optional:   true,
+				OnUpdate:    "RESTRICT",
+				OnDelete:    "RESTRICT",
+				ColumnNames: []string{"foreign_id"},
+				Optional:    true,
 			},
 		},
 		{

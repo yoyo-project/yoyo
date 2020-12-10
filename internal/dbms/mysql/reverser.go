@@ -296,13 +296,10 @@ func (d *reverser) GetReference(tableName, referenceName string) (schema.Referen
 	}
 	_ = rs.Close()
 
-	switch len(columnNames) {
-	case 0:
+	ref.ColumnNames = columnNames
+
+	if len(ref.ColumnNames) == 0 {
 		return ref, fmt.Errorf("unable to find any reference columns for table `%s` from table `%s`", referenceName, tableName)
-	case 1:
-		ref.ColumnName = columnNames[0]
-	default:
-		ref.ColumnNames = columnNames
 	}
 
 	return ref, err
