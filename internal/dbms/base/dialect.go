@@ -2,63 +2,22 @@ package base
 
 import (
 	"github.com/dotvezz/yoyo/internal/datatype"
-	"github.com/dotvezz/yoyo/internal/schema"
 )
 
+// Base is a partial implementation of migration.Dialect. It provides the TypeString method.
 type Base struct {
 	Dialect string
 }
 
+// TypeString is implemented because, with most datatype.Datatype values in most SQL dialects, the datatype.Datatype String()
+// method will probably be correct. Dialect-specific implementations can extend this TypeString method with any specific
+// exceptions. For one example, check the mysql.migrator's TypeString method.
 func (d *Base) TypeString(dt datatype.Datatype) (string, error) {
 	s := dt.String()
 
 	if s == "NONE" {
-		return "", datatype.UnknownDatatype
+		return "", datatype.ErrUnknownDatatype
 	}
 
 	return s, nil
-}
-
-func (d *Base) AddReference(table, reference string, rt schema.Table, i schema.Reference) string {
-	panic("implement me")
-}
-
-func (d *Base) CreateTable(table string, t schema.Table) string {
-	panic("implement me")
-}
-
-func (d *Base) AddIndex(table, index string, i schema.Index) string {
-	panic("implement me")
-}
-
-func (d *Base) AddColumn(table, column string, c schema.Column) string {
-	panic("implement me")
-}
-
-func (d *Base) ListTables() ([]string, error) {
-	panic("implement me")
-}
-
-func (d *Base) ListColumns(table string) ([]string, error) {
-	panic("implement me")
-}
-
-func (d *Base) ListIndices(table string) ([]string, error) {
-	panic("implement me")
-}
-
-func (d *Base) ListReferences(table string) ([]string, error) {
-	panic("implement me")
-}
-
-func (d *Base) GetColumn(table, column string) (schema.Column, error) {
-	panic("implement me")
-}
-
-func (d *Base) GetIndex(table, index string) (schema.Index, error) {
-	panic("implement me")
-}
-
-func (d *Base) GetReference(table, reference string) (schema.Reference, error) {
-	panic("implement me")
 }

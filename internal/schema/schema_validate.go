@@ -111,7 +111,7 @@ func (t *Table) validate() error {
 
 		for _, icn := range i.Columns {
 			var colExists bool
-			for cn, _ := range t.Columns {
+			for cn := range t.Columns {
 				if icn == cn {
 					colExists = true
 					break

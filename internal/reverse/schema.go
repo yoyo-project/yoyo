@@ -5,7 +5,8 @@ import (
 	"github.com/dotvezz/yoyo/internal/schema"
 )
 
-func ReadSchema(reverser Reverser) (db schema.Database, err error) {
+// ReadDatabase uses the given Reverser to scan and write the database into a schema.Database
+func ReadDatabase(reverser Reverser) (db schema.Database, err error) {
 	var tables, columns, indices, references []string
 	if tables, err = reverser.ListTables(); err == nil {
 		for _, tableName := range tables {

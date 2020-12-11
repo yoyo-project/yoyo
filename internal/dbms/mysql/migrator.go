@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// NewMigrator returns an implementation of migration.Dialect for MySQL
 func NewMigrator() *migrator {
 	return &migrator{
 		Base: base.Base{
@@ -24,6 +25,8 @@ type migrator struct {
 	validator
 }
 
+// TypeString returns the string representation of a given datatype.Datatype for MySQL
+// An error will be returned if the datatype.Datatype is invalid or not supported by MySQL
 func (m *migrator) TypeString(dt datatype.Datatype) (s string, err error) {
 	switch dt {
 	case datatype.Integer:
@@ -37,7 +40,7 @@ func (m *migrator) TypeString(dt datatype.Datatype) (s string, err error) {
 	return s, err
 }
 
-// CreateTable generates a query to create a given table.
+// CreateTable returns a query string that create a given table.
 func (m *migrator) CreateTable(tName string, t schema.Table) string {
 	sb := strings.Builder{}
 
@@ -69,11 +72,12 @@ func (m *migrator) CreateTable(tName string, t schema.Table) string {
 	return sb.String()
 }
 
+// AddColumn returns a string query which adds a column to an existing table
 func (m *migrator) AddColumn(tName, cName string, c schema.Column) string {
 	return fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN %s;", tName, m.generateColumn(cName, c))
 }
 
-// AddIndex returns a string query which adds the specified index to a table
+// AddIndex returns a string query which adds the specified index to an existing table
 func (m *migrator) AddIndex(tName, iName string, i schema.Index) string {
 	var indexType string
 
@@ -97,6 +101,7 @@ func (m *migrator) AddIndex(tName, iName string, i schema.Index) string {
 	return fmt.Sprintf("ALTER TABLE `%s` ADD %s `%s` (%s);", tName, indexType, iName, cols.String())
 }
 
+// AddReference returns a query string that adds columns and foreign keys for the given table, foreign table, and schema.Reference
 func (m *migrator) AddReference(tName, ftName string, fTable schema.Table, r schema.Reference) string {
 	var (
 		fcols       []string
@@ -113,7 +118,7 @@ func (m *migrator) AddReference(tName, ftName string, fTable schema.Table, r sch
 
 		switch {
 		case len(refColNames) > 0:
-			fkname, refColNames = refColNames[0], refColNames[1:len(refColNames)]
+			fkname, refColNames = refColNames[0], refColNames[1:]
 		default:
 			fkname = fmt.Sprintf("fk_%s_%s", ftName, cname)
 		}

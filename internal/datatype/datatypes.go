@@ -61,6 +61,7 @@ func (dt *Datatype) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return err
 }
 
+// MarshalYAML provides an implementation for yaml/v2.Marshaler, returns a string representation of the Datatype
 func (dt Datatype) MarshalYAML() (interface{}, error) {
 	return strings.ToLower(dt.String()), nil
 }
@@ -133,6 +134,7 @@ func (dt Datatype) IsSignable() bool {
 	return dt&metaSignable > 0
 }
 
+// FromString returns the decoded Datatype, and an error if the in string is invalid or unknown
 func FromString(in string) (dt Datatype, err error) {
 	switch strings.ToUpper(strings.Split(in, "(")[0]) {
 	case integer, sint:
@@ -166,7 +168,7 @@ func FromString(in string) (dt Datatype, err error) {
 	case boolean, sbool:
 		dt = Boolean
 	default:
-		err = UnknownDatatype
+		err = ErrUnknownDatatype
 	}
 
 	return dt, err

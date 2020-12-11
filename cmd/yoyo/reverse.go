@@ -41,7 +41,7 @@ func initReverser(newMysqlReverser, newPostgresReverser func(host, userName, dbN
 			return fmt.Errorf("unable to initialize: %w", err)
 		}
 
-		config.Schema, err = reverse.ReadSchema(reverser)
+		config.Schema, err = reverse.ReadDatabase(reverser)
 		if err != nil {
 			return fmt.Errorf("unable to reverse-engineer schema: %w", err)
 		}

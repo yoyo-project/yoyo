@@ -7,13 +7,24 @@ import (
 )
 
 const (
-	AddAll     uint8 = 0x000
+	// AddAll is the option that tells some generator methods to not check if things exist and just add them all
+	AddAll uint8 = 0x000
+	// AddMissing is the option that tells some generator methods to check if things exist and skip over them if they do
 	AddMissing uint8 = 0x001
 )
 
+// TableGenerator functions take a string, schema.Table, and io.StringWriter. Implementations will use them to generate
+// SQL for creating or modifying tables
 type TableGenerator func(name string, table schema.Table, sw io.StringWriter) error
+
+// RefGenerator functions take a string, map[string]schema.Reference, and io.StringWriter. Implementations will use them
+// to generate SQL for working with references
 type RefGenerator func(localTable string, refs map[string]schema.Reference, sw io.StringWriter) error
+
+// StringSearcher functions take a string and return true if the matching entity (table, column, etc) exists.
 type StringSearcher func(string) (bool, error)
+
+// SchemaGenerator functions take a schema.Database and io.StringWriter, generating stuff for the Database to the io.StringWriter
 type SchemaGenerator func(db schema.Database, w io.StringWriter) error
 
 // NewSchemaGenerator returns a function that generates a schema and writes it to the given io.StringWriter.
@@ -74,6 +85,7 @@ func NewSchemaGenerator(
 	}
 }
 
+// NewTableAdder returns a TableGenerator that adds a table
 func NewTableAdder(
 	d Dialect,
 ) TableGenerator {
@@ -86,6 +98,7 @@ func NewTableAdder(
 	}
 }
 
+// NewColumnAdder returns a TableGenerator that adds columns from a schema.Table.
 func NewColumnAdder(
 	d Dialect,
 	options uint8,
@@ -113,6 +126,7 @@ func NewColumnAdder(
 	}
 }
 
+// NewIndexAdder returns a TableGenerator that adds indices from a schema.Table.
 func NewIndexAdder(
 	d Dialect,
 	options uint8,
@@ -139,6 +153,7 @@ func NewIndexAdder(
 	}
 }
 
+// NewRefAdder returns a RefGenerator that adds references to a given table.
 func NewRefAdder(
 	d Dialect,
 	db schema.Database,

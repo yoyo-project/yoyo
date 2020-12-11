@@ -60,6 +60,7 @@ const getReferenceColumnsQuery = `SELECT kcu.COLUMN_NAME, NOT c.IS_NULLABLE
         AND kcu.REFERENCED_TABLE_NAME = '%s'
         AND kcu.CONSTRAINT_NAME = '%s'`
 
+// InitNewReverser returns a `NewReverser` function, which returns a reverse.Reverser.
 func InitNewReverser(open func(driver, dsn string) (*sql.DB, error)) func(host, user, dbname, password, port string) (reverse.Reverser, error) {
 	return func(host, user, dbname, password, port string) (reverse.Reverser, error) {
 		reverser := reverser{}
@@ -88,6 +89,7 @@ type reverser struct {
 	db *sql.DB
 }
 
+// ListTables returns a list of tables on the selected database.
 func (d *reverser) ListTables() ([]string, error) {
 	rs, err := d.db.Query("SHOW TABLES")
 	if err != nil {
@@ -111,6 +113,9 @@ func (d *reverser) ListTables() ([]string, error) {
 	return tableNames, nil
 }
 
+// ListIndices returns a []string of index names for the given table.
+// It will NOT return information referring to PrimaryKey or Foreign Keys, which will instead come from GetColumn and
+// ListReferences respectively
 func (d *reverser) ListIndices(table string) ([]string, error) {
 	query := fmt.Sprintf(listIndicesQuery, table)
 	rs, err := d.db.Query(query)
@@ -134,6 +139,8 @@ func (d *reverser) ListIndices(table string) ([]string, error) {
 	return indexNames, nil
 }
 
+// ListColumns returns a []string of column names for the given table
+// It does NOT return any columns which are foreign key columns. These will instead come from ListReferences
 func (d *reverser) ListColumns(table string) ([]string, error) {
 	rs, err := d.db.Query(fmt.Sprintf(listColumnsQuery, table))
 	if err != nil {
@@ -156,6 +163,7 @@ func (d *reverser) ListColumns(table string) ([]string, error) {
 	return columnNames, nil
 }
 
+// ListReferences returns a []string of tables referenced from the given table.
 func (d *reverser) ListReferences(table string) ([]string, error) {
 	rs, err := d.db.Query(fmt.Sprintf(listReferencesQuery, table))
 	if err != nil {
@@ -179,6 +187,7 @@ func (d *reverser) ListReferences(table string) ([]string, error) {
 	return tableNames, nil
 }
 
+// GetColumn returns a schema.Column representing the given tableName and colName.
 // TODO: Charset and Collation
 func (d *reverser) GetColumn(tableName, colName string) (schema.Column, error) {
 	var (
@@ -241,6 +250,7 @@ func (d *reverser) GetColumn(tableName, colName string) (schema.Column, error) {
 	return col, nil
 }
 
+// GetIndex returns a schema.Index representing the given tableName and indexName.
 func (d *reverser) GetIndex(tableName, indexName string) (schema.Index, error) {
 	var (
 		tempColName string
@@ -267,6 +277,7 @@ func (d *reverser) GetIndex(tableName, indexName string) (schema.Index, error) {
 	return index, nil
 }
 
+// GetReference returns a schema.Reference representing the given tableName and indexName.
 func (d *reverser) GetReference(tableName, referenceName string) (schema.Reference, error) {
 	var (
 		ref            schema.Reference

@@ -5,7 +5,7 @@ import "github.com/dotvezz/yoyo/internal/datatype"
 type validator struct {
 }
 
-func (_ *validator) SupportsDatatype(dt datatype.Datatype) bool {
+func (*validator) SupportsDatatype(dt datatype.Datatype) bool {
 	switch dt {
 	case datatype.Integer,
 		datatype.SmallInt,

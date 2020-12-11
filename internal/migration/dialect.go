@@ -23,6 +23,7 @@ type Dialect interface {
 	AddReference(table, referencedTable string, dt schema.Table, i schema.Reference) string
 }
 
+// LoadDialect loads and returns an implementation of Dialect corresponding to the given name string
 func LoadDialect(name string) (d Dialect, err error) {
 	switch name {
 	case dialect.MySQL:
