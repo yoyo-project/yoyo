@@ -3,16 +3,17 @@ package mysql
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/dotvezz/yoyo/internal/datatype"
 	"github.com/dotvezz/yoyo/internal/dbms/base"
 	"github.com/dotvezz/yoyo/internal/dbms/dialect"
 	"github.com/dotvezz/yoyo/internal/schema"
-	"strings"
 )
 
-// NewMigrator returns an implementation of migration.Dialect for MySQL
-func NewMigrator() *migrator {
-	return &migrator{
+// NewAdapter returns an implementation of migration.Dialect for MySQL
+func NewAdapter() *adapter {
+	return &adapter{
 		Base: base.Base{
 			Dialect: dialect.MySQL,
 		},
@@ -20,14 +21,9 @@ func NewMigrator() *migrator {
 	}
 }
 
-type migrator struct {
-	base.Base
-	validator
-}
-
 // TypeString returns the string representation of a given datatype.Datatype for MySQL
 // An error will be returned if the datatype.Datatype is invalid or not supported by MySQL
-func (m *migrator) TypeString(dt datatype.Datatype) (s string, err error) {
+func (m *adapter) TypeString(dt datatype.Datatype) (s string, err error) {
 	switch dt {
 	case datatype.Integer:
 		s = "INT"
@@ -41,7 +37,7 @@ func (m *migrator) TypeString(dt datatype.Datatype) (s string, err error) {
 }
 
 // CreateTable returns a query string that create a given table.
-func (m *migrator) CreateTable(tName string, t schema.Table) string {
+func (m *adapter) CreateTable(tName string, t schema.Table) string {
 	sb := strings.Builder{}
 
 	sb.WriteString(fmt.Sprintf("CREATE TABLE `%s` (\n", tName))
@@ -73,12 +69,12 @@ func (m *migrator) CreateTable(tName string, t schema.Table) string {
 }
 
 // AddColumn returns a string query which adds a column to an existing table
-func (m *migrator) AddColumn(tName, cName string, c schema.Column) string {
+func (m *adapter) AddColumn(tName, cName string, c schema.Column) string {
 	return fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN %s;", tName, m.generateColumn(cName, c))
 }
 
 // AddIndex returns a string query which adds the specified index to an existing table
-func (m *migrator) AddIndex(tName, iName string, i schema.Index) string {
+func (m *adapter) AddIndex(tName, iName string, i schema.Index) string {
 	var indexType string
 
 	switch {
@@ -102,39 +98,22 @@ func (m *migrator) AddIndex(tName, iName string, i schema.Index) string {
 }
 
 // AddReference returns a query string that adds columns and foreign keys for the given table, foreign table, and schema.Reference
-func (m *migrator) AddReference(tName, ftName string, fTable schema.Table, r schema.Reference) string {
+func (m *adapter) AddReference(tName, ftName string, fTable schema.Table, r schema.Reference) string {
 	var (
-		fcols       []string
-		fknames     []string
-		fkname      string
-		refColNames = r.ColumnNames
-		sw          = strings.Builder{}
+		fCols = fTable.PKColNames()
+		lCols = r.ColNames(ftName, fTable)
+		sw    = strings.Builder{}
 	)
 
-	for cname, col := range fTable.Columns {
-		if !col.PrimaryKey {
-			continue
-		}
-
-		switch {
-		case len(refColNames) > 0:
-			fkname, refColNames = refColNames[0], refColNames[1:]
-		default:
-			fkname = fmt.Sprintf("fk_%s_%s", ftName, cname)
-		}
-
-		fknames = append(fknames, fkname)
-		fcols = append(fcols, cname)
-
-		col.Nullable = r.Optional
-
-		sw.WriteString(m.AddColumn(tName, fkname, col))
+	for i := range lCols {
+		fCol := fTable.Columns[fCols[i]]
+		fCol.Nullable = !r.Required
+		sw.WriteString(m.AddColumn(tName, lCols[i], fCol))
 		sw.WriteRune('\n')
 	}
 
 	sw.WriteString(fmt.Sprintf("ALTER TABLE `%s` ADD CONSTRAINT `reference_%s` FOREIGN KEY (`%s`) REFERENCES %s(`%s`)",
-		tName, ftName, strings.Join(fknames, "`, `"), ftName, strings.Join(fcols, "`, `"),
-	))
+		tName, ftName, strings.Join(lCols, "`, `"), ftName, strings.Join(fCols, "`, `")))
 
 	if r.OnDelete != "" {
 		sw.WriteString(fmt.Sprintf(" ON DELETE %s", r.OnDelete))
@@ -149,7 +128,7 @@ func (m *migrator) AddReference(tName, ftName string, fTable schema.Table, r sch
 	return sw.String()
 }
 
-func (m *migrator) generateColumn(cName string, c schema.Column) string {
+func (m *adapter) generateColumn(cName string, c schema.Column) string {
 	sb := strings.Builder{}
 	ts, _ := m.TypeString(c.Datatype)
 

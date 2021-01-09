@@ -2,18 +2,19 @@ package yoyo
 
 import (
 	"fmt"
-	"github.com/dotvezz/yoyo/internal/datatype"
-	"github.com/dotvezz/yoyo/internal/schema"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/dotvezz/yoyo/internal/datatype"
+	"github.com/dotvezz/yoyo/internal/schema"
 )
 
 func cfg(wd string) Config {
-	return Config{
+	conf := Config{
 		Paths: Paths{
-			Migrations: fmt.Sprintf("%s/%s", wd, defaultMigrationsPath),
-			ORM:        fmt.Sprintf("%s/%s", wd, defaultORMPath),
+			Migrations:   fmt.Sprintf("%s/%s", wd, defaultMigrationsPath),
+			Repositories: fmt.Sprintf("%s/%s", wd, defaultRepositoryPath),
 		},
 		Schema: schema.Database{
 			Dialect: "mysql",
@@ -42,6 +43,18 @@ func cfg(wd string) Config {
 			},
 		},
 	}
+
+	for tn, t := range conf.Schema.Tables {
+		t.SetName(tn)
+		conf.Schema.Tables[tn] = t
+
+		for cn, c := range t.Columns {
+			c.SetName(cn)
+			t.Columns[cn] = c
+		}
+	}
+
+	return conf
 }
 
 func TestLoad(t *testing.T) {

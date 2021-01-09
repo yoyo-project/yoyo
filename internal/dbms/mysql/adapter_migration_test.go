@@ -1,23 +1,24 @@
 package mysql
 
 import (
+	"reflect"
+	"strings"
+	"testing"
+
 	"github.com/dotvezz/yoyo/internal/datatype"
 	"github.com/dotvezz/yoyo/internal/dbms/base"
 	"github.com/dotvezz/yoyo/internal/dbms/dialect"
 	"github.com/dotvezz/yoyo/internal/schema"
-	"reflect"
-	"strings"
-	"testing"
 )
 
-func TestNewMigrator(t *testing.T) {
+func TestNewadapter(t *testing.T) {
 	tests := []struct {
 		name string
-		want *migrator
+		want *adapter
 	}{
 		{
-			name: "just a migrator",
-			want: &migrator{
+			name: "just an adapter",
+			want: &adapter{
 				Base: base.Base{
 					Dialect: dialect.MySQL,
 				},
@@ -27,14 +28,14 @@ func TestNewMigrator(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewMigrator(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewMigrator() = %v, want %v", got, tt.want)
+			if got := NewAdapter(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewAdapter() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_migrator_TypeString(t *testing.T) {
+func Test_adapter_TypeString(t *testing.T) {
 	tests := map[string]struct {
 		dt      datatype.Datatype
 		wantS   string
@@ -62,7 +63,7 @@ func Test_migrator_TypeString(t *testing.T) {
 		},
 	}
 
-	m := &migrator{
+	m := &adapter{
 		Base:      base.Base{Dialect: dialect.MySQL},
 		validator: validator{},
 	}
@@ -89,7 +90,7 @@ func Test_migrator_TypeString(t *testing.T) {
 	}
 }
 
-func Test_migrator_CreateTable(t *testing.T) {
+func Test_adapter_CreateTable(t *testing.T) {
 	tests := map[string]struct {
 		tName string
 		t     schema.Table
@@ -130,7 +131,7 @@ func Test_migrator_CreateTable(t *testing.T) {
 		},
 	}
 
-	m := &migrator{
+	m := &adapter{
 		Base:      base.Base{Dialect: dialect.MySQL},
 		validator: validator{},
 	}
@@ -145,7 +146,7 @@ func Test_migrator_CreateTable(t *testing.T) {
 	}
 }
 
-func Test_migrator_AddColumn(t *testing.T) {
+func Test_adapter_AddColumn(t *testing.T) {
 	tests := map[string]struct {
 		tName string
 		cName string
@@ -162,7 +163,7 @@ func Test_migrator_AddColumn(t *testing.T) {
 		},
 	}
 
-	m := &migrator{
+	m := &adapter{
 		Base:      base.Base{Dialect: dialect.MySQL},
 		validator: validator{},
 	}
@@ -177,7 +178,7 @@ func Test_migrator_AddColumn(t *testing.T) {
 	}
 }
 
-func Test_migrator_AddIndex(t *testing.T) {
+func Test_adapter_AddIndex(t *testing.T) {
 	tests := map[string]struct {
 		tName string
 		iName string
@@ -222,7 +223,7 @@ func Test_migrator_AddIndex(t *testing.T) {
 		},
 	}
 
-	m := &migrator{
+	m := &adapter{
 		Base:      base.Base{Dialect: dialect.MySQL},
 		validator: validator{},
 	}
@@ -237,7 +238,7 @@ func Test_migrator_AddIndex(t *testing.T) {
 	}
 }
 
-func Test_migrator_generateColumn(t *testing.T) {
+func Test_adapter_generateColumn(t *testing.T) {
 	point := func(s string) *string {
 		return &s
 	}
@@ -329,7 +330,7 @@ func Test_migrator_generateColumn(t *testing.T) {
 		},
 	}
 
-	m := &migrator{
+	m := &adapter{
 		Base:      base.Base{Dialect: dialect.MySQL},
 		validator: validator{},
 	}
@@ -344,7 +345,7 @@ func Test_migrator_generateColumn(t *testing.T) {
 	}
 }
 
-func Test_migrator_AddReference(t *testing.T) {
+func Test_adapter_AddReference(t *testing.T) {
 	tests := map[string]struct {
 		tName  string
 		ftName string
@@ -361,6 +362,9 @@ func Test_migrator_AddReference(t *testing.T) {
 					"otherCol": {Datatype: datatype.Integer},
 				},
 			},
+			r: schema.Reference{
+				Required: true,
+			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
 		},
@@ -372,9 +376,6 @@ func Test_migrator_AddReference(t *testing.T) {
 					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
 					"otherCol": {Datatype: datatype.Integer},
 				},
-			},
-			r: schema.Reference{
-				Optional: true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED DEFAULT NULL NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
@@ -390,6 +391,7 @@ func Test_migrator_AddReference(t *testing.T) {
 			},
 			r: schema.Reference{
 				OnDelete: "CASCADE",
+				Required: true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON DELETE CASCADE;",
@@ -405,6 +407,7 @@ func Test_migrator_AddReference(t *testing.T) {
 			},
 			r: schema.Reference{
 				OnUpdate: "CASCADE",
+				Required: true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON UPDATE CASCADE;",
@@ -418,6 +421,9 @@ func Test_migrator_AddReference(t *testing.T) {
 					"id2":      {PrimaryKey: true, Datatype: datatype.Integer},
 					"otherCol": {Datatype: datatype.Integer},
 				},
+			},
+			r: schema.Reference{
+				Required: true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD COLUMN `fk_foreign_id2` INT SIGNED NOT NULL;\n" +
@@ -433,13 +439,14 @@ func Test_migrator_AddReference(t *testing.T) {
 			},
 			r: schema.Reference{
 				ColumnNames: []string{"fk"},
+				Required:    true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk` INT SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk`) REFERENCES foreign(`id`);",
 		},
 	}
 
-	m := &migrator{
+	m := &adapter{
 		Base:      base.Base{Dialect: dialect.MySQL},
 		validator: validator{},
 	}

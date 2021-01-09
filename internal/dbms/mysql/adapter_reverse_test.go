@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/dotvezz/yoyo/internal/datatype"
-	"github.com/dotvezz/yoyo/internal/schema"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/dotvezz/yoyo/internal/datatype"
+	"github.com/dotvezz/yoyo/internal/schema"
 )
 
 func TestInitNewReverser(t *testing.T) {
@@ -53,7 +54,7 @@ func TestInitNewReverser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := InitNewReverser(tt.open)
+			got := InitReverserBuilder(tt.open)
 			_, err := got(tt.args.host, tt.args.user, tt.args.dbname, tt.args.password, tt.args.port)
 
 			if err != nil && tt.wantError == false {
@@ -141,7 +142,7 @@ func Test_reverser_ListTables(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := &reverser{
+			d := &adapter{
 				db: tt.fields.db,
 			}
 			got, err := d.ListTables()
@@ -244,7 +245,7 @@ func Test_reverser_ListIndices(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := &reverser{
+			d := &adapter{
 				db: tt.fields.db,
 			}
 			got, err := d.ListIndices(tt.args.table)
@@ -331,7 +332,7 @@ func Test_reverser_ListColumns(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := &reverser{
+			d := &adapter{
 				db: tt.fields.db,
 			}
 			got, err := d.ListColumns(tt.args.table)
@@ -418,7 +419,7 @@ func Test_reverser_ListReferences(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := &reverser{
+			d := &adapter{
 				db: tt.fields.db,
 			}
 			got, err := d.ListReferences(tt.args.table)
@@ -663,7 +664,7 @@ func Test_reverser_GetColumn(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := &reverser{
+			d := &adapter{
 				db: tt.fields.db,
 			}
 			got, err := d.GetColumn(tt.args.table, tt.args.colName)
@@ -797,7 +798,7 @@ func Test_reverser_GetIndex(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := &reverser{
+			d := &adapter{
 				db: tt.fields.db,
 			}
 			got, err := d.GetIndex(tt.args.table, tt.args.indexName)
@@ -857,7 +858,7 @@ func Test_reverser_GetReference(t *testing.T) {
 				OnUpdate:    "RESTRICT",
 				OnDelete:    "RESTRICT",
 				ColumnNames: []string{"foreign_id"},
-				Optional:    false,
+				Required:    false,
 			},
 		},
 		{
@@ -883,7 +884,7 @@ func Test_reverser_GetReference(t *testing.T) {
 				OnUpdate:    "RESTRICT",
 				OnDelete:    "RESTRICT",
 				ColumnNames: []string{"foreign_id", "foreign_id2"},
-				Optional:    false,
+				Required:    false,
 			},
 		},
 		{
@@ -908,7 +909,7 @@ func Test_reverser_GetReference(t *testing.T) {
 				OnUpdate:    "RESTRICT",
 				OnDelete:    "RESTRICT",
 				ColumnNames: []string{"foreign_id"},
-				Optional:    true,
+				Required:    true,
 			},
 		},
 		{
@@ -934,7 +935,7 @@ func Test_reverser_GetReference(t *testing.T) {
 				OnUpdate:    "RESTRICT",
 				OnDelete:    "RESTRICT",
 				ColumnNames: []string{"foreign_id", "foreign_id2"},
-				Optional:    true,
+				Required:    true,
 			},
 		},
 		{
@@ -994,7 +995,7 @@ func Test_reverser_GetReference(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := &reverser{
+			d := &adapter{
 				db: tt.fields.db,
 			}
 			got, err := d.GetReference(tt.args.table, tt.args.referenceName)

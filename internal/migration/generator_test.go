@@ -1,10 +1,11 @@
 package migration
 
 import (
-	"github.com/dotvezz/yoyo/internal/datatype"
-	"github.com/dotvezz/yoyo/internal/schema"
 	"strings"
 	"testing"
+
+	"github.com/dotvezz/yoyo/internal/datatype"
+	"github.com/dotvezz/yoyo/internal/schema"
 )
 
 func TestNewSchemaGenerator(t *testing.T) {
@@ -23,11 +24,11 @@ func TestNewSchemaGenerator(t *testing.T) {
 	//	// TODO: Add test cases.
 	//}
 	//
-	//generate := NewSchemaGenerator()
+	//generate := NewGenerator()
 	//for _, tt := range tests {
 	//	t.Run(tt.name, func(t *testing.T) {
-	//		if got := NewSchemaGenerator(tt.args.conn, tt.args.dialect, tt.args.addMissingColumns, tt.args.addMissingIndices, tt.args.addIndices); !reflect.DeepEqual(got, tt.want) {
-	//			t.Errorf("NewSchemaGenerator() = %v, want %v", got, tt.want)
+	//		if got := NewGenerator(tt.args.conn, tt.args.dialect, tt.args.addMissingColumns, tt.args.addMissingIndices, tt.args.addIndices); !reflect.DeepEqual(got, tt.want) {
+	//			t.Errorf("NewGenerator() = %v, want %v", got, tt.want)
 	//		}
 	//	})
 	//}
@@ -91,13 +92,13 @@ func TestNewIndexAdder(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			sb := strings.Builder{}
 			d := &mockDialect{}
-			f := NewIndexAdder(d, tt.fields.options, func(_, index string) (bool, error) {
+			f := NewIndexAdder(d, tt.fields.options, func(_, index string) bool {
 				for _, s := range tt.fields.existingIndices {
 					if s == index {
-						return true, nil
+						return true
 					}
 				}
-				return false, nil
+				return false
 			})
 
 			err := f(tt.args.tableName, tt.args.table, &sb)
@@ -185,13 +186,13 @@ func TestNewColumnAdder(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			sb := strings.Builder{}
 			d := &mockDialect{}
-			f := NewColumnAdder(d, tt.fields.options, func(_, column string) (bool, error) {
+			f := NewColumnAdder(d, tt.fields.options, func(_, column string) bool {
 				for _, s := range tt.fields.existingColumns {
 					if s == column {
-						return true, nil
+						return true
 					}
 				}
-				return false, nil
+				return false
 			})
 
 			err := f(tt.args.tableName, tt.args.table, &sb)

@@ -2,7 +2,7 @@ package datatype
 
 import "strings"
 
-// Datatype is used to encode information about types for use in generation or validation
+// Datatype is used to encode information about types for use in repository or validation
 // The least-significant 8 bits are reserved for general metadata
 // The next 16 bits are not currently used. They were historically reserved for DBMS support in the early concept stage.
 // The next 8 bits are reserved for unique type identification
@@ -47,6 +47,16 @@ const (
 	enum       = "ENUM"
 	boolean    = "BOOLEAN" // yoyo considers "BOOLEAN" to be the canonical string, however
 	sbool      = "BOOL"    // it still accepts "BOOL" as an alias and canonicalizes it to "BOOLEAN"
+
+	goInt64   = "int64"
+	goInt32   = "int32"
+	goInt16   = "int16"
+	goInt8    = "int8"
+	goFloat64 = "float64"
+	goString  = "string"
+	goBool    = "bool"
+	goRune    = "rune"
+	goBlob    = "[]byte"
 )
 
 // UnmarshalYAML provides an implementation for yaml/v2.Unmarshaler to parse the yaml config
@@ -98,6 +108,43 @@ func (dt Datatype) String() string {
 		return enum
 	case Boolean:
 		return boolean
+	default:
+		return "NONE"
+	}
+}
+
+func (dt Datatype) GoTypeString() string {
+	switch dt {
+	case Integer:
+		return goInt32
+	case TinyInt:
+		return goInt8
+	case SmallInt:
+		return goInt16
+	case MediumInt:
+		return goInt32
+	case BigInt:
+		return goInt64
+	case Decimal:
+		return goFloat64
+	case Varchar:
+		return goString
+	case Text:
+		return goString
+	case TinyText:
+		return goString
+	case MediumText:
+		return goString
+	case LongText:
+		return goString
+	case Char:
+		return goRune
+	case Blob:
+		return goBlob
+	case Enum:
+		return goString
+	case Boolean:
+		return goBool
 	default:
 		return "NONE"
 	}
@@ -203,4 +250,6 @@ const (
 	idBlob
 	idEnum
 	idBoolean
+	idDate
+	idTimestamp
 )

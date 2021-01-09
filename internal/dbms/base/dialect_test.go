@@ -1,8 +1,9 @@
 package base
 
 import (
-	"github.com/dotvezz/yoyo/internal/datatype"
 	"testing"
+
+	"github.com/dotvezz/yoyo/internal/datatype"
 )
 
 func TestBase_TypeString(t *testing.T) {

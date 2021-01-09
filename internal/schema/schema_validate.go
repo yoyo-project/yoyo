@@ -2,9 +2,10 @@ package schema
 
 import (
 	"fmt"
-	"github.com/dotvezz/yoyo/internal/dbms/dialect"
 	"strconv"
 	"strings"
+
+	"github.com/dotvezz/yoyo/internal/dbms/dialect"
 )
 
 const (
