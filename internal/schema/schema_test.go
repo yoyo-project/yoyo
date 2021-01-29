@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"github.com/dotvezz/yoyo/internal/datatype"
 	"testing"
+
+	"github.com/dotvezz/yoyo/internal/datatype"
 
 	yaml "gopkg.in/yaml.v2"
 )

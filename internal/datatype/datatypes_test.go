@@ -1,9 +1,10 @@
 package datatype
 
 import (
-	"gopkg.in/yaml.v2"
 	"reflect"
 	"testing"
+
+	"gopkg.in/yaml.v2"
 )
 
 func TestDatatype_UnmarshalYAML(t *testing.T) {

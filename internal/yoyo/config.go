@@ -3,18 +3,19 @@ package yoyo
 import (
 	"errors"
 	"fmt"
-	"github.com/dotvezz/yoyo/internal/schema"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/dotvezz/yoyo/internal/schema"
+	"gopkg.in/yaml.v2"
 )
 
 const (
 	filename              = "yoyo.yml"
-	defaultMigrationsPath = "yoyo/migrations"
-	defaultORMPath        = "yoyo/orm"
+	defaultMigrationsPath = "yoyo/migrations/"
+	defaultRepositoryPath = "yoyo/repositories/"
 )
 
 // LoadConfig searches for a yoyo.yml file, unmarshals it, and returns the unmarshaled struct.
@@ -52,8 +53,8 @@ func LoadConfig() (yml Config, err error) {
 		yml.Paths.Migrations = fmt.Sprintf("%s/%s", dir, defaultMigrationsPath)
 	}
 
-	if yml.Paths.ORM == "" {
-		yml.Paths.ORM = fmt.Sprintf("%s/%s", dir, defaultORMPath)
+	if yml.Paths.Repositories == "" {
+		yml.Paths.Repositories = fmt.Sprintf("%s/%s", dir, defaultRepositoryPath)
 	}
 
 	return
@@ -65,8 +66,9 @@ type Config struct {
 	Schema schema.Database
 }
 
-// Paths defines the locations that Migrations and generated ORM code will be created in
+// Paths defines the locations that Migrations and generated Repositories code will be created in
 type Paths struct {
-	Migrations string
-	ORM        string // Soon...
+	Migrations   string
+	Repositories string // Soon...
+	Models       string // Soon...
 }

@@ -1,17 +1,38 @@
+
 schema:
   dialect: mysql
   tables:
-    make:
+    city:
       columns:
         id:
           type: int
           unsigned: true
-          nullable: false
           primary_key: true
           auto_increment: true
         name:
-          type: varchar(16)
+          type: varchar(32)
           default: ""
-    model:
+    person:
       columns:
         id:
+          type: int
+          unsigned: true
+          primary_key: true
+          auto_increment: true
+        name:
+          type: varchar(32)
+          default: ""
+        favorite_color:
+          type: enum("blue", "red", "green", "yellow", "orange", "purple")
+          nullable: true
+        birthday:
+          type: date
+          nullable: true
+      indices:
+        color:
+          rows:
+            - favorite_color
+      references:
+        state:
+          has_one: true
+          optional: true

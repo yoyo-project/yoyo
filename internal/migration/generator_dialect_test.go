@@ -2,6 +2,7 @@ package migration
 
 import (
 	"errors"
+
 	"github.com/dotvezz/yoyo/internal/datatype"
 	"github.com/dotvezz/yoyo/internal/schema"
 )

@@ -2,8 +2,11 @@ package migration
 
 import (
 	"fmt"
-	"github.com/dotvezz/yoyo/internal/schema"
 	"io"
+
+	"github.com/dotvezz/yoyo/internal/reverse"
+	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/dotvezz/yoyo/internal/yoyo"
 )
 
 const (
@@ -24,11 +27,13 @@ type RefGenerator func(localTable string, refs map[string]schema.Reference, sw i
 // StringSearcher functions take a string and return true if the matching entity (table, column, etc) exists.
 type StringSearcher func(string) (bool, error)
 
-// SchemaGenerator functions take a schema.Database and io.StringWriter, generating stuff for the Database to the io.StringWriter
-type SchemaGenerator func(db schema.Database, w io.StringWriter) error
+// Generator functions take a schema.Database and io.StringWriter, generating stuff for the Database to the io.StringWriter
+type Generator func(db schema.Database, w io.StringWriter) error
 
-// NewSchemaGenerator returns a function that generates a schema and writes it to the given io.StringWriter.
-func NewSchemaGenerator(
+type GeneratorLoader func(config yoyo.Config) (Generator, error)
+
+// NewGenerator returns a function that generates a schema and writes it to the given io.StringWriter.
+func NewGenerator(
 	createTable TableGenerator,
 	addMissingColumns TableGenerator,
 	addMissingIndices TableGenerator,
@@ -36,7 +41,7 @@ func NewSchemaGenerator(
 	hasTable StringSearcher,
 	addMissingRefs RefGenerator,
 	addAllRefs RefGenerator,
-) SchemaGenerator {
+) Generator {
 	return func(db schema.Database, w io.StringWriter) error {
 		for n, t := range db.Tables {
 			exists, err := hasTable(n)
@@ -87,10 +92,10 @@ func NewSchemaGenerator(
 
 // NewTableAdder returns a TableGenerator that adds a table
 func NewTableAdder(
-	d Dialect,
+	a Adapter,
 ) TableGenerator {
 	return func(tName string, t schema.Table, sw io.StringWriter) error {
-		_, err := sw.WriteString(fmt.Sprintf("%s\n", d.CreateTable(tName, t)))
+		_, err := sw.WriteString(fmt.Sprintf("%s\n", a.CreateTable(tName, t)))
 		if err != nil {
 			return fmt.Errorf("unable to generate migration: %sw", err)
 		}
@@ -100,24 +105,20 @@ func NewTableAdder(
 
 // NewColumnAdder returns a TableGenerator that adds columns from a schema.Table.
 func NewColumnAdder(
-	d Dialect,
+	a Adapter,
 	options uint8,
-	hasColumn func(table, column string) (bool, error),
+	hasColumn reverse.TableSearcher,
 ) TableGenerator {
 	return func(tName string, t schema.Table, sw io.StringWriter) error {
 		for cName, c := range t.Columns {
 			if options&AddMissing > 0 {
-				exists, err := hasColumn(tName, cName)
-				if err != nil {
-					return fmt.Errorf("unable to generate migration: %sw", err)
-				}
 
-				if exists {
+				if hasColumn(tName, cName) {
 					continue
 				}
 			}
 
-			_, err := sw.WriteString(fmt.Sprintf("%s\n", d.AddColumn(tName, cName, c)))
+			_, err := sw.WriteString(fmt.Sprintf("%s\n", a.AddColumn(tName, cName, c)))
 			if err != nil {
 				return fmt.Errorf("unable to generate migration: %sw", err)
 			}
@@ -128,23 +129,18 @@ func NewColumnAdder(
 
 // NewIndexAdder returns a TableGenerator that adds indices from a schema.Table.
 func NewIndexAdder(
-	d Dialect,
+	a Adapter,
 	options uint8,
-	hasIndex func(table, index string) (bool, error),
+	hasIndex reverse.TableSearcher,
 ) TableGenerator {
 	return func(tName string, t schema.Table, sw io.StringWriter) error {
 		for iName, i := range t.Indices {
 			if options&AddMissing > 0 {
-				exists, err := hasIndex(tName, iName)
-				if err != nil {
-					return fmt.Errorf("unable to generate migration: %sw", err)
-				}
-
-				if exists {
+				if hasIndex(tName, iName) {
 					continue
 				}
 			}
-			_, err := sw.WriteString(d.AddIndex(tName, iName, i))
+			_, err := sw.WriteString(a.AddIndex(tName, iName, i))
 			if err != nil {
 				return fmt.Errorf("unable to generate migration: %sw", err)
 			}
@@ -155,10 +151,10 @@ func NewIndexAdder(
 
 // NewRefAdder returns a RefGenerator that adds references to a given table.
 func NewRefAdder(
-	d Dialect,
+	a Adapter,
 	db schema.Database,
 	options uint8,
-	hasReference func(localTable, refTable string) (bool, error),
+	hasReference reverse.TableSearcher,
 ) RefGenerator {
 	return func(localTable string, refs map[string]schema.Reference, sw io.StringWriter) error {
 		for foreignTable, ref := range refs {
@@ -168,12 +164,7 @@ func NewRefAdder(
 			ft, ok := db.Tables[foreignTable]
 
 			if options&AddMissing > 0 {
-				exists, err := hasReference(localTable, foreignTable)
-				if err != nil {
-					return fmt.Errorf("unable to generate migration: %sw", err)
-				}
-
-				if exists {
+				if hasReference(localTable, foreignTable) {
 					continue
 				}
 			}
@@ -181,12 +172,44 @@ func NewRefAdder(
 			if !ok { // This should technically be caught by validation, but still
 				return fmt.Errorf("referenced table `%s` does not exist in dbms definition", foreignTable)
 			}
-			s := d.AddReference(localTable, foreignTable, ft, ref)
+			s := a.AddReference(localTable, foreignTable, ft, ref)
 			_, err := sw.WriteString(s)
 			if err != nil {
 				return fmt.Errorf("unable to generate migration: %w", err)
 			}
 		}
 		return nil
+	}
+}
+
+func InitGeneratorLoader(
+	initReverseAdapter func(dia string) (adapter reverse.Adapter, err error),
+	initMigrationAdapter func(dia string) (a Adapter, err error),
+	newGenerator func(TableGenerator, TableGenerator, TableGenerator, TableGenerator, StringSearcher, RefGenerator, RefGenerator) Generator,
+) GeneratorLoader {
+	return func(config yoyo.Config) (Generator, error) {
+		var (
+			err      error
+			reverser reverse.Adapter
+			migrator Adapter
+		)
+		reverser, err = initReverseAdapter(config.Schema.Dialect)
+		if err != nil {
+			return nil, fmt.Errorf("cannot initialize reverse adapter: %w", err)
+		}
+		migrator, err = initMigrationAdapter(config.Schema.Dialect)
+		if err != nil {
+			return nil, fmt.Errorf("cannot initialize migration adapter: %w", err)
+		}
+
+		return newGenerator(
+			NewTableAdder(migrator),
+			NewColumnAdder(migrator, AddMissing, reverse.InitHasColumn(reverser.GetColumn)),
+			NewIndexAdder(migrator, AddMissing, reverse.InitHasIndex(reverser.GetIndex)),
+			NewIndexAdder(migrator, AddAll, nil),
+			reverse.InitHasTable(reverser.ListTables),
+			NewRefAdder(migrator, config.Schema, AddMissing, reverse.InitHasReference(reverser.GetReference)),
+			NewRefAdder(migrator, config.Schema, AddAll, nil),
+		), nil
 	}
 }

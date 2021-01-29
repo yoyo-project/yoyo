@@ -2,14 +2,17 @@ package migration
 
 import (
 	"fmt"
+
 	"github.com/dotvezz/yoyo/internal/dbms/dialect"
 	"github.com/dotvezz/yoyo/internal/dbms/mysql"
 	"github.com/dotvezz/yoyo/internal/dbms/postgres"
 	"github.com/dotvezz/yoyo/internal/schema"
 )
 
-// Dialect describes an internal dialect to be used by Yoyo for generating Migration code for a given DBMS.
-type Dialect interface {
+type AdapterLoader func(name string) (d Adapter, err error)
+
+// Adapter describes an internal dialect to be used by Yoyo for generating Migration code for a given DBMS.
+type Adapter interface {
 	// CreateTable returns a string query which creates a full table with columns columns and primary key
 	CreateTable(table string, t schema.Table) string
 
@@ -23,13 +26,13 @@ type Dialect interface {
 	AddReference(table, referencedTable string, dt schema.Table, i schema.Reference) string
 }
 
-// LoadDialect loads and returns an implementation of Dialect corresponding to the given name string
-func LoadDialect(name string) (d Dialect, err error) {
+// LoadAdapter loads and returns an implementation of Adapter corresponding to the given name string
+func LoadAdapter(name string) (d Adapter, err error) {
 	switch name {
 	case dialect.MySQL:
-		d = mysql.NewMigrator()
+		d = mysql.NewAdapter()
 	case dialect.PostgreSQL:
-		d = postgres.NewMigrator()
+		d = postgres.NewAdapter()
 	default:
 		err = fmt.Errorf("unknown dialect `%s`", name)
 	}

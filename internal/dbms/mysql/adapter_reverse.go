@@ -3,12 +3,13 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/dotvezz/yoyo/internal/datatype"
 	"github.com/dotvezz/yoyo/internal/reverse"
 	"github.com/dotvezz/yoyo/internal/schema"
 	goMysql "github.com/go-sql-driver/mysql"
-	"strconv"
-	"strings"
 )
 
 const listColumnsQuery = `SELECT c.COLUMN_NAME FROM information_schema.COLUMNS c
@@ -60,10 +61,10 @@ const getReferenceColumnsQuery = `SELECT kcu.COLUMN_NAME, NOT c.IS_NULLABLE
         AND kcu.REFERENCED_TABLE_NAME = '%s'
         AND kcu.CONSTRAINT_NAME = '%s'`
 
-// InitNewReverser returns a `NewReverser` function, which returns a reverse.Reverser.
-func InitNewReverser(open func(driver, dsn string) (*sql.DB, error)) func(host, user, dbname, password, port string) (reverse.Reverser, error) {
-	return func(host, user, dbname, password, port string) (reverse.Reverser, error) {
-		reverser := reverser{}
+// InitReverserBuilder returns a `NewReverser` function, which returns a reverse.Adapter.
+func InitReverserBuilder(open func(driver, dsn string) (*sql.DB, error)) func(host, user, dbname, password, port string) (reverse.Adapter, error) {
+	return func(host, user, dbname, password, port string) (reverse.Adapter, error) {
+		r := adapter{}
 		cnf := goMysql.NewConfig()
 
 		cnf.User = user
@@ -76,22 +77,18 @@ func InitNewReverser(open func(driver, dsn string) (*sql.DB, error)) func(host, 
 		cnf.DBName = dbname
 
 		var err error
-		reverser.db, err = open("mysql", cnf.FormatDSN())
+		r.db, err = open("mysql", cnf.FormatDSN())
 		if err != nil {
-			return nil, fmt.Errorf("unable to open database connection for mysql reverser: %w", err)
+			return nil, fmt.Errorf("unable to open database connection for mysql r: %w", err)
 		}
 
-		return &reverser, nil
+		return &r, nil
 	}
 }
 
-type reverser struct {
-	db *sql.DB
-}
-
 // ListTables returns a list of tables on the selected database.
-func (d *reverser) ListTables() ([]string, error) {
-	rs, err := d.db.Query("SHOW TABLES")
+func (a *adapter) ListTables() ([]string, error) {
+	rs, err := a.db.Query("SHOW TABLES")
 	if err != nil {
 		return nil, fmt.Errorf("unable to list tables: %w", err)
 	}
@@ -116,9 +113,9 @@ func (d *reverser) ListTables() ([]string, error) {
 // ListIndices returns a []string of index names for the given table.
 // It will NOT return information referring to PrimaryKey or Foreign Keys, which will instead come from GetColumn and
 // ListReferences respectively
-func (d *reverser) ListIndices(table string) ([]string, error) {
+func (a *adapter) ListIndices(table string) ([]string, error) {
 	query := fmt.Sprintf(listIndicesQuery, table)
-	rs, err := d.db.Query(query)
+	rs, err := a.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("unable to list indices: %w", err)
 	}
@@ -141,8 +138,8 @@ func (d *reverser) ListIndices(table string) ([]string, error) {
 
 // ListColumns returns a []string of column names for the given table
 // It does NOT return any columns which are foreign key columns. These will instead come from ListReferences
-func (d *reverser) ListColumns(table string) ([]string, error) {
-	rs, err := d.db.Query(fmt.Sprintf(listColumnsQuery, table))
+func (a *adapter) ListColumns(table string) ([]string, error) {
+	rs, err := a.db.Query(fmt.Sprintf(listColumnsQuery, table))
 	if err != nil {
 		return nil, fmt.Errorf("unable to list indices: %w", err)
 	}
@@ -164,8 +161,8 @@ func (d *reverser) ListColumns(table string) ([]string, error) {
 }
 
 // ListReferences returns a []string of tables referenced from the given table.
-func (d *reverser) ListReferences(table string) ([]string, error) {
-	rs, err := d.db.Query(fmt.Sprintf(listReferencesQuery, table))
+func (a *adapter) ListReferences(table string) ([]string, error) {
+	rs, err := a.db.Query(fmt.Sprintf(listReferencesQuery, table))
 	if err != nil {
 		return nil, fmt.Errorf("unable to list indices: %w", err)
 	}
@@ -189,7 +186,7 @@ func (d *reverser) ListReferences(table string) ([]string, error) {
 
 // GetColumn returns a schema.Column representing the given tableName and colName.
 // TODO: Charset and Collation
-func (d *reverser) GetColumn(tableName, colName string) (schema.Column, error) {
+func (a *adapter) GetColumn(tableName, colName string) (schema.Column, error) {
 	var (
 		dt         string
 		nullable   string
@@ -198,7 +195,7 @@ func (d *reverser) GetColumn(tableName, colName string) (schema.Column, error) {
 		extra      string
 		col        schema.Column
 	)
-	rs, err := d.db.Query(fmt.Sprintf(getColumnQuery, tableName, colName))
+	rs, err := a.db.Query(fmt.Sprintf(getColumnQuery, tableName, colName))
 	if err != nil {
 		return col, fmt.Errorf("unable to get column information for `%s`.`%s`: %w`", tableName, colName, err)
 	}
@@ -251,14 +248,14 @@ func (d *reverser) GetColumn(tableName, colName string) (schema.Column, error) {
 }
 
 // GetIndex returns a schema.Index representing the given tableName and indexName.
-func (d *reverser) GetIndex(tableName, indexName string) (schema.Index, error) {
+func (a *adapter) GetIndex(tableName, indexName string) (schema.Index, error) {
 	var (
 		tempColName string
 		columns     []string
 		index       schema.Index
 	)
 
-	rs, err := d.db.Query(fmt.Sprintf(getIndexQuery, tableName, indexName))
+	rs, err := a.db.Query(fmt.Sprintf(getIndexQuery, tableName, indexName))
 	if err != nil {
 		return index, fmt.Errorf("unable to get information for index `%s` on table `%s`: %w`", indexName, tableName, err)
 	}
@@ -278,7 +275,7 @@ func (d *reverser) GetIndex(tableName, indexName string) (schema.Index, error) {
 }
 
 // GetReference returns a schema.Reference representing the given tableName and indexName.
-func (d *reverser) GetReference(tableName, referenceName string) (schema.Reference, error) {
+func (a *adapter) GetReference(tableName, referenceName string) (schema.Reference, error) {
 	var (
 		ref            schema.Reference
 		constraintName string
@@ -286,7 +283,7 @@ func (d *reverser) GetReference(tableName, referenceName string) (schema.Referen
 		columnNames    []string
 	)
 
-	rs, err := d.db.Query(fmt.Sprintf(fmt.Sprintf(getReferenceQuery, tableName, referenceName)))
+	rs, err := a.db.Query(fmt.Sprintf(fmt.Sprintf(getReferenceQuery, tableName, referenceName)))
 	if err != nil {
 		return ref, fmt.Errorf("unable to get reference information for table `%s` from table `%s`: %w", referenceName, tableName, err)
 	}
@@ -296,13 +293,13 @@ func (d *reverser) GetReference(tableName, referenceName string) (schema.Referen
 	}
 	_ = rs.Close()
 
-	rs, err = d.db.Query(fmt.Sprintf(getReferenceColumnsQuery, tableName, referenceName, constraintName))
+	rs, err = a.db.Query(fmt.Sprintf(getReferenceColumnsQuery, tableName, referenceName, constraintName))
 	if err != nil {
 		return ref, fmt.Errorf("unable to get reference columns for table `%s` from table `%s`: %w", referenceName, tableName, err)
 	}
 
 	for rs.Next() {
-		err = rs.Scan(&tempString, &ref.Optional)
+		err = rs.Scan(&tempString, &ref.Required)
 		columnNames = append(columnNames, tempString)
 	}
 	_ = rs.Close()

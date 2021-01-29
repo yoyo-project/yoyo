@@ -1,12 +1,21 @@
 package reverse
 
 import (
+	"fmt"
+
+	"github.com/dotvezz/yoyo/env"
+	"github.com/dotvezz/yoyo/internal/dbms/dialect"
 	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/dotvezz/yoyo/internal/yoyo"
 )
 
-// Reverser is the yoyo interface for reverse-engineering databases to a schema.Database for creating diff migrations
+type AdapterLoader func(dia string) (adapter Adapter, err error)
+type DatabaseReader func(config yoyo.Config) (db schema.Database, err error)
+type AdapterBuilder func(host, userName, dbName, password, port string) (Adapter, error)
+
+// Adapter is the yoyo interface for reverse-engineering databases to a schema.Database for creating diff migrations
 // and for creating a yoyo.yml from an existing database.
-type Reverser interface {
+type Adapter interface {
 	ListTables() ([]string, error)
 
 	// ListColumns returns a []string of column names for the given table
@@ -29,4 +38,19 @@ type Reverser interface {
 
 	// GetReference returns a schema.Reference representing the given tableName and indexName.
 	GetReference(table, column string) (schema.Reference, error)
+}
+
+func InitAdapterSelector(newMysqlReverser, newPostgresReverser AdapterBuilder) func(dia string) (adapter Adapter, err error) {
+	return func(dia string) (adapter Adapter, err error) {
+		switch dia {
+		case dialect.MySQL:
+			adapter, err = newMysqlReverser(env.DBHost(), env.DBUser(), env.DBName(), env.DBPassword(), env.DBPort())
+		case dialect.PostgreSQL:
+			adapter, err = newPostgresReverser(env.DBHost(), env.DBUser(), env.DBName(), env.DBPassword(), env.DBPort())
+		default:
+			err = fmt.Errorf("unknown dialect `%s`", dia)
+		}
+
+		return adapter, err
+	}
 }

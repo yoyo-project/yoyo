@@ -3,13 +3,14 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/dotvezz/yoyo/internal/reverse"
 	"github.com/dotvezz/yoyo/internal/schema"
 )
 
-// InitNewReverser returns a function that returns a PostgreSQL reverse.Reverser
-func InitNewReverser(open func(driver, dsn string) (*sql.DB, error)) func(host, user, dbname, password, port string) (reverse.Reverser, error) {
-	return func(host, user, dbname, password, port string) (reverse.Reverser, error) {
+// InitReverserBuilder returns a function that returns a PostgreSQL reverse.Adapter
+func InitReverserBuilder(open func(driver, dsn string) (*sql.DB, error)) func(host, user, dbname, password, port string) (reverse.Adapter, error) {
+	return func(host, user, dbname, password, port string) (reverse.Adapter, error) {
 		reverser := reverser{}
 
 		var err error
