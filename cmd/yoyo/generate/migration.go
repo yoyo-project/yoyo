@@ -14,7 +14,7 @@ import (
 
 type FileOpener func(string) (*os.File, error)
 
-func BuildMigrationGeneratorFunc(
+func Migrations(
 	now func() time.Time,
 	loadGenerator migration.GeneratorLoader,
 	create FileOpener,

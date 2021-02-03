@@ -55,10 +55,12 @@ func (t *Table) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // UnmarshalYAML provides an implementation for yaml/v2.Unmarshaler to parse a Reference definition
 func (r *Reference) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	r2 := new(struct {
-		HasOne   bool
-		HasMany  bool
-		OnDelete string
-		OnUpdate string
+		HasOne      bool `yaml:"has_one"`
+		HasMany     bool `yaml:"has_many"`
+		Required    bool
+		ColumnNames []string `yaml:"column_names"`
+		OnDelete    string   `yaml:"on_delete"`
+		OnUpdate    string   `yaml:"on_update"`
 	})
 
 	err := unmarshal(r2)
@@ -66,10 +68,12 @@ func (r *Reference) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
+	r.HasOne = r2.HasOne
+	r.HasMany = r2.HasMany
+	r.Required = r2.Required
+	r.ColumnNames = r2.ColumnNames
 	r.OnUpdate = strings.TrimSpace(strings.ToUpper(r2.OnUpdate))
 	r.OnDelete = strings.TrimSpace(strings.ToUpper(r2.OnDelete))
-	r.HasMany = r2.HasMany
-	r.HasOne = r2.HasOne
 
 	return r.validate()
 }

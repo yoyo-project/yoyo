@@ -23,7 +23,11 @@ func main() {
 			Commands: []lime.Command{
 				{
 					Keyword: "migration",
-					Func:    generate.BuildMigrationGeneratorFunc(ucs.GetCurrentTime, ucs.LoadMigrationGenerator, os.Create),
+					Func:    generate.Migrations(ucs.GetCurrentTime, ucs.LoadMigrationGenerator, os.Create),
+				},
+				{
+					Keyword: "repos",
+					Func:    generate.Repos(ucs.LoadRepositoryGenerator),
 				},
 			},
 		},

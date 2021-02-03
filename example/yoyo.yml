@@ -35,4 +35,4 @@ schema:
       references:
         state:
           has_one: true
-          optional: true
+          required: false
