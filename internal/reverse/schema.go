@@ -3,8 +3,8 @@ package reverse
 import (
 	"fmt"
 
-	"github.com/dotvezz/yoyo/internal/schema"
-	"github.com/dotvezz/yoyo/internal/yoyo"
+	"github.com/yoyo-project/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
 // ReadDatabase uses the given Adapter to scan and write the database into a schema.Database

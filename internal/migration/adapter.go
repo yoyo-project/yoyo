@@ -3,10 +3,10 @@ package migration
 import (
 	"fmt"
 
-	"github.com/dotvezz/yoyo/internal/dbms/dialect"
-	"github.com/dotvezz/yoyo/internal/dbms/mysql"
-	"github.com/dotvezz/yoyo/internal/dbms/postgres"
-	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/dbms/dialect"
+	"github.com/yoyo-project/yoyo/internal/dbms/mysql"
+	"github.com/yoyo-project/yoyo/internal/dbms/postgres"
+	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
 type AdapterLoader func(name string) (d Adapter, err error)

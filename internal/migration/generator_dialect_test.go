@@ -3,8 +3,8 @@ package migration
 import (
 	"errors"
 
-	"github.com/dotvezz/yoyo/internal/datatype"
-	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/datatype"
+	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
 const (

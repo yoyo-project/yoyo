@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/dotvezz/yoyo/internal/datatype"
-	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/datatype"
+	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
 func cfg(wd string) Config {

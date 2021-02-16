@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dotvezz/yoyo/internal/datatype"
-	"github.com/dotvezz/yoyo/internal/reverse"
-	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/datatype"
+	"github.com/yoyo-project/yoyo/internal/reverse"
+	"github.com/yoyo-project/yoyo/internal/schema"
 	goMysql "github.com/go-sql-driver/mysql"
 )
 

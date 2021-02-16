@@ -3,7 +3,7 @@ package postgres
 import (
 	"testing"
 
-	"github.com/dotvezz/yoyo/internal/datatype"
+	"github.com/yoyo-project/yoyo/internal/datatype"
 )
 
 func Test_validator_SupportsDatatype(t *testing.T) {

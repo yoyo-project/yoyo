@@ -3,7 +3,7 @@ package mysql
 import (
 	"database/sql"
 
-	"github.com/dotvezz/yoyo/internal/dbms/base"
+	"github.com/yoyo-project/yoyo/internal/dbms/base"
 )
 
 type adapter struct {

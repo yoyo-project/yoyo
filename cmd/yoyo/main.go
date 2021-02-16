@@ -7,8 +7,8 @@ import (
 	"github.com/dotvezz/lime"
 	"github.com/dotvezz/lime/cli"
 	"github.com/dotvezz/lime/options"
-	"github.com/dotvezz/yoyo/cmd/yoyo/generate"
-	"github.com/dotvezz/yoyo/cmd/yoyo/usecases"
+	"github.com/yoyo-project/yoyo/cmd/yoyo/generate"
+	"github.com/yoyo-project/yoyo/cmd/yoyo/usecases"
 )
 
 func main() {

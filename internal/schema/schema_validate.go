@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dotvezz/yoyo/internal/dbms/dialect"
+	"github.com/yoyo-project/yoyo/internal/dbms/dialect"
 )
 
 const (

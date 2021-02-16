@@ -1,4 +1,4 @@
-module github.com/dotvezz/yoyo
+module github.com/yoyo-project/yoyo
 
 go 1.12
 

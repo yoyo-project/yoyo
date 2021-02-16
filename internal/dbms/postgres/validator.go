@@ -1,6 +1,6 @@
 package postgres
 
-import "github.com/dotvezz/yoyo/internal/datatype"
+import "github.com/yoyo-project/yoyo/internal/datatype"
 
 type validator struct {
 }

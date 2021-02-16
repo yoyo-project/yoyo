@@ -1,7 +1,7 @@
 package base
 
 import (
-	"github.com/dotvezz/yoyo/internal/datatype"
+	"github.com/yoyo-project/yoyo/internal/datatype"
 )
 
 // Base is a partial implementation of migration.Dialect. It provides the TypeString method.

@@ -3,10 +3,10 @@ package reverse
 import (
 	"fmt"
 
-	"github.com/dotvezz/yoyo/env"
-	"github.com/dotvezz/yoyo/internal/dbms/dialect"
-	"github.com/dotvezz/yoyo/internal/schema"
-	"github.com/dotvezz/yoyo/internal/yoyo"
+	"github.com/yoyo-project/yoyo/env"
+	"github.com/yoyo-project/yoyo/internal/dbms/dialect"
+	"github.com/yoyo-project/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
 type AdapterLoader func(dia string) (adapter Adapter, err error)

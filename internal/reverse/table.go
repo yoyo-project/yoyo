@@ -3,7 +3,7 @@ package reverse
 import (
 	"fmt"
 
-	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
 type TableSearcher func(table, x string) bool

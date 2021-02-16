@@ -3,7 +3,7 @@ package repository
 import (
 	"io"
 
-	"github.com/dotvezz/yoyo/internal/repository/template"
+	"github.com/yoyo-project/yoyo/internal/repository/template"
 )
 
 func NewQueryNodeGenerator() SimpleWriteGenerator {

@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"github.com/dotvezz/yoyo/example/yoyo/repositories/query/state"
+	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/state"
 )
 
 type stateRepo struct {

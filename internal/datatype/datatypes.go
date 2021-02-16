@@ -24,7 +24,7 @@ const (
 	LongText   = idLongText | metaString
 	Char       = idChar | metaString
 	Blob       = idBlob | metaBinary
-	Enum       = idEnum | metaString | metaRequiresScale
+	Enum       = idEnum | metaString
 	Boolean    = idBoolean
 )
 

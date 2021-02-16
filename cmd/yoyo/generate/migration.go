@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/dotvezz/lime"
-	"github.com/dotvezz/yoyo/internal/migration"
-	"github.com/dotvezz/yoyo/internal/yoyo"
+	"github.com/yoyo-project/yoyo/internal/migration"
+	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
 type FileOpener func(string) (*os.File, error)

@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dotvezz/yoyo/internal/yoyo"
+	"github.com/yoyo-project/yoyo/internal/yoyo"
 
-	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
 type Generator func(db schema.Database, repositoriesPath string) error

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/dotvezz/yoyo/internal/reverse"
-	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/reverse"
+	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
 // InitReverserBuilder returns a function that returns a PostgreSQL reverse.Adapter

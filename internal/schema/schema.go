@@ -1,7 +1,7 @@
 package schema
 
 import (
-	"github.com/dotvezz/yoyo/internal/datatype"
+	"github.com/yoyo-project/yoyo/internal/datatype"
 )
 
 // Database represents a single database/schema in a DBMS.

@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/dotvezz/yoyo/internal/repository"
+	"github.com/yoyo-project/yoyo/internal/repository"
 
-	"github.com/dotvezz/yoyo/internal/dbms/mysql"
-	"github.com/dotvezz/yoyo/internal/dbms/postgres"
-	"github.com/dotvezz/yoyo/internal/migration"
-	"github.com/dotvezz/yoyo/internal/reverse"
+	"github.com/yoyo-project/yoyo/internal/dbms/mysql"
+	"github.com/yoyo-project/yoyo/internal/dbms/postgres"
+	"github.com/yoyo-project/yoyo/internal/migration"
+	"github.com/yoyo-project/yoyo/internal/reverse"
 )
 
 type UseCases struct {

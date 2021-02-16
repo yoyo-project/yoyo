@@ -302,13 +302,13 @@ func TestDatatype_RequiresScale(t *testing.T) {
 		},
 		{
 			dt:   Enum,
-			want: true,
+			want: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.dt.String(), func(t *testing.T) {
 			if got := tt.dt.RequiresScale(); got != tt.want {
-				t.Errorf("IsNumeric() = %v, want %v", got, tt.want)
+				t.Errorf("RequiresScale() = %v, want %v", got, tt.want)
 			}
 		})
 	}

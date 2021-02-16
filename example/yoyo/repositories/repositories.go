@@ -3,8 +3,8 @@ package repositories
 import (
 	"database/sql"
 
-	"github.com/dotvezz/yoyo/example/yoyo/repositories/query/person"
-	"github.com/dotvezz/yoyo/example/yoyo/repositories/query/state"
+	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/person"
+	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/state"
 )
 
 type Transact func(func() error) error

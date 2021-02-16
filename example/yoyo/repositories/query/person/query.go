@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dotvezz/yoyo/example/yoyo/repositories/query"
+	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query"
 )
 
 type Query struct {

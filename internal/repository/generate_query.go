@@ -4,9 +4,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/dotvezz/yoyo/internal/repository/template"
-	"github.com/dotvezz/yoyo/internal/schema"
-	"github.com/dotvezz/yoyo/internal/yoyo"
+	"github.com/yoyo-project/yoyo/internal/repository/template"
+	"github.com/yoyo-project/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
 func NewQueryFileGenerator(config yoyo.Config) EntityGenerator {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/dotvezz/lime"
-	"github.com/dotvezz/yoyo/internal/repository"
-	"github.com/dotvezz/yoyo/internal/yoyo"
+	"github.com/yoyo-project/yoyo/internal/repository"
+	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
 func Repos(

@@ -3,10 +3,10 @@ package postgres
 import (
 	"fmt"
 
-	"github.com/dotvezz/yoyo/internal/datatype"
-	"github.com/dotvezz/yoyo/internal/dbms/base"
-	"github.com/dotvezz/yoyo/internal/dbms/dialect"
-	"github.com/dotvezz/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/datatype"
+	"github.com/yoyo-project/yoyo/internal/dbms/base"
+	"github.com/yoyo-project/yoyo/internal/dbms/dialect"
+	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
 // NewAdapter returns an implementation of migration.Dialect for PostgreSQL

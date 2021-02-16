@@ -3,11 +3,11 @@ package repository
 import (
 	"fmt"
 
-	"github.com/dotvezz/yoyo/internal/dbms/dialect"
-	"github.com/dotvezz/yoyo/internal/dbms/mysql"
-	"github.com/dotvezz/yoyo/internal/dbms/postgres"
-	"github.com/dotvezz/yoyo/internal/schema"
-	"github.com/dotvezz/yoyo/internal/yoyo"
+	"github.com/yoyo-project/yoyo/internal/dbms/dialect"
+	"github.com/yoyo-project/yoyo/internal/dbms/mysql"
+	"github.com/yoyo-project/yoyo/internal/dbms/postgres"
+	"github.com/yoyo-project/yoyo/internal/schema"
+	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
 type AdapterLoader func(dia string) (Adapter, error)
