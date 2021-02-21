@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
+	goMysql "github.com/go-sql-driver/mysql"
 	"github.com/yoyo-project/yoyo/internal/datatype"
 	"github.com/yoyo-project/yoyo/internal/reverse"
 	"github.com/yoyo-project/yoyo/internal/schema"
-	goMysql "github.com/go-sql-driver/mysql"
 )
 
 const listColumnsQuery = `SELECT c.COLUMN_NAME FROM information_schema.COLUMNS c

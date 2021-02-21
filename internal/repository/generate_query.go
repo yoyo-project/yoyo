@@ -3,14 +3,14 @@ package repository
 import (
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/yoyo-project/yoyo/internal/repository/template"
 	"github.com/yoyo-project/yoyo/internal/schema"
-	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
-func NewQueryFileGenerator(config yoyo.Config, packagePath Finder) EntityGenerator {
+func NewQueryFileGenerator(reposPath string, packagePath Finder) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) error {
 		var methods, functions, imports []string
 		for cn, c := range t.Columns {
@@ -20,7 +20,7 @@ func NewQueryFileGenerator(config yoyo.Config, packagePath Finder) EntityGenerat
 			imports = append(imports, is...)
 		}
 
-		importPath, err := packagePath(config.Paths.Repositories)
+		importPath, err := packagePath(reposPath + "/")
 		if err != nil {
 			return fmt.Errorf("unable to generate query file: %w", err)
 		}
@@ -29,7 +29,7 @@ func NewQueryFileGenerator(config yoyo.Config, packagePath Finder) EntityGenerat
 			template.PackageName,
 			t.QueryPackageName(),
 			template.StdlibImports,
-			strings.Join(unique(imports), "\n    "),
+			strings.Join(sortedUnique(imports), "\n	"),
 			template.RepositoriesPackage,
 			importPath,
 		)
@@ -53,7 +53,7 @@ func NewQueryFileGenerator(config yoyo.Config, packagePath Finder) EntityGenerat
 	}
 }
 
-func unique(in []string) (out []string) {
+func sortedUnique(in []string) (out []string) {
 	m := make(map[string]bool)
 	for i := range in {
 		if _, ok := m[in[i]]; ok {
@@ -62,5 +62,6 @@ func unique(in []string) (out []string) {
 		out = append(out, in[i])
 		m[in[i]] = true
 	}
+	sort.Strings(out)
 	return out
 }

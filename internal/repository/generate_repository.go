@@ -1,28 +1,79 @@
 package repository
 
 import (
+	"fmt"
 	"io"
-	"path/filepath"
 	"strings"
 
 	"github.com/yoyo-project/yoyo/internal/repository/template"
 	"github.com/yoyo-project/yoyo/internal/schema"
-	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
-func NewEntityRepositoryGenerator(cfg yoyo.Config, adapter Adapter) EntityGenerator {
-	return func(t schema.Table, w io.StringWriter) error {
-		_, packageName := filepath.Split(cfg.Paths.Repositories)
-		cNames := make([]string, 0)
-		for columnName := range t.Columns {
-			cNames = append(cNames, columnName)
+func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath string, packagePath Finder) EntityGenerator {
+	return func(t schema.Table, w io.StringWriter) (err error) {
+		var pkNames, cNames, scanFields, inFields, pkFields, colAssignments []string
+		for columnName, col := range t.Columns {
+			if !col.PrimaryKey {
+				cNames = append(cNames, columnName)
+			} else {
+				pkFields = append(pkFields, strings.ReplaceAll(template.PKFieldTemplate, template.FieldName, col.ExportedGoName()))
+				pkNames = append(pkNames, columnName)
+			}
+			scanFields = append(scanFields, fmt.Sprintf("&ent.%s", col.ExportedGoName()))
+			inFields = append(inFields, fmt.Sprintf("in.%s", col.ExportedGoName()))
+		}
+
+		var queryImportPath string
+		queryImportPath, err = packagePath(fmt.Sprintf("%s/query/%s", reposPath, t.QueryPackageName()))
+		if err != nil {
+			return fmt.Errorf("unable to generate repository: %w", err)
+		}
+
+		var pkCapture, pkCapTemplate string
+		pkReplacer := strings.NewReplacer()
+
+		switch len(t.PKColumns()) {
+		case 0:
+			// Do nothing
+		case 1:
+			col := t.PKColumns()[0]
+			pkCapTemplate = template.SinglePKCaptureTemplate
+			pkReplacer = strings.NewReplacer(
+				template.FieldName,
+				col.ExportedGoName(),
+				template.Type,
+				col.GoTypeString(),
+			)
+		default:
+			pkCapTemplate = template.MultiPKCaptureTemplate
+			pkReplacer = strings.NewReplacer()
+		}
+
+		pkCapture = pkReplacer.Replace(pkCapTemplate)
+
+		pkQueryReplacer := strings.NewReplacer(
+			template.QueryPackageName,
+			t.QueryPackageName(),
+			template.PKFields,
+			strings.Join(pkFields, "\n		"),
+		)
+
+		pkQuery := pkQueryReplacer.Replace(template.PKQueryTemplate)
+
+		preparedStatementPlaceholders := adapter.PreparedStatementPlaceholders(len(cNames))
+		for i, colName := range cNames {
+			colAssignments = append(colAssignments, fmt.Sprintf("%s = %s", colName, preparedStatementPlaceholders[i]))
 		}
 
 		r := strings.NewReplacer(
 			template.PackageName,
 			packageName,
 			template.Imports,
-			"",
+			fmt.Sprintf(`"%s"`, queryImportPath),
+			template.ScanFields,
+			strings.Join(scanFields, ", "),
+			template.InFields,
+			strings.Join(inFields, ", "),
 			template.EntityName,
 			t.ExportedGoName(),
 			template.TableName,
@@ -30,17 +81,19 @@ func NewEntityRepositoryGenerator(cfg yoyo.Config, adapter Adapter) EntityGenera
 			template.ColumnNames,
 			strings.Join(cNames, ", "),
 			template.StatementPlaceholders,
-			strings.Join(adapter.PreparedStatementPlaceholders(len(cNames)), ", "),
+			strings.Join(preparedStatementPlaceholders, ", "),
+			template.PKCapture,
+			pkCapture,
+			template.PKQuery,
+			pkQuery,
 			template.ColumnAssignments,
-			"",
-			template.PrimaryKeyCondition,
-			"",
+			strings.Join(colAssignments, ", "),
 			template.QueryPackageName,
 			t.QueryPackageName(),
 		)
 
-		r.Replace(template.RepositoryFile)
+		_, err = w.WriteString(r.Replace(template.RepositoryFile))
 
-		return nil
+		return err
 	}
 }

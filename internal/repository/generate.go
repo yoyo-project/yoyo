@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/yoyo-project/yoyo/internal/yoyo"
 
@@ -153,11 +154,13 @@ func InitGeneratorLoader(
 ) GeneratorLoader {
 	return func(config yoyo.Config) Generator {
 		adapter, _ := loadAdapter(config.Schema.Dialect)
+		reposPath := strings.TrimRight(config.Paths.Repositories, "/\\")
+		_, packageName := filepath.Split(strings.Trim(config.Paths.Repositories, "/\\"))
 		return newGenerator(
-			NewEntityGenerator(config.Schema.Tables),
-			NewEntityRepositoryGenerator(config, adapter),
-			NewQueryFileGenerator(config, findPackagePath),
-			NewRepositoriesGenerator(),
+			NewEntityGenerator(packageName, config.Schema.Tables),
+			NewEntityRepositoryGenerator(packageName, adapter, reposPath, findPackagePath),
+			NewQueryFileGenerator(reposPath, findPackagePath),
+			NewRepositoriesGenerator(packageName, reposPath, findPackagePath, config.Schema.Tables),
 			NewQueryNodeGenerator(),
 			file.CreateWithDirs,
 		)

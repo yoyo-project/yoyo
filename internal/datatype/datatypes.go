@@ -181,6 +181,11 @@ func (dt Datatype) IsSignable() bool {
 	return dt&metaSignable > 0
 }
 
+// IsTime returns true if the Datatype can be stored as either a signed or unsigned value
+func (dt Datatype) IsTime() bool {
+	return dt&metaTime > 0
+}
+
 // FromString returns the decoded Datatype, and an error if the in string is invalid or unknown
 func FromString(in string) (dt Datatype, err error) {
 	switch strings.ToUpper(strings.Split(in, "(")[0]) {
@@ -228,6 +233,7 @@ const (
 	metaInteger
 	metaBinary
 	metaString
+	metaTime
 	metaSignable
 	metaRequiresScale
 )

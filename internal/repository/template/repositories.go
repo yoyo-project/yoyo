@@ -1,8 +1,8 @@
 package template
 
 const (
-	Imports              = "$IMPORTS"
-	StructFields         = "$STRUCT_FIELDS$"
+	Imports              = "$IMPORTS$"
+	ReposStructFields    = "$REPOS_STRUCT_FIELDS$"
 	RepositoryInterfaces = "$REPOSITORY_INTERFACES$"
 	RepoInits            = "$REPO_INITS$"
 )
@@ -12,13 +12,13 @@ const RepositoriesFile = `package ` + PackageName + `
 import (
 	"database/sql"
 
-` + Imports + `
+	` + Imports + `
 )
 
 type Transact func(func() error) error
 
 type Repositories struct {
-` + StructFields + `
+	` + ReposStructFields + `
 }
 
 ` + RepositoryInterfaces + `
@@ -26,7 +26,7 @@ type Repositories struct {
 func InitRepositories(db *sql.DB) (Repositories, Transact) {
 	baseRepo := &repository{db: db}
 	return Repositories{
-` + RepoInits + `
+		` + RepoInits + `
 	}, initTransact(baseRepo)
 }
 
@@ -63,5 +63,13 @@ func initTransact(r *repository) Transact {
 
 		return
 	}
+}
+`
+
+const RepositoryInterfaceTemplate = `type ` + EntityName + `Repository interface {
+	FetchOne(` + QueryPackageName + `.Query) (` + EntityName + `, error)
+	Search(` + QueryPackageName + `.Query) (` + EntityName + `s, error)
+	Save(` + EntityName + `) (` + EntityName + `, error)
+	Delete(` + QueryPackageName + `.Query) error
 }
 `

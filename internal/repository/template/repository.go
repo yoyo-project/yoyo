@@ -3,13 +3,15 @@ package template
 const (
 	TableName             = "$TABLE_NAME$"
 	QueryPackageName      = "$ENTITY_PACKAGE_NAME$"
-	EntityFieldPointers   = "$ENTITY_FIELD_POINTERS$"
 	ColumnNames           = "$COLUMN_NAMES$"
 	StatementPlaceholders = "$STATEMENT_PLACEHOLDERS$"
-	PrimaryKeyCondition   = "$PRIMARY_KEY_CONDITION$"
 	ColumnAssignments     = "$COLUMN_ASSIGNMENTS$"
 	EntityName            = "$ENTITY_NAME$"
-	InProperties          = "$IN_PROPERTIES$"
+	InFields              = "$IN_FIELDS$"
+	PKCapture             = "$ID_CAPTURE$"
+	FieldName             = "$PK_FIELD_NAME$"
+	PKQuery               = "$PK_QUERY$"
+	PKFields              = "$PK_FIELDS"
 )
 
 const RepositoryFile = `package ` + PackageName + `
@@ -23,11 +25,10 @@ import (
 
 const (
 	insert` + EntityName + ` = "INSERT INTO ` + TableName + `" +
-		" ( ` + ColumnNames + `) " +
-		" VALUES ( ` + StatementPlaceholders + ` );"
+		" (` + ColumnNames + `) " +
+		" VALUES (` + StatementPlaceholders + `);"
 	update` + EntityName + ` = "UPDATE ` + TableName + `" +
-		" SET ` + ColumnAssignments + `" +
-		" WHERE ` + PrimaryKeyCondition + `
+		" SET ` + ColumnAssignments + ` %s;"
 	select` + EntityName + ` = "SELECT ` + ColumnNames + ` FROM ` + TableName + `%s;"
 	delete` + EntityName + ` = "DELETE FROM ` + TableName + `%s;"
 )
@@ -53,7 +54,7 @@ func (r *` + QueryPackageName + `Repo) FetchOne(query ` + QueryPackageName + `.Q
 
 	row := stmt.QueryRow(args...)
 
-	err = row.Scan(` + EntityFieldPointers + `)
+	err = row.Scan(` + ScanFields + `)
 
 	persisted := ent
 	ent.persisted = &persisted
@@ -106,19 +107,11 @@ func (r *` + QueryPackageName + `Repo) insert(in ` + EntityName + `) (e ` + Enti
 		return e, err
 	}
 
-	res, err = stmt.Exec(` + InProperties + `)
+	res, err = stmt.Exec(` + InFields + `)
 	if err != nil {
 		return e, err
 	}
-
-	e = in
-	var eid int64
-	eid, err = res.LastInsertId()
-	e.ID = uint(eid)
-	if err != nil {
-		return e, err
-	}
-
+` + PKCapture + `
 	in = e
 	e.persisted = &in
 
@@ -136,12 +129,15 @@ func (r *` + QueryPackageName + `Repo) update(in ` + EntityName + `) (e ` + Enti
 		}
 	}()
 
-	stmt, err = r.prepare(update` + EntityName + `)
+` + PKQuery + `
+
+	stmt, err = r.prepare(fmt.Sprintf(updatePerson, q))
 	if err != nil {
 		return e, err
 	}
 
-	_, err = stmt.Exec(in.ID, in.Name, in.FavoriteColor, in.Birthday, in.StateID, in.persisted.ID)
+	fields := []interface{}{in.Name, in.FavoriteColor, in.Id}
+	_, err = stmt.Exec(append(fields, args...)...)
 	if err != nil {
 		return e, err
 	}
@@ -153,7 +149,7 @@ func (r *` + QueryPackageName + `Repo) update(in ` + EntityName + `) (e ` + Enti
 	return e, err
 }
 
-func (r *` + QueryPackageName + `Repo) Delete(query ` + EntityName + `.Query) (err error) {
+func (r *` + QueryPackageName + `Repo) Delete(query ` + QueryPackageName + `.Query) (err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
@@ -174,3 +170,31 @@ func (r *` + QueryPackageName + `Repo) Delete(query ` + EntityName + `.Query) (e
 }
 
 `
+
+const SinglePKCaptureTemplate = `
+	e = in
+	var eid int64
+	eid, err = res.LastInsertId()
+	e.` + FieldName + ` = ` + Type + `(eid)
+	if err != nil {
+		return e, err
+	}
+`
+
+const MultiPKCaptureTemplate = `
+	e = in
+	var eid int64
+	eid, err = res.LastInsertId()
+	e.Id = int32(eid)
+	if err != nil {
+		return e, err
+	}
+`
+
+const PKQueryTemplate = `
+	q, args := ` + QueryPackageName + `.Query{}.
+		` + PKFields + `
+		SQL()
+`
+
+const PKFieldTemplate = FieldName + "(in.persisted." + FieldName + ")."

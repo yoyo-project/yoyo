@@ -39,3 +39,13 @@ func (t *Table) PKColNames() (cols []string) {
 
 	return cols
 }
+
+func (t *Table) PKColumns() (cols []Column) {
+	for _, col := range t.Columns {
+		if col.PrimaryKey {
+			cols = append(cols, col)
+		}
+	}
+
+	return cols
+}

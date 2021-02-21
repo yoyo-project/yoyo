@@ -23,3 +23,11 @@ func (c *Column) GoTypeString() string {
 
 	return s
 }
+
+func (c *Column) RequiredImport() string {
+	if c.Datatype.IsTime() {
+		return `"time"`
+	}
+
+	return ""
+}

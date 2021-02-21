@@ -18,7 +18,7 @@ func Repos(
 		}
 
 		generate := loadGenerator(config)
-		
+
 		err = generate(config.Schema, config.Paths.Repositories)
 		if err != nil {
 			return fmt.Errorf("unable to generate: %w", err)

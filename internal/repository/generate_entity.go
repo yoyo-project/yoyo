@@ -9,11 +9,15 @@ import (
 	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
-func NewEntityGenerator(ts map[string]schema.Table) EntityGenerator {
+func NewEntityGenerator(packageName string, ts map[string]schema.Table) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) error {
-		var fields, referenceFields []string
+		var fields, referenceFields, scanFields, imports []string
 		for _, c := range t.Columns {
 			fields = append(fields, fmt.Sprintf("%s %s", c.ExportedGoName(), c.GoTypeString()))
+			scanFields = append(scanFields, fmt.Sprintf("&e.%s", c.ExportedGoName()))
+			if imp := c.RequiredImport(); imp != "" {
+				imports = append(imports, imp)
+			}
 		}
 
 		for rn, r := range t.References {
@@ -38,12 +42,18 @@ func NewEntityGenerator(ts map[string]schema.Table) EntityGenerator {
 		}
 
 		r := strings.NewReplacer(
+			template.PackageName,
+			packageName,
 			template.EntityFields,
-			strings.Join(fields, "\n    "),
+			strings.Join(fields, "\n	"),
+			template.ScanFields,
+			strings.Join(scanFields, ", "),
+			template.Imports,
+			strings.Join(sortedUnique(imports), "\n	"),
 			template.EntityName,
 			t.ExportedGoName(),
 			template.ReferenceFields,
-			strings.Join(referenceFields, "\n    "),
+			strings.Join(referenceFields, "\n	"),
 		)
 
 		_, err := w.WriteString(r.Replace(template.EntityFile))
