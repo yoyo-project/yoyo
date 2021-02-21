@@ -43,13 +43,13 @@ func NewRepositoriesGenerator(packageName, reposPath string, packagePath Finder,
 			template.PackageName,
 			packageName,
 			template.RepositoryInterfaces,
-			strings.Join(repoInterfaces, "\n"),
+			strings.Join(sortedUnique(repoInterfaces), "\n"),
 			template.Imports,
 			strings.Join(sortedUnique(imports), "\n	"),
 			template.ReposStructFields,
-			strings.Join(reposStructFields, "\n	"),
+			strings.Join(sortedUnique(reposStructFields), "\n	"),
 			template.RepoInits,
-			strings.Join(repoInits, "\n		"),
+			strings.Join(sortedUnique(repoInits), "\n		"),
 		)
 
 		_, err = w.WriteString(r.Replace(template.RepositoriesFile))

@@ -39,12 +39,12 @@ func NewQueryFileGenerator(reposPath string, packagePath Finder) EntityGenerator
 			return err
 		}
 
-		_, err = w.WriteString(strings.Join(methods, "\n"))
+		_, err = w.WriteString(strings.Join(sortedUnique(methods), "\n"))
 		if err != nil {
 			return err
 		}
 
-		_, err = w.WriteString(strings.Join(functions, "\n"))
+		_, err = w.WriteString(strings.Join(sortedUnique(functions), "\n"))
 		if err != nil {
 			return err
 		}

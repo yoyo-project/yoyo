@@ -9,11 +9,11 @@ import (
 
 const (
 	insertPerson = "INSERT INTO person" +
-		" (name, favorite_color) " +
-		" VALUES (?, ?);"
+		" (favorite_color, name) " +
+		" VALUES (?);"
 	updatePerson = "UPDATE person" +
-		" SET name = ?, favorite_color = ? %s;"
-	selectPerson = "SELECT name, favorite_color FROM person %s;"
+		" SET favorite_color = ?, name = ? %s;"
+	selectPerson = "SELECT favorite_color, name FROM person %s;"
 	deletePerson = "DELETE FROM person %s;"
 )
 
@@ -38,7 +38,7 @@ func (r *personRepo) FetchOne(query person.Query) (ent Person, err error) {
 
 	row := stmt.QueryRow(args...)
 
-	err = row.Scan(&ent.Id, &ent.Name, &ent.FavoriteColor)
+	err = row.Scan(&ent.FavoriteColor, &ent.Id, &ent.Name)
 
 	persisted := ent
 	ent.persisted = &persisted
@@ -91,7 +91,7 @@ func (r *personRepo) insert(in Person) (e Person, err error) {
 		return e, err
 	}
 
-	res, err = stmt.Exec(in.Id, in.Name, in.FavoriteColor)
+	res, err = stmt.Exec(in.FavoriteColor, in.Id, in.Name)
 	if err != nil {
 		return e, err
 	}
@@ -132,7 +132,7 @@ func (r *personRepo) update(in Person) (e Person, err error) {
 		return e, err
 	}
 
-	fields := []interface{}{in.Id, in.Name, in.FavoriteColor}
+	fields := []interface{}{in.FavoriteColor, in.Id, in.Name}
 	_, err = stmt.Exec(append(fields, args...)...)
 	if err != nil {
 		return e, err
