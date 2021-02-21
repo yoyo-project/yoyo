@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var splitter = regexp.MustCompile("[-_]/g")
+var splitter = regexp.MustCompile("[-_]")
 
 func pascal(in string) string {
 	ss := splitter.Split(in, -1)

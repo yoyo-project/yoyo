@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
-func NewQueryFileGenerator(config yoyo.Config) EntityGenerator {
+func NewQueryFileGenerator(config yoyo.Config, packagePath Finder) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) error {
 		var methods, functions, imports []string
 		for cn, c := range t.Columns {
@@ -19,16 +20,21 @@ func NewQueryFileGenerator(config yoyo.Config) EntityGenerator {
 			imports = append(imports, is...)
 		}
 
+		importPath, err := packagePath(config.Paths.Repositories)
+		if err != nil {
+			return fmt.Errorf("unable to generate query file: %w", err)
+		}
+
 		r := strings.NewReplacer(
 			template.PackageName,
 			t.QueryPackageName(),
 			template.StdlibImports,
-			strings.Join(imports, "\n    "),
+			strings.Join(unique(imports), "\n    "),
 			template.RepositoriesPackage,
-			config.Paths.Repositories,
+			importPath,
 		)
 
-		_, err := w.WriteString(r.Replace(template.QueryFile))
+		_, err = w.WriteString(r.Replace(template.QueryFile))
 		if err != nil {
 			return err
 		}
@@ -45,4 +51,16 @@ func NewQueryFileGenerator(config yoyo.Config) EntityGenerator {
 
 		return err
 	}
+}
+
+func unique(in []string) (out []string) {
+	m := make(map[string]bool)
+	for i := range in {
+		if _, ok := m[in[i]]; ok {
+			continue
+		}
+		out = append(out, in[i])
+		m[in[i]] = true
+	}
+	return out
 }

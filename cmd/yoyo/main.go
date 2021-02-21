@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/yoyo-project/yoyo/internal/file"
 	"os"
 
 	"github.com/dotvezz/lime"
@@ -23,7 +24,7 @@ func main() {
 			Commands: []lime.Command{
 				{
 					Keyword: "migration",
-					Func:    generate.Migrations(ucs.GetCurrentTime, ucs.LoadMigrationGenerator, os.Create),
+					Func:    generate.Migrations(ucs.GetCurrentTime, ucs.LoadMigrationGenerator, file.CreateWithDirs),
 				},
 				{
 					Keyword: "repos",

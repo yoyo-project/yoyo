@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"database/sql"
+	"github.com/yoyo-project/yoyo/internal/file"
 	"time"
 
 	"github.com/yoyo-project/yoyo/internal/repository"
@@ -39,7 +40,7 @@ func Init() (ucs UseCases) {
 	ucs.LoadMigrationGenerator = migration.InitGeneratorLoader(ucs.LoadReverseAdapter, ucs.LoadMigrationAdapter, migration.NewGenerator)
 
 	ucs.LoadRepositoryAdapter = repository.LoadAdapter
-	ucs.LoadRepositoryGenerator = repository.InitGeneratorLoader(repository.NewGenerator, ucs.LoadRepositoryAdapter)
+	ucs.LoadRepositoryGenerator = repository.InitGeneratorLoader(repository.NewGenerator, ucs.LoadRepositoryAdapter, file.FindPackagePath)
 
 	return ucs
 }

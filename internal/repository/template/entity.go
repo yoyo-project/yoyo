@@ -10,7 +10,8 @@ const EntityFile = `package repositories
 import (
 	"database/sql"
 	"fmt"
-	"time"
+
+	` + Imports + `
 )
 
 type ` + EntityName + ` struct {

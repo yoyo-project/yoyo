@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"github.com/yoyo-project/yoyo/internal/file"
 	"io"
 	"os"
 	"path/filepath"
@@ -17,6 +18,7 @@ type WriteGenerator func(db schema.Database, w io.StringWriter) error
 type SimpleWriteGenerator func(w io.StringWriter) error
 type EntityGenerator func(t schema.Table, w io.StringWriter) error
 type FileOpener func(string) (*os.File, error)
+type Finder func(string) (string, error)
 
 func NewGenerator(
 	generateEntity EntityGenerator,
@@ -147,16 +149,17 @@ func NewGenerator(
 func InitGeneratorLoader(
 	newGenerator func(EntityGenerator, EntityGenerator, EntityGenerator, WriteGenerator, SimpleWriteGenerator, FileOpener) Generator,
 	loadAdapter AdapterLoader,
+	findPackagePath Finder,
 ) GeneratorLoader {
 	return func(config yoyo.Config) Generator {
 		adapter, _ := loadAdapter(config.Schema.Dialect)
 		return newGenerator(
 			NewEntityGenerator(config.Schema.Tables),
 			NewEntityRepositoryGenerator(config, adapter),
-			NewQueryFileGenerator(config),
+			NewQueryFileGenerator(config, findPackagePath),
 			NewRepositoriesGenerator(),
 			NewQueryNodeGenerator(),
-			os.Create,
+			file.CreateWithDirs,
 		)
 	}
 }

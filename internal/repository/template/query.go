@@ -42,7 +42,7 @@ const (
 import (
 	` + StdlibImports + `
 
-	"` + RepositoriesPackage + `/query"
+	"` + RepositoriesPackage + `query"
 )
 
 type Query struct {
@@ -50,29 +50,27 @@ type Query struct {
 }
 
 func (q Query) SQL() (string, []interface{}) {
-	return s.n.SQL()
+	return q.n.SQL()
 }
 
 func (q Query) Or(in Query) Query {
 	return Query{query.Node{
-		Children: &[2]query.Node{s.n, in.n},
+		Children: &[2]query.Node{q.n, in.n},
 		Operator: query.Or,
 	}}
 }
 `
-	QueryMethod = `
-func (q Query) ` + FuncName + `(in Query) Query {
+	QueryMethod = `func (q Query) ` + FuncName + `(in ` + Type + `) Query {
 	return Query{query.Node{
-		Children: &[2]query.Node{s.n, ` + FuncName + `(in).n},
+		Children: &[2]query.Node{q.n, ` + FuncName + `(in).n},
 		Operator: query.And,
 	}}
 }
 `
-	QueryFunction = `
-func ` + FuncName + `(in ` + Type + `) Query {
+	QueryFunction = `func ` + FuncName + `(in ` + Type + `) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
-			Column:  ` + ColumnName + `",
+			Column:   "` + ColumnName + `",
 			Operator: query.` + Operator + `,
 			Value:    ` + Value + `,
 		},
@@ -162,6 +160,16 @@ func (o operation) operator() (operator string) {
 		operator = "Like"
 	case ContainsNot:
 		operator = "NotLike"
+	case StartsWith:
+		operator = "Like"
+	case StartsWithNot:
+		operator = "NotLike"
+	case EndsWith:
+		operator = "Like"
+	case EndsWithNot:
+		operator = "NotLike"
+	case Not:
+		operator = "NotEquals"
 	default:
 		operator = o.name
 	}
@@ -178,12 +186,22 @@ func (o operation) imports() (imports []string) {
 	return imports
 }
 
-func buildMethod(fnc string) string {
-	return strings.ReplaceAll(QueryMethod, FuncName, fnc)
+func buildMethod(fnc, typ string) string {
+	r := strings.NewReplacer(
+		FuncName, fnc,
+		Type, typ,
+	)
+	return r.Replace(QueryMethod)
 }
 
 func buildFunc(fnc, col, typ, op, val string) string {
-	r := strings.NewReplacer(FuncName, fnc, Type, typ, ColumnName, col, Operator, op, Value, val)
+	r := strings.NewReplacer(
+		FuncName, fnc,
+		Type, typ,
+		ColumnName, col,
+		Operator, op,
+		Value, val,
+	)
 	return r.Replace(QueryFunction)
 }
 
@@ -191,8 +209,8 @@ func buildOperations(field, col, typ string, ops []operation) (methods, function
 	for _, op := range ops {
 		funcName := op.funcName(field)
 		val := op.val()
-		methods = append(methods, buildMethod(funcName))
-		functions = append(functions, buildFunc(funcName, typ, col, op.operator(), val))
+		methods = append(methods, buildMethod(funcName, typ))
+		functions = append(functions, buildFunc(funcName, col, typ, op.operator(), val))
 		imports = append(imports, op.imports()...)
 	}
 

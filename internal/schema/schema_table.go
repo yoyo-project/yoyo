@@ -26,7 +26,7 @@ func (t *Table) QueryPackageName() string {
 	}
 
 	name := pascal(t.name)
-	name = string(append([]byte{byte(unicode.ToUpper(rune(name[0])))}, name[1:]...))
+	name = string(append([]byte{byte(unicode.ToLower(rune(name[0])))}, name[1:]...))
 	return name
 }
 
