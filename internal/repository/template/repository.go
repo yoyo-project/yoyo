@@ -29,8 +29,8 @@ const (
 		" VALUES (` + StatementPlaceholders + `);"
 	update` + EntityName + ` = "UPDATE ` + TableName + `" +
 		" SET ` + ColumnAssignments + ` %s;"
-	select` + EntityName + ` = "SELECT ` + ColumnNames + ` FROM ` + TableName + `%s;"
-	delete` + EntityName + ` = "DELETE FROM ` + TableName + `%s;"
+	select` + EntityName + ` = "SELECT ` + ColumnNames + ` FROM ` + TableName + ` %s;"
+	delete` + EntityName + ` = "DELETE FROM ` + TableName + ` %s;"
 )
 
 type ` + QueryPackageName + `Repo struct {
@@ -131,12 +131,12 @@ func (r *` + QueryPackageName + `Repo) update(in ` + EntityName + `) (e ` + Enti
 
 ` + PKQuery + `
 
-	stmt, err = r.prepare(fmt.Sprintf(updatePerson, q))
+	stmt, err = r.prepare(fmt.Sprintf(update` + EntityName + `, q))
 	if err != nil {
 		return e, err
 	}
 
-	fields := []interface{}{in.Name, in.FavoriteColor, in.Id}
+	fields := []interface{}{` + InFields + `}
 	_, err = stmt.Exec(append(fields, args...)...)
 	if err != nil {
 		return e, err

@@ -4,24 +4,24 @@ import (
 	"database/sql"
 	"fmt"
 	
-	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/person"
+	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/city"
 )
 
 const (
-	insertPerson = "INSERT INTO person" +
-		" (name, favorite_color) " +
-		" VALUES (?, ?);"
-	updatePerson = "UPDATE person" +
-		" SET name = ?, favorite_color = ? %s;"
-	selectPerson = "SELECT name, favorite_color FROM person %s;"
-	deletePerson = "DELETE FROM person %s;"
+	insertCity = "INSERT INTO city" +
+		" (name) " +
+		" VALUES (?);"
+	updateCity = "UPDATE city" +
+		" SET name = ? %s;"
+	selectCity = "SELECT name FROM city %s;"
+	deleteCity = "DELETE FROM city %s;"
 )
 
-type personRepo struct {
+type cityRepo struct {
 	*repository
 }
 
-func (r *personRepo) FetchOne(query person.Query) (ent Person, err error) {
+func (r *cityRepo) FetchOne(query city.Query) (ent City, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
@@ -31,14 +31,14 @@ func (r *personRepo) FetchOne(query person.Query) (ent Person, err error) {
 	}()
 
 	conditions, args := query.SQL()
-	stmt, err = r.prepare(fmt.Sprintf(selectPerson, conditions))
+	stmt, err = r.prepare(fmt.Sprintf(selectCity, conditions))
 	if err != nil {
 		return
 	}
 
 	row := stmt.QueryRow(args...)
 
-	err = row.Scan(&ent.Id, &ent.Name, &ent.FavoriteColor)
+	err = row.Scan(&ent.Id, &ent.Name)
 
 	persisted := ent
 	ent.persisted = &persisted
@@ -46,7 +46,7 @@ func (r *personRepo) FetchOne(query person.Query) (ent Person, err error) {
 	return ent, err
 }
 
-func (r *personRepo) Search(query person.Query) (es Persons, err error) {
+func (r *cityRepo) Search(query city.Query) (es Citys, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
@@ -56,7 +56,7 @@ func (r *personRepo) Search(query person.Query) (es Persons, err error) {
 	}()
 
 	conditions, args := query.SQL()
-	stmt, err = r.prepare(fmt.Sprintf(selectPerson, conditions))
+	stmt, err = r.prepare(fmt.Sprintf(selectCity, conditions))
 	if err != nil {
 		return es, err
 	}
@@ -66,7 +66,7 @@ func (r *personRepo) Search(query person.Query) (es Persons, err error) {
 	return es, err
 }
 
-func (r *personRepo) Save(in Person) (Person, error) {
+func (r *cityRepo) Save(in City) (City, error) {
 	if in.persisted == nil {
 		return r.insert(in)
 	} else {
@@ -74,7 +74,7 @@ func (r *personRepo) Save(in Person) (Person, error) {
 	}
 }
 
-func (r *personRepo) insert(in Person) (e Person, err error) {
+func (r *cityRepo) insert(in City) (e City, err error) {
 	var (
 		stmt *sql.Stmt
 		res  sql.Result
@@ -86,12 +86,12 @@ func (r *personRepo) insert(in Person) (e Person, err error) {
 		}
 	}()
 
-	stmt, err = r.prepare(insertPerson)
+	stmt, err = r.prepare(insertCity)
 	if err != nil {
 		return e, err
 	}
 
-	res, err = stmt.Exec(in.Id, in.Name, in.FavoriteColor)
+	res, err = stmt.Exec(in.Id, in.Name)
 	if err != nil {
 		return e, err
 	}
@@ -110,7 +110,7 @@ func (r *personRepo) insert(in Person) (e Person, err error) {
 	return e, err
 }
 
-func (r *personRepo) update(in Person) (e Person, err error) {
+func (r *cityRepo) update(in City) (e City, err error) {
 	var (
 		stmt *sql.Stmt
 	)
@@ -122,17 +122,17 @@ func (r *personRepo) update(in Person) (e Person, err error) {
 	}()
 
 
-	q, args := person.Query{}.
+	q, args := city.Query{}.
 		Id(in.persisted.Id).
 		SQL()
 
 
-	stmt, err = r.prepare(fmt.Sprintf(updatePerson, q))
+	stmt, err = r.prepare(fmt.Sprintf(updateCity, q))
 	if err != nil {
 		return e, err
 	}
 
-	fields := []interface{}{in.Id, in.Name, in.FavoriteColor}
+	fields := []interface{}{in.Id, in.Name}
 	_, err = stmt.Exec(append(fields, args...)...)
 	if err != nil {
 		return e, err
@@ -145,7 +145,7 @@ func (r *personRepo) update(in Person) (e Person, err error) {
 	return e, err
 }
 
-func (r *personRepo) Delete(query person.Query) (err error) {
+func (r *cityRepo) Delete(query city.Query) (err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
@@ -155,7 +155,7 @@ func (r *personRepo) Delete(query person.Query) (err error) {
 	}()
 
 	conditions, args := query.SQL()
-	stmt, err = r.prepare(fmt.Sprintf(deletePerson, conditions))
+	stmt, err = r.prepare(fmt.Sprintf(deleteCity, conditions))
 	if err != nil {
 		return err
 	}

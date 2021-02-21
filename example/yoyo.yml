@@ -25,9 +25,6 @@ schema:
         favorite_color:
           type: enum("blue", "red", "green", "yellow", "orange", "purple")
           nullable: true
-        birthday:
-          type: date
-          nullable: true
       indices:
         color:
           rows:

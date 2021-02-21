@@ -3,15 +3,22 @@ package repositories
 import (
 	"database/sql"
 
+	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/city"
 	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/person"
-	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/state"
 )
 
 type Transact func(func() error) error
 
 type Repositories struct {
+	CityRepository
 	PersonRepository
-	StateRepository
+}
+
+type CityRepository interface {
+	FetchOne(city.Query) (City, error)
+	Search(city.Query) (Citys, error)
+	Save(City) (City, error)
+	Delete(city.Query) error
 }
 
 type PersonRepository interface {
@@ -21,18 +28,12 @@ type PersonRepository interface {
 	Delete(person.Query) error
 }
 
-type StateRepository interface {
-	FetchOne(state.Query) (State, error)
-	Search(state.Query) (States, error)
-	Save(State) (State, error)
-	Delete(state.Query)
-}
 
 func InitRepositories(db *sql.DB) (Repositories, Transact) {
 	baseRepo := &repository{db: db}
 	return Repositories{
+		CityRepository: &cityRepo{baseRepo},
 		PersonRepository: &personRepo{baseRepo},
-		StateRepository:  &stateRepo{baseRepo},
 	}, initTransact(baseRepo)
 }
 

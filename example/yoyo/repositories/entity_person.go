@@ -3,16 +3,16 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
-	"time"
+
+	
 )
 
 type Person struct {
-	ID            uint
-	Name          string
+	Id int32
+	Name string
 	FavoriteColor string
-	Birthday      time.Time
 
-	StateID *int
+	
 
 	persisted *Person
 }
@@ -21,17 +21,17 @@ type Persons struct {
 	rs *sql.Rows
 }
 
-func (s *Persons) Next() bool {
-	return s.rs.Next()
+func (es *Persons) Next() bool {
+	return es.rs.Next()
 }
 
-func (s *Persons) Scan(person *Person) (err error) {
-	if person == nil {
-		return fmt.Errorf("in States.Scan: passed a nil entity")
+func (es *Persons) Scan(e * Person) (err error) {
+	if e == nil {
+		return fmt.Errorf("in Persons.Scan: passed a nil entity")
 	}
 
-	err = s.rs.Scan(&person.ID, &person.Name, &person.FavoriteColor)
-	persisted := *person
-	person.persisted = &persisted
+	err = es.rs.Scan(&e.Id, &e.Name, &e.FavoriteColor)
+	persisted := *e
+	e.persisted = &persisted
 	return err
 }

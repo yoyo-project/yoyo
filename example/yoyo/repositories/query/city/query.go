@@ -1,4 +1,4 @@
-package person
+package city
 
 import (
 	"fmt"
@@ -114,62 +114,6 @@ func (q Query) NameEndsWith(in string) Query {
 func (q Query) NameEndsWithNot(in string) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, NameEndsWithNot(in).n},
-		Operator: query.And,
-	}}
-}
-
-func (q Query) FavoriteColor(in string) Query {
-	return Query{query.Node{
-		Children: &[2]query.Node{q.n, FavoriteColor(in).n},
-		Operator: query.And,
-	}}
-}
-
-func (q Query) FavoriteColorNot(in string) Query {
-	return Query{query.Node{
-		Children: &[2]query.Node{q.n, FavoriteColorNot(in).n},
-		Operator: query.And,
-	}}
-}
-
-func (q Query) FavoriteColorContains(in string) Query {
-	return Query{query.Node{
-		Children: &[2]query.Node{q.n, FavoriteColorContains(in).n},
-		Operator: query.And,
-	}}
-}
-
-func (q Query) FavoriteColorContainsNot(in string) Query {
-	return Query{query.Node{
-		Children: &[2]query.Node{q.n, FavoriteColorContainsNot(in).n},
-		Operator: query.And,
-	}}
-}
-
-func (q Query) FavoriteColorStartsWith(in string) Query {
-	return Query{query.Node{
-		Children: &[2]query.Node{q.n, FavoriteColorStartsWith(in).n},
-		Operator: query.And,
-	}}
-}
-
-func (q Query) FavoriteColorStartsWithNot(in string) Query {
-	return Query{query.Node{
-		Children: &[2]query.Node{q.n, FavoriteColorStartsWithNot(in).n},
-		Operator: query.And,
-	}}
-}
-
-func (q Query) FavoriteColorEndsWith(in string) Query {
-	return Query{query.Node{
-		Children: &[2]query.Node{q.n, FavoriteColorEndsWith(in).n},
-		Operator: query.And,
-	}}
-}
-
-func (q Query) FavoriteColorEndsWithNot(in string) Query {
-	return Query{query.Node{
-		Children: &[2]query.Node{q.n, FavoriteColorEndsWithNot(in).n},
 		Operator: query.And,
 	}}
 }
@@ -307,86 +251,6 @@ func NameEndsWithNot(in string) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "name",
-			Operator: query.NotLike,
-			Value:    fmt.Sprintf("'%%%s'", in),
-		},
-	}}
-}
-
-func FavoriteColor(in string) Query {
-	return Query{query.Node{
-		Condition: query.Condition{
-			Column:   "favorite_color",
-			Operator: query.Equals,
-			Value:    in,
-		},
-	}}
-}
-
-func FavoriteColorNot(in string) Query {
-	return Query{query.Node{
-		Condition: query.Condition{
-			Column:   "favorite_color",
-			Operator: query.NotEquals,
-			Value:    in,
-		},
-	}}
-}
-
-func FavoriteColorContains(in string) Query {
-	return Query{query.Node{
-		Condition: query.Condition{
-			Column:   "favorite_color",
-			Operator: query.Like,
-			Value:    fmt.Sprintf("'%%%s%%'", in),
-		},
-	}}
-}
-
-func FavoriteColorContainsNot(in string) Query {
-	return Query{query.Node{
-		Condition: query.Condition{
-			Column:   "favorite_color",
-			Operator: query.NotLike,
-			Value:    fmt.Sprintf("'%%%s%%'", in),
-		},
-	}}
-}
-
-func FavoriteColorStartsWith(in string) Query {
-	return Query{query.Node{
-		Condition: query.Condition{
-			Column:   "favorite_color",
-			Operator: query.Like,
-			Value:    fmt.Sprintf("'%s%%'", in),
-		},
-	}}
-}
-
-func FavoriteColorStartsWithNot(in string) Query {
-	return Query{query.Node{
-		Condition: query.Condition{
-			Column:   "favorite_color",
-			Operator: query.NotLike,
-			Value:    fmt.Sprintf("'%s%%'", in),
-		},
-	}}
-}
-
-func FavoriteColorEndsWith(in string) Query {
-	return Query{query.Node{
-		Condition: query.Condition{
-			Column:   "favorite_color",
-			Operator: query.Like,
-			Value:    fmt.Sprintf("'%%%s'", in),
-		},
-	}}
-}
-
-func FavoriteColorEndsWithNot(in string) Query {
-	return Query{query.Node{
-		Condition: query.Condition{
-			Column:   "favorite_color",
 			Operator: query.NotLike,
 			Value:    fmt.Sprintf("'%%%s'", in),
 		},
