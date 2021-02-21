@@ -25,11 +25,14 @@ schema:
         favorite_color:
           type: enum("blue", "red", "green", "yellow", "orange", "purple")
           nullable: true
+        age:
+          type: decimal(10,5)
+          default: 0.0
       indices:
         color:
-          rows:
+          columns:
             - favorite_color
       references:
-        state:
+        city:
           has_one: true
           required: false

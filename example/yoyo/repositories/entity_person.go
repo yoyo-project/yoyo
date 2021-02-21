@@ -8,11 +8,12 @@ import (
 )
 
 type Person struct {
+	Age ufloat64
 	FavoriteColor string
 	Id int32
 	Name string
 
-	
+	Id int32
 
 	persisted *Person
 }
@@ -30,7 +31,7 @@ func (es *Persons) Scan(e * Person) (err error) {
 		return fmt.Errorf("in Persons.Scan: passed a nil entity")
 	}
 
-	err = es.rs.Scan(&e.FavoriteColor, &e.Id, &e.Name)
+	err = es.rs.Scan(&e.Age, &e.FavoriteColor, &e.Id, &e.Name)
 	persisted := *e
 	e.persisted = &persisted
 	return err

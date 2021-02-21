@@ -1,11 +1,14 @@
 package schema
 
 import (
+	"gopkg.in/yaml.v2"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 var invalidNameChars = regexp.MustCompile("[^a-zA-Z\\d_-]")
+var scaleRemover = regexp.MustCompile("[^\\d,]")
 
 // UnmarshalYAML provides an implementation for yaml/v2.Unmarshaler to parse a Database definition
 func (db *Database) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -49,7 +52,62 @@ func (t *Table) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		t.Columns[cn] = c
 	}
 
+	t.Indices = t2.Indices
+	t.References = t2.References
+	t.GoName = t2.GoName
+
 	return t.validate()
+}
+
+func (c *Column) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	c2 := new(struct {
+		Datatype      string `yaml:"type"`
+		Unsigned      bool
+		Nullable      bool
+		Default       *string
+		Charset       string
+		Collation     string
+		PrimaryKey    bool   `yaml:"primary_key"`
+		AutoIncrement bool   `yaml:"auto_increment"`
+		GoName        string `yaml:"go_name"`
+	})
+
+	err := unmarshal(c2)
+	if err != nil {
+		return err
+	}
+
+	ps := scaleRemover.ReplaceAllString(c2.Datatype, "")
+	ss := strings.Split(ps, ",")
+	for i, s := range ss {
+		if s == "" {
+			continue
+		}
+		switch i {
+		case 0:
+			c.Precision, err = strconv.Atoi(s)
+		case 1:
+			c.Scale, err = strconv.Atoi(s)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	err = yaml.Unmarshal([]byte(c2.Datatype), &c.Datatype)
+	if err != nil {
+		return err
+	}
+	c.Unsigned = c2.Unsigned
+	c.Nullable = c2.Nullable
+	c.Default = c2.Default
+	c.Charset = c2.Charset
+	c.Collation = c2.Collation
+	c.PrimaryKey = c2.PrimaryKey
+	c.AutoIncrement = c2.AutoIncrement
+	c.GoName = c2.GoName
+
+	return nil
 }
 
 // UnmarshalYAML provides an implementation for yaml/v2.Unmarshaler to parse a Reference definition

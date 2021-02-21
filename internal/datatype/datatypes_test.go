@@ -54,7 +54,7 @@ func TestDatatype_UnmarshalYAML(t *testing.T) {
 		},
 		{
 			name:         decimal,
-			input:        "datatype: " + decimal + "(-5, 8)",
+			input:        "datatype: " + decimal + "(6, 3)",
 			wantDatatype: Decimal,
 		},
 		{

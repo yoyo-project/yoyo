@@ -20,6 +20,48 @@ func (q Query) Or(in Query) Query {
 		Operator: query.Or,
 	}}
 }
+func (q Query) Age(in ufloat64) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, Age(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) AgeGreaterOrEqual(in ufloat64) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, AgeGreaterOrEqual(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) AgeGreaterThan(in ufloat64) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, AgeGreaterThan(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) AgeLessOrEqual(in ufloat64) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, AgeLessOrEqual(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) AgeLessThan(in ufloat64) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, AgeLessThan(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) AgeNot(in ufloat64) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, AgeNot(in).n},
+		Operator: query.And,
+	}}
+}
+
 func (q Query) FavoriteColor(in string) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, FavoriteColor(in).n},
@@ -173,6 +215,66 @@ func (q Query) NameStartsWithNot(in string) Query {
 		Operator: query.And,
 	}}
 }
+func Age(in ufloat64) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "age",
+			Operator: query.Equals,
+			Value:    in,
+		},
+	}}
+}
+
+func AgeGreaterOrEqual(in ufloat64) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "age",
+			Operator: query.GreaterOrEqual,
+			Value:    in,
+		},
+	}}
+}
+
+func AgeGreaterThan(in ufloat64) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "age",
+			Operator: query.GreaterThan,
+			Value:    in,
+		},
+	}}
+}
+
+func AgeLessOrEqual(in ufloat64) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "age",
+			Operator: query.LessOrEqual,
+			Value:    in,
+		},
+	}}
+}
+
+func AgeLessThan(in ufloat64) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "age",
+			Operator: query.LessThan,
+			Value:    in,
+		},
+	}}
+}
+
+func AgeNot(in ufloat64) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "age",
+			Operator: query.NotEquals,
+			Value:    in,
+		},
+	}}
+}
+
 func FavoriteColor(in string) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
