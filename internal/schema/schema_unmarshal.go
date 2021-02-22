@@ -3,12 +3,11 @@ package schema
 import (
 	"gopkg.in/yaml.v2"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
 var invalidNameChars = regexp.MustCompile("[^a-zA-Z\\d_-]")
-var scaleRemover = regexp.MustCompile("[^\\d,]")
+var paramIsolator = regexp.MustCompile("[^\\d,]")
 
 // UnmarshalYAML provides an implementation for yaml/v2.Unmarshaler to parse a Database definition
 func (db *Database) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -77,21 +76,9 @@ func (c *Column) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	ps := scaleRemover.ReplaceAllString(c2.Datatype, "")
-	ss := strings.Split(ps, ",")
-	for i, s := range ss {
-		if s == "" {
-			continue
-		}
-		switch i {
-		case 0:
-			c.Precision, err = strconv.Atoi(s)
-		case 1:
-			c.Scale, err = strconv.Atoi(s)
-		}
-		if err != nil {
-			return err
-		}
+	ps := paramIsolator.ReplaceAllString(c2.Datatype, "")
+	if len(ps) > 0 {
+		c.Params = strings.Split(ps, ",")
 	}
 
 	err = yaml.Unmarshal([]byte(c2.Datatype), &c.Datatype)

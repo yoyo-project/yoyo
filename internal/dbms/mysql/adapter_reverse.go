@@ -3,7 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
-	"strconv"
+	"regexp"
 	"strings"
 
 	goMysql "github.com/go-sql-driver/mysql"
@@ -11,6 +11,8 @@ import (
 	"github.com/yoyo-project/yoyo/internal/reverse"
 	"github.com/yoyo-project/yoyo/internal/schema"
 )
+
+var paramIsolator = regexp.MustCompile("[^\\d,]")
 
 const listColumnsQuery = `SELECT c.COLUMN_NAME FROM information_schema.COLUMNS c
     LEFT JOIN information_schema.KEY_COLUMN_USAGE kcu
@@ -223,21 +225,10 @@ func (a *adapter) GetColumn(tableName, colName string) (schema.Column, error) {
 		col.Unsigned = true
 	}
 
-	if strings.Contains(dts[0], "(") {
-		dts = strings.Split(dts[0], "(")
-		if len(dts) > 1 {
-			dts = strings.Split(dts[1], ",")
-			col.Precision, err = strconv.Atoi(strings.Trim(dts[0], ",()"))
-			if err != nil {
-				return col, fmt.Errorf("unable to determine precision/length for column `%s`.`%s`: %w", tableName, colName, err)
-			}
-		}
-		if col.Datatype.IsNumeric() && len(dts) > 1 {
-			col.Scale, err = strconv.Atoi(strings.Trim(dts[1], ")"))
-			if err != nil {
-				return col, fmt.Errorf("unable to determine scale for column `%s`.`%s`: %w", tableName, colName, err)
-			}
-		}
+	ps := strings.Split(paramIsolator.ReplaceAllString(dts[0], ""), ",")
+
+	if len(ps) > 0 {
+		col.Params = ps
 	}
 
 	col.Default = defaultVal

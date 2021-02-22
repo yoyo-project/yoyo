@@ -8,12 +8,12 @@ import (
 )
 
 type Person struct {
-	Age ufloat64
+	Age float64
 	FavoriteColor string
 	Id int32
 	Name string
 
-	Id int32
+	CityId int32
 
 	persisted *Person
 }

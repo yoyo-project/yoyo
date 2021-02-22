@@ -17,7 +17,7 @@ func (c *Column) SetName(in string) {
 func (c *Column) GoTypeString() string {
 	s := c.Datatype.GoTypeString()
 
-	if c.Unsigned == false && c.Datatype.IsSignable() {
+	if c.Unsigned == false && c.Datatype.IsSignable() && c.Datatype.HasGoUnsigned() {
 		s = fmt.Sprintf("u%s", s)
 	}
 

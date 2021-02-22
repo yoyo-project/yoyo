@@ -290,9 +290,8 @@ func Test_adapter_generateColumn(t *testing.T) {
 		"decimal": {
 			cName: "col",
 			c: schema.Column{
-				Datatype:  datatype.Decimal,
-				Scale:     6,
-				Precision: 4,
+				Datatype: datatype.Decimal,
+				Params:   []string{"6", "4"},
 			},
 			wantS: "`col` DECIMAL(6, 4) SIGNED NOT NULL",
 		},
@@ -315,16 +314,15 @@ func Test_adapter_generateColumn(t *testing.T) {
 			cName: "col",
 			c: schema.Column{
 				Datatype: datatype.Varchar,
-				Scale:    64,
+				Params:   []string{"64"},
 			},
 			wantS: "`col` VARCHAR(64) NOT NULL",
 		},
 		"sized hypothetical thing": {
 			cName: "col",
 			c: schema.Column{
-				Datatype:  0,
-				Scale:     64,
-				Precision: 43,
+				Datatype: 0,
+				Params:   []string{"64", "43"},
 			},
 			wantS: "`col` (64, 43) NOT NULL",
 		},

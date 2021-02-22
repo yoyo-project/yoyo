@@ -20,42 +20,42 @@ func (q Query) Or(in Query) Query {
 		Operator: query.Or,
 	}}
 }
-func (q Query) Age(in ufloat64) Query {
+func (q Query) Age(in float64) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, Age(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) AgeGreaterOrEqual(in ufloat64) Query {
+func (q Query) AgeGreaterOrEqual(in float64) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, AgeGreaterOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) AgeGreaterThan(in ufloat64) Query {
+func (q Query) AgeGreaterThan(in float64) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, AgeGreaterThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) AgeLessOrEqual(in ufloat64) Query {
+func (q Query) AgeLessOrEqual(in float64) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, AgeLessOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) AgeLessThan(in ufloat64) Query {
+func (q Query) AgeLessThan(in float64) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, AgeLessThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) AgeNot(in ufloat64) Query {
+func (q Query) AgeNot(in float64) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, AgeNot(in).n},
 		Operator: query.And,
@@ -215,7 +215,7 @@ func (q Query) NameStartsWithNot(in string) Query {
 		Operator: query.And,
 	}}
 }
-func Age(in ufloat64) Query {
+func Age(in float64) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "age",
@@ -225,7 +225,7 @@ func Age(in ufloat64) Query {
 	}}
 }
 
-func AgeGreaterOrEqual(in ufloat64) Query {
+func AgeGreaterOrEqual(in float64) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "age",
@@ -235,7 +235,7 @@ func AgeGreaterOrEqual(in ufloat64) Query {
 	}}
 }
 
-func AgeGreaterThan(in ufloat64) Query {
+func AgeGreaterThan(in float64) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "age",
@@ -245,7 +245,7 @@ func AgeGreaterThan(in ufloat64) Query {
 	}}
 }
 
-func AgeLessOrEqual(in ufloat64) Query {
+func AgeLessOrEqual(in float64) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "age",
@@ -255,7 +255,7 @@ func AgeLessOrEqual(in ufloat64) Query {
 	}}
 }
 
-func AgeLessThan(in ufloat64) Query {
+func AgeLessThan(in float64) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "age",
@@ -265,7 +265,7 @@ func AgeLessThan(in ufloat64) Query {
 	}}
 }
 
-func AgeNot(in ufloat64) Query {
+func AgeNot(in float64) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "age",

@@ -11,12 +11,12 @@ type Datatype uint64
 
 // These are the actual Datatype constants with all the metadata and unique identifiers encoded into them
 const (
-	Integer    = idInteger | metaNumeric | metaInteger | metaSignable
-	TinyInt    = idTinyInt | metaNumeric | metaInteger | metaSignable
-	SmallInt   = idSmallInt | metaNumeric | metaInteger | metaSignable
-	MediumInt  = idMediumInt | metaNumeric | metaInteger | metaSignable
-	BigInt     = idBigInt | metaNumeric | metaInteger | metaSignable
-	Decimal    = idDecimal | metaNumeric | metaSignable | metaRequiresScale
+	Integer    = idInteger | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
+	TinyInt    = idTinyInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
+	SmallInt   = idSmallInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
+	MediumInt  = idMediumInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
+	BigInt     = idBigInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
+	Decimal    = idDecimal | metaNumeric | metaSignable | metaRequiresParams
 	Varchar    = idVarchar | metaString
 	Text       = idText | metaString
 	TinyText   = idTinyText | metaString
@@ -24,7 +24,7 @@ const (
 	LongText   = idLongText | metaString
 	Char       = idChar | metaString
 	Blob       = idBlob | metaBinary
-	Enum       = idEnum | metaString
+	Enum       = idEnum | metaString | metaRequiresParams
 	Boolean    = idBoolean
 )
 
@@ -165,10 +165,10 @@ func (dt Datatype) IsBinary() bool {
 	return dt&metaBinary > 0
 }
 
-// RequiresScale returns true if the Datatype requires a range.
-// The `(8, 5)` in MySQL's `DECIMAL(8, 5)` is a range, as far as yoyo is concerned
-func (dt Datatype) RequiresScale() bool {
-	return dt&metaRequiresScale > 0
+// RequiresParams returns true if the Datatype requires parameters in SQL syntax.
+// The `(8, 5)` in SQL's `DECIMAL(8, 5)` for example
+func (dt Datatype) RequiresParams() bool {
+	return dt&metaRequiresParams > 0
 }
 
 // IsString returns true if the Datatype is a string type
@@ -179,6 +179,11 @@ func (dt Datatype) IsString() bool {
 // IsSignable returns true if the Datatype can be stored as either a signed or unsigned value
 func (dt Datatype) IsSignable() bool {
 	return dt&metaSignable > 0
+}
+
+// HasGoUnsigned returns true if the Datatype has an unsigned variant Go type like int and uint
+func (dt Datatype) HasGoUnsigned() bool {
+	return dt&metaHasGoUnisgned > 0
 }
 
 // IsTime returns true if the Datatype can be stored as either a signed or unsigned value
@@ -235,7 +240,8 @@ const (
 	metaString
 	metaTime
 	metaSignable
-	metaRequiresScale
+	metaHasGoUnisgned
+	metaRequiresParams
 )
 
 // These are the unique type identifiers

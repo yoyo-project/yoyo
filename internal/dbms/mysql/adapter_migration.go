@@ -23,21 +23,21 @@ func NewAdapter() *adapter {
 
 // TypeString returns the string representation of a given datatype.Datatype for MySQL
 // An error will be returned if the datatype.Datatype is invalid or not supported by MySQL
-func (m *adapter) TypeString(dt datatype.Datatype) (s string, err error) {
+func (a *adapter) TypeString(dt datatype.Datatype) (s string, err error) {
 	switch dt {
 	case datatype.Integer:
 		s = "INT"
 	default:
-		s, err = m.Base.TypeString(dt)
+		s, err = a.Base.TypeString(dt)
 	}
-	if err == nil && !m.validator.SupportsDatatype(dt) {
+	if err == nil && !a.validator.SupportsDatatype(dt) {
 		err = errors.New("unsupported datatype")
 	}
 	return s, err
 }
 
 // CreateTable returns a query string that create a given table.
-func (m *adapter) CreateTable(tName string, t schema.Table) string {
+func (a *adapter) CreateTable(tName string, t schema.Table) string {
 	sb := strings.Builder{}
 
 	sb.WriteString(fmt.Sprintf("CREATE TABLE `%s` (\n", tName))
@@ -53,7 +53,7 @@ func (m *adapter) CreateTable(tName string, t schema.Table) string {
 			first = false
 		}
 		sb.WriteString("    ")
-		sb.WriteString(m.generateColumn(colName, c))
+		sb.WriteString(a.generateColumn(colName, c))
 		if c.PrimaryKey {
 			pks = append(pks, colName)
 		}
@@ -69,12 +69,12 @@ func (m *adapter) CreateTable(tName string, t schema.Table) string {
 }
 
 // AddColumn returns a string query which adds a column to an existing table
-func (m *adapter) AddColumn(tName, cName string, c schema.Column) string {
-	return fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN %s;", tName, m.generateColumn(cName, c))
+func (a *adapter) AddColumn(tName, cName string, c schema.Column) string {
+	return fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN %s;", tName, a.generateColumn(cName, c))
 }
 
 // AddIndex returns a string query which adds the specified index to an existing table
-func (m *adapter) AddIndex(tName, iName string, i schema.Index) string {
+func (a *adapter) AddIndex(tName, iName string, i schema.Index) string {
 	var indexType string
 
 	switch {
@@ -98,7 +98,7 @@ func (m *adapter) AddIndex(tName, iName string, i schema.Index) string {
 }
 
 // AddReference returns a query string that adds columns and foreign keys for the given table, foreign table, and schema.Reference
-func (m *adapter) AddReference(tName, ftName string, fTable schema.Table, r schema.Reference) string {
+func (a *adapter) AddReference(tName, ftName string, fTable schema.Table, r schema.Reference) string {
 	var (
 		fCols = fTable.PKColNames()
 		lCols = r.ColNames(ftName, fTable)
@@ -108,7 +108,7 @@ func (m *adapter) AddReference(tName, ftName string, fTable schema.Table, r sche
 	for i := range lCols {
 		fCol := fTable.Columns[fCols[i]]
 		fCol.Nullable = !r.Required
-		sw.WriteString(m.AddColumn(tName, lCols[i], fCol))
+		sw.WriteString(a.AddColumn(tName, lCols[i], fCol))
 		sw.WriteRune('\n')
 	}
 
@@ -128,22 +128,14 @@ func (m *adapter) AddReference(tName, ftName string, fTable schema.Table, r sche
 	return sw.String()
 }
 
-func (m *adapter) generateColumn(cName string, c schema.Column) string {
+func (a *adapter) generateColumn(cName string, c schema.Column) string {
 	sb := strings.Builder{}
-	ts, _ := m.TypeString(c.Datatype)
+	ts, _ := a.TypeString(c.Datatype)
 
-	if c.Datatype.RequiresScale() {
-		sb.WriteString(fmt.Sprintf("`%s` %s(%d, %d)", cName, ts, c.Scale, c.Precision))
+	if len(c.Params) > 0 {
+		sb.WriteString(fmt.Sprintf("`%s` %s(%s)", cName, ts, strings.Join(c.Params, ", ")))
 	} else {
-		if c.Scale > 0 {
-			if c.Precision > 0 {
-				sb.WriteString(fmt.Sprintf("`%s` %s(%d, %d)", cName, ts, c.Scale, c.Precision))
-			} else {
-				sb.WriteString(fmt.Sprintf("`%s` %s(%d)", cName, ts, c.Scale))
-			}
-		} else {
-			sb.WriteString(fmt.Sprintf("`%s` %s", cName, ts))
-		}
+		sb.WriteString(fmt.Sprintf("`%s` %s", cName, ts))
 	}
 
 	if c.Datatype.IsSignable() {

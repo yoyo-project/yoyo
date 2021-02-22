@@ -106,7 +106,7 @@ func TestLoad(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(gotCfg, tt.wantCfg) {
-				t.Errorf("LoadConfig() gotCfg = %v, want %v", gotCfg, tt.wantCfg)
+				t.Errorf("LoadConfig() \n got %#v, \nwant %#v", gotCfg, tt.wantCfg)
 			}
 		})
 	}

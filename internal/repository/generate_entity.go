@@ -25,7 +25,7 @@ func NewEntityGenerator(packageName string, ts map[string]schema.Table) EntityGe
 				ft := ts[rn]
 				for _, cn := range ft.PKColNames() {
 					c := ft.Columns[cn]
-					referenceFields = append(referenceFields, fmt.Sprintf("%s %s", c.ExportedGoName(), c.GoTypeString()))
+					referenceFields = append(referenceFields, fmt.Sprintf("%s%s %s", ft.ExportedGoName(), c.ExportedGoName(), c.GoTypeString()))
 				}
 			}
 		}

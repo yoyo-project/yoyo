@@ -56,8 +56,8 @@ func (c *Column) validate() error {
 		}
 	}
 
-	if c.Datatype.RequiresScale() && c.Scale < 1 {
-		return fmt.Errorf("datatype '%s' requires a scale value", c.Datatype)
+	if c.Datatype.RequiresParams() && len(c.Params) == 0 {
+		return fmt.Errorf("datatype '%s' requires at least one parameter", c.Datatype)
 	}
 
 	return nil
