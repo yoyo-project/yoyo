@@ -2,7 +2,7 @@
 
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 [![Go Report Card](https://goreportcard.com/badge/github.com/yoyo-project/yoyo)](https://goreportcard.com/report/github.com/yoyo-project/yoyo)
-[![Maintainability](https://api.codeclimate.com/v1/badges/d9120db0c5ef422736eb/maintainability)](https://codeclimate.com/github/yoyo-project/yoyo/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/1e0d4f34de5f07425ba5/maintainability)](https://codeclimate.com/github/yoyo-project/yoyo/maintainability)
 [![codecov](https://codecov.io/gh/yoyo-project/yoyo/branch/main/graph/badge.svg)](https://codecov.io/gh/yoyo-project/yoyo)
 [![CircleCI](https://circleci.com/gh/yoyo-project/yoyo/tree/main.svg?style=shield)](https://circleci.com/gh/yoyo-project/yoyo/tree/main)
 
