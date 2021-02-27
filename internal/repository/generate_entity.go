@@ -9,7 +9,7 @@ import (
 	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
-func NewEntityGenerator(packageName string, ts map[string]schema.Table) EntityGenerator {
+func NewEntityGenerator(packageName string, db schema.Database) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) error {
 		var fields, referenceFields, scanFields, imports []string
 		for _, c := range t.Columns {
@@ -20,21 +20,20 @@ func NewEntityGenerator(packageName string, ts map[string]schema.Table) EntityGe
 			}
 		}
 
-		for rn, r := range t.References {
+		for _, r := range t.References {
 			if r.HasOne {
-				ft := ts[rn]
+				ft, _ := db.GetTable(r.TableName)
 				for _, cn := range ft.PKColNames() {
-					c := ft.Columns[cn]
+					c, _ := ft.GetColumn(cn)
 					referenceFields = append(referenceFields, fmt.Sprintf("%s%s %s", ft.ExportedGoName(), c.ExportedGoName(), c.GoTypeString()))
 				}
 			}
 		}
 
-		for _, t2 := range ts {
-			for rn, r := range t2.References {
-				if r.HasMany && rn == t.TableName() {
-					for _, cn := range t2.PKColNames() {
-						c := t2.Columns[cn]
+		for _, t2 := range db.Tables {
+			for _, r := range t2.References {
+				if r.HasMany && r.TableName == t.Name {
+					for _, c := range t2.PKColumns() {
 						referenceFields = append(referenceFields, fmt.Sprintf("%s %s", c.ExportedGoName(), c.GoTypeString()))
 					}
 				}

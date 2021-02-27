@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/yoyo-project/yoyo/internal/schema"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (

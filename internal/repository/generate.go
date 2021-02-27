@@ -157,10 +157,10 @@ func InitGeneratorLoader(
 		reposPath := strings.TrimRight(config.Paths.Repositories, "/\\")
 		_, packageName := filepath.Split(strings.Trim(config.Paths.Repositories, "/\\"))
 		return newGenerator(
-			NewEntityGenerator(packageName, config.Schema.Tables),
+			NewEntityGenerator(packageName, config.Schema),
 			NewEntityRepositoryGenerator(packageName, adapter, reposPath, findPackagePath),
 			NewQueryFileGenerator(reposPath, findPackagePath),
-			NewRepositoriesGenerator(packageName, reposPath, findPackagePath, config.Schema.Tables),
+			NewRepositoriesGenerator(packageName, reposPath, findPackagePath, config.Schema),
 			NewQueryNodeGenerator(),
 			file.CreateWithDirs,
 		)

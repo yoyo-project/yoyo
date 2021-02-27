@@ -11,7 +11,7 @@ import (
 	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
-func TestNewadapter(t *testing.T) {
+func TestNewAdapter(t *testing.T) {
 	tests := []struct {
 		name string
 		want *adapter
@@ -103,8 +103,9 @@ func Test_adapter_CreateTable(t *testing.T) {
 		"single column no primary key": {
 			tName: "table",
 			t: schema.Table{
-				Columns: map[string]schema.Column{
-					"column": {
+				Columns: []schema.Column{
+					{
+						Name:     "column",
 						Datatype: datatype.Integer,
 					},
 				},
@@ -114,12 +115,14 @@ func Test_adapter_CreateTable(t *testing.T) {
 		"two column with primary key": {
 			tName: "table",
 			t: schema.Table{
-				Columns: map[string]schema.Column{
-					"column": {
+				Columns: []schema.Column{
+					{
+						Name:       "column",
 						Datatype:   datatype.Integer,
 						PrimaryKey: true,
 					},
-					"column2": {
+					{
+						Name:     "column2",
 						Datatype: datatype.Integer,
 					},
 				},
@@ -140,7 +143,7 @@ func Test_adapter_CreateTable(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			gotS := m.CreateTable(tt.tName, tt.t)
 			if gotS != tt.wantS {
-				t.Errorf("expected string `%s`, got string `%s`", tt.wantS, gotS)
+				t.Errorf("\nwant `%s`\n got `%s`", tt.wantS, gotS)
 			}
 		})
 	}
@@ -355,13 +358,15 @@ func Test_adapter_AddReference(t *testing.T) {
 			tName:  "local",
 			ftName: "foreign",
 			fTable: schema.Table{
-				Columns: map[string]schema.Column{
-					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
-					"otherCol": {Datatype: datatype.Integer},
+				Name: "foreign",
+				Columns: []schema.Column{
+					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
+					{Name: "otherCol", Datatype: datatype.Integer},
 				},
 			},
 			r: schema.Reference{
-				Required: true,
+				TableName: "foreign",
+				Required:  true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
@@ -370,9 +375,9 @@ func Test_adapter_AddReference(t *testing.T) {
 			tName:  "local",
 			ftName: "foreign",
 			fTable: schema.Table{
-				Columns: map[string]schema.Column{
-					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
-					"otherCol": {Datatype: datatype.Integer},
+				Columns: []schema.Column{
+					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
+					{Name: "otherCol", Datatype: datatype.Integer},
 				},
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED DEFAULT NULL NULL;\n" +
@@ -382,9 +387,9 @@ func Test_adapter_AddReference(t *testing.T) {
 			tName:  "local",
 			ftName: "foreign",
 			fTable: schema.Table{
-				Columns: map[string]schema.Column{
-					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
-					"otherCol": {Datatype: datatype.Integer},
+				Columns: []schema.Column{
+					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
+					{Name: "otherCol", Datatype: datatype.Integer},
 				},
 			},
 			r: schema.Reference{
@@ -398,9 +403,9 @@ func Test_adapter_AddReference(t *testing.T) {
 			tName:  "local",
 			ftName: "foreign",
 			fTable: schema.Table{
-				Columns: map[string]schema.Column{
-					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
-					"otherCol": {Datatype: datatype.Integer},
+				Columns: []schema.Column{
+					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
+					{Name: "otherCol", Datatype: datatype.Integer},
 				},
 			},
 			r: schema.Reference{
@@ -414,10 +419,10 @@ func Test_adapter_AddReference(t *testing.T) {
 			tName:  "local",
 			ftName: "foreign",
 			fTable: schema.Table{
-				Columns: map[string]schema.Column{
-					"id":       {PrimaryKey: true, Datatype: datatype.Integer},
-					"id2":      {PrimaryKey: true, Datatype: datatype.Integer},
-					"otherCol": {Datatype: datatype.Integer},
+				Columns: []schema.Column{
+					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
+					{Name: "id2", PrimaryKey: true, Datatype: datatype.Integer},
+					{Name: "otherCol", Datatype: datatype.Integer},
 				},
 			},
 			r: schema.Reference{
@@ -431,8 +436,8 @@ func Test_adapter_AddReference(t *testing.T) {
 			tName:  "local",
 			ftName: "foreign",
 			fTable: schema.Table{
-				Columns: map[string]schema.Column{
-					"id": {PrimaryKey: true, Datatype: datatype.Integer},
+				Columns: []schema.Column{
+					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
 				},
 			},
 			r: schema.Reference{
@@ -453,7 +458,7 @@ func Test_adapter_AddReference(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			gotS := m.AddReference(tt.tName, tt.ftName, tt.fTable, tt.r)
 			if gotS != tt.wantS {
-				t.Errorf("expected string `%s`, got string `%s`", tt.wantS, gotS)
+				t.Errorf("\nwant string `%s`\n got string `%s`", tt.wantS, gotS)
 			}
 		})
 	}

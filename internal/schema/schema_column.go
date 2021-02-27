@@ -7,11 +7,7 @@ func (c *Column) ExportedGoName() string {
 		return pascal(c.GoName)
 	}
 
-	return pascal(c.name)
-}
-
-func (c *Column) SetName(in string) {
-	c.name = in
+	return pascal(c.Name)
 }
 
 func (c *Column) GoTypeString() string {

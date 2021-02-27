@@ -22,7 +22,7 @@ type TableGenerator func(name string, table schema.Table, sw io.StringWriter) er
 
 // RefGenerator functions take a string, map[string]schema.Reference, and io.StringWriter. Implementations will use them
 // to generate SQL for working with references
-type RefGenerator func(localTable string, refs map[string]schema.Reference, sw io.StringWriter) error
+type RefGenerator func(localTable string, refs []schema.Reference, sw io.StringWriter) error
 
 // StringSearcher functions take a string and return true if the matching entity (table, column, etc) exists.
 type StringSearcher func(string) (bool, error)
@@ -43,29 +43,29 @@ func NewGenerator(
 	addAllRefs RefGenerator,
 ) Generator {
 	return func(db schema.Database, w io.StringWriter) error {
-		for n, t := range db.Tables {
-			exists, err := hasTable(n)
+		for _, t := range db.Tables {
+			exists, err := hasTable(t.Name)
 			if err != nil {
 				return fmt.Errorf("unable to check if table existss: %w", err)
 			}
 
 			if !exists {
-				err = createTable(n, t, w)
+				err = createTable(t.Name, t, w)
 				if err != nil {
 					return fmt.Errorf("unable to unable to generate table create query: %w", err)
 				}
 
-				err = addAllIndices(n, t, w)
+				err = addAllIndices(t.Name, t, w)
 				if err != nil {
 					return fmt.Errorf("unable to generate queries to add existingIndices: %w", err)
 				}
 			} else {
-				err = addMissingColumns(n, t, w)
+				err = addMissingColumns(t.Name, t, w)
 				if err != nil {
 					return fmt.Errorf("unable to generate queries to add existingColumns: %w", err)
 				}
 
-				err = addMissingIndices(n, t, w)
+				err = addMissingIndices(t.Name, t, w)
 				if err != nil {
 					return fmt.Errorf("unable to generate queries to add existingIndices: %w", err)
 				}
@@ -73,16 +73,16 @@ func NewGenerator(
 		}
 
 		// Generate References/Foreign Keys after generating all tables
-		for n, t := range db.Tables {
-			exists, err := hasTable(n)
+		for _, t := range db.Tables {
+			exists, err := hasTable(t.Name)
 			if err != nil {
 				return fmt.Errorf("unable to check if table existss: %w", err)
 			}
 
 			if !exists {
-				err = addAllRefs(n, t.References, w)
+				err = addAllRefs(t.Name, t.References, w)
 			} else {
-				err = addMissingRefs(n, t.References, w)
+				err = addMissingRefs(t.Name, t.References, w)
 			}
 		}
 
@@ -110,15 +110,15 @@ func NewColumnAdder(
 	hasColumn reverse.TableSearcher,
 ) TableGenerator {
 	return func(tName string, t schema.Table, sw io.StringWriter) error {
-		for cName, c := range t.Columns {
+		for _, c := range t.Columns {
 			if options&AddMissing > 0 {
 
-				if hasColumn(tName, cName) {
+				if hasColumn(tName, c.Name) {
 					continue
 				}
 			}
 
-			_, err := sw.WriteString(fmt.Sprintf("%s\n", a.AddColumn(tName, cName, c)))
+			_, err := sw.WriteString(fmt.Sprintf("%s\n", a.AddColumn(tName, c.Name, c)))
 			if err != nil {
 				return fmt.Errorf("unable to generate migration: %sw", err)
 			}
@@ -134,13 +134,13 @@ func NewIndexAdder(
 	hasIndex reverse.TableSearcher,
 ) TableGenerator {
 	return func(tName string, t schema.Table, sw io.StringWriter) error {
-		for iName, i := range t.Indices {
+		for _, i := range t.Indices {
 			if options&AddMissing > 0 {
-				if hasIndex(tName, iName) {
+				if hasIndex(tName, i.Name) {
 					continue
 				}
 			}
-			_, err := sw.WriteString(a.AddIndex(tName, iName, i))
+			_, err := sw.WriteString(a.AddIndex(tName, i.Name, i))
 			if err != nil {
 				return fmt.Errorf("unable to generate migration: %sw", err)
 			}
@@ -156,23 +156,25 @@ func NewRefAdder(
 	options uint8,
 	hasReference reverse.TableSearcher,
 ) RefGenerator {
-	return func(localTable string, refs map[string]schema.Reference, sw io.StringWriter) error {
-		for foreignTable, ref := range refs {
+	return func(localTable string, refs []schema.Reference, sw io.StringWriter) error {
+		for _, ref := range refs {
+			fTableName := ref.TableName
 			if ref.HasMany { // swap the tables if it's a HasMany
-				localTable, foreignTable = foreignTable, localTable
+				localTable, fTableName = fTableName, localTable
 			}
-			ft, ok := db.Tables[foreignTable]
+
+			ft, ok := db.GetTable(fTableName)
 
 			if options&AddMissing > 0 {
-				if hasReference(localTable, foreignTable) {
+				if hasReference(localTable, fTableName) {
 					continue
 				}
 			}
 
 			if !ok { // This should technically be caught by validation, but still
-				return fmt.Errorf("referenced table `%s` does not exist in dbms definition", foreignTable)
+				return fmt.Errorf("referenced table `%s` does not exist in dbms definition", fTableName)
 			}
-			s := a.AddReference(localTable, foreignTable, ft, ref)
+			s := a.AddReference(localTable, fTableName, ft, ref)
 			_, err := sw.WriteString(s)
 			if err != nil {
 				return fmt.Errorf("unable to generate migration: %w", err)

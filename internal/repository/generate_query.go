@@ -13,8 +13,8 @@ import (
 func NewQueryFileGenerator(reposPath string, packagePath Finder) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) error {
 		var methods, functions, imports []string
-		for cn, c := range t.Columns {
-			ms, fs, is := template.GenerateQueryLogic(cn, c)
+		for _, c := range t.Columns {
+			ms, fs, is := template.GenerateQueryLogic(c.Name, c)
 			methods = append(methods, ms...)
 			functions = append(functions, fs...)
 			imports = append(imports, is...)

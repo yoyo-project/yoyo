@@ -7,48 +7,48 @@ import (
 // Database represents a single database/schema in a DBMS.
 type Database struct {
 	Dialect string
-	Tables  map[string]Table
+	Tables  []Table
 }
 
 // Table represents a table in a database
 type Table struct {
-	Columns    map[string]Column
-	Indices    map[string]Index
-	References map[string]Reference // map[tableName]Reference
-	GoName     string               `yaml:"go_name"`
-
-	name string // used for internal yoyo logic
+	Name       string
+	GoName     string
+	Columns    []Column
+	Indices    []Index
+	References []Reference
 }
 
 // Column represents a column in a table
 type Column struct {
-	Datatype      datatype.Datatype `yaml:"type"`
+	Name          string
+	GoName        string
+	Datatype      datatype.Datatype
 	Unsigned      bool
 	Nullable      bool
 	Default       *string
 	Params        []string
 	Charset       string
 	Collation     string
-	PrimaryKey    bool   `yaml:"primary_key"`
-	AutoIncrement bool   `yaml:"auto_increment"`
-	GoName        string `yaml:"go_name"`
-
-	name string // used for internal yoyo logic
+	PrimaryKey    bool
+	AutoIncrement bool
 }
 
 // Reference represents a relationship boetween tables.
 // Not a SQL-native concept, more of an ORM-style design. Translates to foreign keys and constraints in SQL
 type Reference struct {
-	HasOne      bool `yaml:"has_one"`
-	HasMany     bool `yaml:"has_many"`
+	TableName   string
+	HasOne      bool
+	HasMany     bool
 	Required    bool
-	ColumnNames []string `yaml:"column_names"`
-	OnDelete    string   `yaml:"on_delete"`
-	OnUpdate    string   `yaml:"on_update"`
+	ColumnNames []string
+	OnDelete    string
+	OnUpdate    string
 }
 
 // Index represents a simple index on a column or columns
 type Index struct {
+	Name    string
 	Columns []string
 	Unique  bool
 }

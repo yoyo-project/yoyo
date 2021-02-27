@@ -22,11 +22,8 @@ func InitDatabaseReader(loadAdapter AdapterLoader) DatabaseReader {
 				if columns, err = adapter.ListColumns(tableName); err == nil {
 					for _, colName := range columns {
 						if column, err := adapter.GetColumn(tableName, colName); err == nil {
-							if table.Columns == nil {
-								table.Columns = map[string]schema.Column{}
-							}
-							column.SetName(colName)
-							table.Columns[colName] = column
+							column.Name = colName
+							table.Columns = append(table.Columns, column)
 						} else {
 							return db, fmt.Errorf("%w in GetColumn", err)
 						}
@@ -37,10 +34,8 @@ func InitDatabaseReader(loadAdapter AdapterLoader) DatabaseReader {
 				if indices, err = adapter.ListIndices(tableName); err == nil {
 					for _, indexName := range indices {
 						if index, err := adapter.GetIndex(tableName, indexName); err == nil {
-							if table.Indices == nil {
-								table.Indices = map[string]schema.Index{}
-							}
-							table.Indices[indexName] = index
+							index.Name = indexName
+							table.Indices = append(table.Indices, index)
 						} else {
 							return db, fmt.Errorf("%w in GetIndex", err)
 						}
@@ -49,12 +44,10 @@ func InitDatabaseReader(loadAdapter AdapterLoader) DatabaseReader {
 					return db, fmt.Errorf("%w in ListIndices", err)
 				}
 				if references, err = adapter.ListReferences(tableName); err == nil {
-					for _, refName := range references {
-						if reference, err := adapter.GetReference(tableName, refName); err == nil {
-							if table.References == nil {
-								table.References = map[string]schema.Reference{}
-							}
-							table.References[refName] = reference
+					for _, ftName := range references {
+						if reference, err := adapter.GetReference(tableName, ftName); err == nil {
+							reference.TableName = ftName
+							table.References = append(table.References, reference)
 						} else {
 							return db, fmt.Errorf("%w in GetReference", err)
 						}
@@ -62,11 +55,9 @@ func InitDatabaseReader(loadAdapter AdapterLoader) DatabaseReader {
 				} else {
 					return db, fmt.Errorf("%w in ListReferences", err)
 				}
-				if db.Tables == nil {
-					db.Tables = map[string]schema.Table{}
-				}
-				table.SetName(tableName)
-				db.Tables[tableName] = table
+
+				table.Name = tableName
+				db.Tables = append(db.Tables, table)
 			}
 		} else {
 			err = fmt.Errorf("%w in ListTables", err)

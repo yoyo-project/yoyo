@@ -12,12 +12,12 @@ import (
 func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath string, packagePath Finder) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) (err error) {
 		var pkNames, cNames, scanFields, inFields, pkFields, colAssignments []string
-		for columnName, col := range t.Columns {
+		for _, col := range t.Columns {
 			if !col.PrimaryKey {
-				cNames = append(cNames, columnName)
+				cNames = append(cNames, col.Name)
 			} else {
 				pkFields = append(pkFields, strings.ReplaceAll(template.PKFieldTemplate, template.FieldName, col.ExportedGoName()))
-				pkNames = append(pkNames, columnName)
+				pkNames = append(pkNames, col.Name)
 			}
 			scanFields = append(scanFields, fmt.Sprintf("&ent.%s", col.ExportedGoName()))
 			inFields = append(inFields, fmt.Sprintf("in.%s", col.ExportedGoName()))
@@ -77,7 +77,7 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 			template.EntityName,
 			t.ExportedGoName(),
 			template.TableName,
-			t.TableName(),
+			t.Name,
 			template.ColumnNames,
 			strings.Join(sortedUnique(cNames), ", "),
 			template.StatementPlaceholders,

@@ -68,8 +68,9 @@ func TestNewIndexAdder(t *testing.T) {
 			args: args{
 				tableName: "myTable",
 				table: schema.Table{
-					Columns: map[string]schema.Column{
-						"id": {
+					Columns: []schema.Column{
+						{
+							Name:          "id",
 							Datatype:      datatype.Integer,
 							Unsigned:      true,
 							Nullable:      false,
@@ -77,8 +78,9 @@ func TestNewIndexAdder(t *testing.T) {
 							PrimaryKey:    true,
 						},
 					},
-					Indices: map[string]schema.Index{
-						"primary": {
+					Indices: []schema.Index{
+						{
+							Name: "primary",
 							Columns: []string{
 								"id",
 							},
@@ -151,8 +153,9 @@ func TestNewColumnAdder(t *testing.T) {
 			args: args{
 				tableName: "myTable",
 				table: schema.Table{
-					Columns: map[string]schema.Column{
-						"id": {
+					Columns: []schema.Column{
+						{
+							Name:     "id",
 							Datatype: datatype.Integer,
 							Unsigned: true,
 						},
@@ -169,12 +172,14 @@ func TestNewColumnAdder(t *testing.T) {
 			args: args{
 				tableName: "myTable",
 				table: schema.Table{
-					Columns: map[string]schema.Column{
-						"id": {
+					Columns: []schema.Column{
+						{
+							Name:     "id",
 							Datatype: datatype.Integer,
 							Unsigned: true,
 						},
-						"blah": {
+						{
+							Name:     "blah",
 							Datatype: datatype.Text,
 						},
 					},

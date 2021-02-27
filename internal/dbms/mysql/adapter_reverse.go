@@ -12,7 +12,7 @@ import (
 	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
-var paramIsolator = regexp.MustCompile("[^\\d,]")
+var paramIsolator = regexp.MustCompile("(^.*?(\\(|$)|[\"\\)\\s])")
 
 const listColumnsQuery = `SELECT c.COLUMN_NAME FROM information_schema.COLUMNS c
     LEFT JOIN information_schema.KEY_COLUMN_USAGE kcu

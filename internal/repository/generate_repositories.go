@@ -9,11 +9,11 @@ import (
 	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
-func NewRepositoriesGenerator(packageName, reposPath string, packagePath Finder, ts map[string]schema.Table) WriteGenerator {
+func NewRepositoriesGenerator(packageName, reposPath string, packagePath Finder, db schema.Database) WriteGenerator {
 	return func(db schema.Database, w io.StringWriter) (err error) {
 		var repoInterfaces, imports, reposStructFields, repoInits []string
 
-		for _, t := range ts {
+		for _, t := range db.Tables {
 			// replacer for interface templates
 			ir := strings.NewReplacer(
 				template.EntityName,

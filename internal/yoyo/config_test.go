@@ -18,40 +18,35 @@ func cfg(wd string) Config {
 		},
 		Schema: schema.Database{
 			Dialect: "mysql",
-			Tables: map[string]schema.Table{
-				"primary": {
-					Columns: map[string]schema.Column{
-						"id": {
+			Tables: []schema.Table{
+				{
+					Name: "primary",
+					Columns: []schema.Column{
+						{
+							Name:     "id",
 							Datatype: datatype.Integer,
 							Default: func() *string {
 								var s = "0"
 								return &s
 							}(),
 						},
-						"secondary_id": {
+						{
+							Name:     "secondary_id",
 							Datatype: datatype.Integer,
 						},
 					},
 				},
-				"secondary": {
-					Columns: map[string]schema.Column{
-						"id": {
+				{
+					Name: "secondary",
+					Columns: []schema.Column{
+						{
+							Name:     "id",
 							Datatype: datatype.Integer,
 						},
 					},
 				},
 			},
 		},
-	}
-
-	for tn, t := range conf.Schema.Tables {
-		t.SetName(tn)
-		conf.Schema.Tables[tn] = t
-
-		for cn, c := range t.Columns {
-			c.SetName(cn)
-			t.Columns[cn] = c
-		}
 	}
 
 	return conf
@@ -110,5 +105,4 @@ func TestLoad(t *testing.T) {
 			}
 		})
 	}
-
 }

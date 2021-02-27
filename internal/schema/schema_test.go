@@ -5,30 +5,36 @@ import (
 
 	"github.com/yoyo-project/yoyo/internal/datatype"
 
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 var TestDatabase = Database{
 	Dialect: "mysql",
-	Tables: map[string]Table{
-		"primary": {
-			Columns: map[string]Column{
-				"id": {
+	Tables: []Table{
+		{
+			Name: "primary",
+			Columns: []Column{
+				{
+					Name:     "id",
 					Datatype: datatype.Integer,
 				},
-				"secondary_id": {
+				{
+					Name:     "id2",
 					Datatype: datatype.Integer,
 				},
 			},
-			References: map[string]Reference{
-				"secondary": {
-					HasOne: true,
+			References: []Reference{
+				{
+					TableName: "secondary",
+					HasOne:    true,
 				},
 			},
 		},
-		"secondary": {
-			Columns: map[string]Column{
-				"id": {
+		{
+			Name: "secondary",
+			Columns: []Column{
+				{
+					Name:     "id",
 					Datatype: datatype.Integer,
 				},
 			},
@@ -44,7 +50,8 @@ tables:
     columns:
       id:
         type: integer
-        default: 0
+      id2:
+        type: integer
   table2:
     columns: 
       id:

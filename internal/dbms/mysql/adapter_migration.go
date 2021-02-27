@@ -46,16 +46,16 @@ func (a *adapter) CreateTable(tName string, t schema.Table) string {
 		first = true
 		pks   []string
 	)
-	for colName, c := range t.Columns {
+	for _, c := range t.Columns {
 		if !first {
 			sb.WriteString(",\n")
 		} else {
 			first = false
 		}
 		sb.WriteString("    ")
-		sb.WriteString(a.generateColumn(colName, c))
+		sb.WriteString(a.generateColumn(c.Name, c))
 		if c.PrimaryKey {
-			pks = append(pks, colName)
+			pks = append(pks, c.Name)
 		}
 	}
 
@@ -105,10 +105,10 @@ func (a *adapter) AddReference(tName, ftName string, fTable schema.Table, r sche
 		sw    = strings.Builder{}
 	)
 
-	for i := range lCols {
-		fCol := fTable.Columns[fCols[i]]
+	for i, lColName := range lCols {
+		fCol, _ := fTable.GetColumn(fCols[i])
 		fCol.Nullable = !r.Required
-		sw.WriteString(a.AddColumn(tName, lCols[i], fCol))
+		sw.WriteString(a.AddColumn(tName, lColName, fCol)) // use fCol because the column's definition needs to match
 		sw.WriteRune('\n')
 	}
 
