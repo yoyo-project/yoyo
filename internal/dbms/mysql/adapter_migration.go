@@ -98,11 +98,12 @@ func (a *adapter) AddIndex(tName, iName string, i schema.Index) string {
 }
 
 // AddReference returns a query string that adds columns and foreign keys for the given table, foreign table, and schema.Reference
-func (a *adapter) AddReference(tName, ftName string, fTable schema.Table, r schema.Reference) string {
+func (a *adapter) AddReference(tName string, fTable schema.Table, r schema.Reference) string {
 	var (
-		fCols = fTable.PKColNames()
-		lCols = r.ColNames(ftName, fTable)
-		sw    = strings.Builder{}
+		fCols  = fTable.PKColNames()
+		lCols  = r.ColNames(fTable)
+		sw     = strings.Builder{}
+		ftName = fTable.Name
 	)
 
 	for i, lColName := range lCols {

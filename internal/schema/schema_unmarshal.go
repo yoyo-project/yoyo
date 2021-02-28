@@ -145,7 +145,7 @@ func (r *Reference) UnmarshalYAML(value *yaml.Node) (err error) {
 		case "required":
 			err = value.Content[i+1].Decode(&r.Required)
 		case "column_names", "columns":
-			err = value.Content[i+1].Decode(r.ColumnNames)
+			err = value.Content[i+1].Decode(&r.ColumnNames)
 		case "on_delete":
 			err = value.Content[i+1].Decode(&r.OnDelete)
 		case "on_update":

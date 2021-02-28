@@ -1,8 +1,18 @@
 package schema
 
 import (
+	"regexp"
+	"strings"
 	"unicode"
 )
+
+func camelToSnake(in string) (out string) {
+	var camelToSnake = regexp.MustCompile("[A-Z]").ReplaceAllFunc
+	f := func(in []byte) []byte {
+		return append([]byte{'_'}, strings.ToLower(string(in))...)
+	}
+	return string(camelToSnake([]byte(in), f))
+}
 
 // ExportedGoName returns a string with a name to use to represent the table in Exported go types or variables.
 // If a GoName is explicitly set already, the returned value will be that forced into PascalCase. If not, it will be
@@ -27,14 +37,10 @@ func (t *Table) GetColumn(name string) (Column, bool) {
 }
 
 // QueryPackageName returns a string to use for this table's query package
-func (t *Table) QueryPackageName() string {
-	if t.GoName != "" {
-		return pascal(t.GoName)
-	}
-
-	name := pascal(t.Name)
+func (t *Table) QueryPackageName() (name string) {
+	name = t.ExportedGoName()
 	name = string(append([]byte{byte(unicode.ToLower(rune(name[0])))}, name[1:]...))
-	return name
+	return camelToSnake(name)
 }
 
 // PKColNames returns a list of column names that represent this table's Primary Key.
