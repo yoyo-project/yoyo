@@ -26,6 +26,9 @@ const (
 	Blob       = idBlob | metaBinary
 	Enum       = idEnum | metaString | metaRequiresParams
 	Boolean    = idBoolean
+	Date       = idDate | metaTime
+	DateTime   = idDateTime | metaTime
+	Timestamp  = idTimestamp | metaTime
 )
 
 // These are the string representations of datatypes
@@ -263,5 +266,6 @@ const (
 	idEnum
 	idBoolean
 	idDate
+	idDateTime
 	idTimestamp
 )

@@ -23,7 +23,7 @@ type Adapter interface {
 	AddIndex(table, index string, i schema.Index) string
 
 	// AddReference returns a string query which adds the specified index to a table
-	AddReference(table, referencedTable string, dt schema.Table, i schema.Reference) string
+	AddReference(table string, dt schema.Table, i schema.Reference) string
 }
 
 // LoadAdapter loads and returns an implementation of Adapter corresponding to the given name string

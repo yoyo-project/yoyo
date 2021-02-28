@@ -349,14 +349,12 @@ func Test_adapter_generateColumn(t *testing.T) {
 func Test_adapter_AddReference(t *testing.T) {
 	tests := map[string]struct {
 		tName  string
-		ftName string
 		fTable schema.Table
 		r      schema.Reference
 		wantS  string
 	}{
 		"simple single foreign key": {
 			tName:  "local",
-			ftName: "foreign",
 			fTable: schema.Table{
 				Name: "foreign",
 				Columns: []schema.Column{
@@ -373,8 +371,8 @@ func Test_adapter_AddReference(t *testing.T) {
 		},
 		"optional single foreign key": {
 			tName:  "local",
-			ftName: "foreign",
 			fTable: schema.Table{
+				Name: "foreign",
 				Columns: []schema.Column{
 					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
 					{Name: "otherCol", Datatype: datatype.Integer},
@@ -385,8 +383,8 @@ func Test_adapter_AddReference(t *testing.T) {
 		},
 		"single foreign key with on delete": {
 			tName:  "local",
-			ftName: "foreign",
 			fTable: schema.Table{
+				Name: "foreign",
 				Columns: []schema.Column{
 					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
 					{Name: "otherCol", Datatype: datatype.Integer},
@@ -401,8 +399,8 @@ func Test_adapter_AddReference(t *testing.T) {
 		},
 		"single foreign key with on update": {
 			tName:  "local",
-			ftName: "foreign",
 			fTable: schema.Table{
+				Name: "foreign",
 				Columns: []schema.Column{
 					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
 					{Name: "otherCol", Datatype: datatype.Integer},
@@ -417,8 +415,8 @@ func Test_adapter_AddReference(t *testing.T) {
 		},
 		"dual foreign key": {
 			tName:  "local",
-			ftName: "foreign",
 			fTable: schema.Table{
+				Name: "foreign",
 				Columns: []schema.Column{
 					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
 					{Name: "id2", PrimaryKey: true, Datatype: datatype.Integer},
@@ -434,8 +432,8 @@ func Test_adapter_AddReference(t *testing.T) {
 		},
 		"single foreign key with custom name": {
 			tName:  "local",
-			ftName: "foreign",
 			fTable: schema.Table{
+				Name: "foreign",
 				Columns: []schema.Column{
 					{Name: "id", PrimaryKey: true, Datatype: datatype.Integer},
 				},
@@ -456,7 +454,7 @@ func Test_adapter_AddReference(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			gotS := m.AddReference(tt.tName, tt.ftName, tt.fTable, tt.r)
+			gotS := m.AddReference(tt.tName, tt.fTable, tt.r)
 			if gotS != tt.wantS {
 				t.Errorf("\nwant string `%s`\n got string `%s`", tt.wantS, gotS)
 			}

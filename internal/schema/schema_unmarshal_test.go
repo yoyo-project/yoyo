@@ -35,12 +35,23 @@ tables:
 				Tables:  []Table{{Name: "primary", Columns: []Column{{Name: "id", Datatype: datatype.Integer}}}},
 			},
 		},
+		{
+			name: "with invalid table",
+			yml: `
+dialect: mysql
+tables:
+  primary: no`,
+			wantDB: Database{
+				Dialect: "mysql",
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			db := Database{}
-			if err := yaml.Unmarshal([]byte(tt.yml), &db); err != nil {
-				t.Errorf("Got error %s", err)
+			if err := yaml.Unmarshal([]byte(tt.yml), &db); err != nil && !tt.wantErr || err == nil && tt.wantErr {
+				t.Errorf("Got error %s, want error %v", err, tt.wantErr)
 			}
 
 			if !reflect.DeepEqual(db, tt.wantDB) {
@@ -58,9 +69,49 @@ func TestReference_UnmarshalYAML(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			yml: "has_one: true",
+			name: "has one",
+			yml:  "has_one: true",
 			wantRef: Reference{
 				HasOne: true,
+			},
+		},
+		{
+			name: "has many",
+			yml:  "has_many: true",
+			wantRef: Reference{
+				HasMany: true,
+			},
+		},
+		{
+			name: "required",
+			yml:  "required: true\nhas_one: true",
+			wantRef: Reference{
+				HasOne:   true,
+				Required: true,
+			},
+		},
+		{
+			name: "columns",
+			yml:  "columns:\n  - col1\n  - col2\nhas_one: true",
+			wantRef: Reference{
+				HasOne:      true,
+				ColumnNames: []string{"col1", "col2"},
+			},
+		},
+		{
+			name: "on delete",
+			yml:  "has_one: true\non_delete: CASCADE",
+			wantRef: Reference{
+				HasOne: true,
+				OnDelete: "CASCADE",
+			},
+		},
+		{
+			name: "on update",
+			yml:  "has_one: true\non_update: CASCADE",
+			wantRef: Reference{
+				HasOne: true,
+				OnUpdate: "CASCADE",
 			},
 		},
 	}
@@ -86,6 +137,43 @@ func TestTable_UnmarshalYAML(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "goname",
+			yml: `
+go_name: Table
+columns:
+  id:
+    type: INT
+    primary_key: true`,
+			want: Table{
+				GoName: "Table",
+				Columns: []Column{
+					{
+						Name:       "id",
+						Datatype:   datatype.Integer,
+						PrimaryKey: true,
+					},
+				},
+			},
+		},
+		{
+			name: "one primary key",
+			yml: `
+columns:
+  id:
+    type: INT
+    primary_key: true`,
+			want: Table{
+				Columns: []Column{
+					{
+						Name:       "id",
+						Datatype:   datatype.Integer,
+						PrimaryKey: true,
+					},
+				},
+			},
+		},
+		{
+			name: "two primary keys",
 			yml: `
 columns:
   id:
@@ -105,6 +193,55 @@ columns:
 						Name:       "id2",
 						Datatype:   datatype.Integer,
 						PrimaryKey: true,
+					},
+				},
+			},
+		},
+		{
+			name: "index on single column",
+			yml: `
+columns:
+  col:
+    type: INT
+indices:
+  idx_col:
+    columns:
+      - col`,
+			want: Table{
+				Columns: []Column{
+					{
+						Name:     "col",
+						Datatype: datatype.Integer,
+					},
+				},
+				Indices: []Index{
+					{
+						Name:    "idx_col",
+						Columns: []string{"col"},
+					},
+				},
+			},
+		},
+		{
+			name: "reference on single column",
+			yml: `
+columns:
+  col:
+    type: INT
+references:
+  foreign_table:
+    has_many: true`,
+			want: Table{
+				Columns: []Column{
+					{
+						Name:     "col",
+						Datatype: datatype.Integer,
+					},
+				},
+				References: []Reference{
+					{
+						TableName: "foreign_table",
+						HasMany:   true,
 					},
 				},
 			},
@@ -134,8 +271,8 @@ func TestColumn_UnmarshalYAML(t *testing.T) {
 		{
 			name: "int pk",
 			yml: `
-    type: INT
-    primary_key: true`,
+type: INT
+primary_key: true`,
 			want: Column{
 				Datatype:   datatype.Integer,
 				PrimaryKey: true,
@@ -143,10 +280,86 @@ func TestColumn_UnmarshalYAML(t *testing.T) {
 		},
 		{
 			name: "enum",
-			yml: `type: enum("red", "blue")`,
+			yml:  `type: enum("red", "blue")`,
 			want: Column{
-				Datatype:   datatype.Enum,
-				Params: []string{"red", "blue"},
+				Datatype: datatype.Enum,
+				Params:   []string{"red", "blue"},
+			},
+		},
+		{
+			name: "unsigned int",
+			yml: `
+type: INT
+unsigned: true`,
+			want: Column{
+				Datatype: datatype.Integer,
+				Unsigned: true,
+			},
+		},
+		{
+			name: "nullable int",
+			yml: `
+type: INT
+nullable: true`,
+			want: Column{
+				Datatype: datatype.Integer,
+				Nullable: true,
+			},
+		},
+		{
+			name: "nullable int",
+			yml: `
+type: INT
+nullable: true`,
+			want: Column{
+				Datatype: datatype.Integer,
+				Nullable: true,
+			},
+		},
+		{
+			name: "int with goname",
+			yml: `
+type: INT
+go_name: Col`,
+			want: Column{
+				Datatype: datatype.Integer,
+				GoName:   "Col",
+			},
+		},
+		{
+			name: "auto_increment int",
+			yml: `
+type: INT
+primary_key: true
+auto_increment: true`,
+			want: Column{
+				Datatype:      datatype.Integer,
+				PrimaryKey:    true,
+				AutoIncrement: true,
+			},
+		},
+		{
+			name: "auto_increment int",
+			yml: `
+type: INT
+primary_key: true
+auto_increment: true`,
+			want: Column{
+				Datatype:      datatype.Integer,
+				PrimaryKey:    true,
+				AutoIncrement: true,
+			},
+		},
+		{
+			name: "string with collation and charset",
+			yml: `
+type: text
+charset: utf8-mb4
+collation: latin`,
+			want: Column{
+				Datatype:  datatype.Text,
+				Charset:   "utf8-mb4",
+				Collation: "latin",
 			},
 		},
 	}

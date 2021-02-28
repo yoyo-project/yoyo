@@ -57,7 +57,7 @@ func (a *adapter) AddIndex(table, index string, i schema.Index) string {
 }
 
 // AddReference generates a query that adds columns and foreign keys for the given table, foreign table, and schema.Reference
-func (a *adapter) AddReference(table, referencedTable string, dt schema.Table, i schema.Reference) string {
+func (a *adapter) AddReference(table string, dt schema.Table, i schema.Reference) string {
 	panic("implement me")
 }
 
