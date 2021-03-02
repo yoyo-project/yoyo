@@ -391,3 +391,84 @@ func TestDatatype_MarshalYAML(t *testing.T) {
 		})
 	}
 }
+
+func TestDatatype_GoTypeString(t *testing.T) {
+	tests := []struct {
+		name string
+		dt   Datatype
+		want string
+	}{
+
+		{
+			dt:   Integer,
+			want: goInt32,
+		},
+		{
+			dt:   TinyInt,
+			want: goInt8,
+		},
+		{
+			dt:   SmallInt,
+			want: goInt16,
+		},
+		{
+			dt:   MediumInt,
+			want: goInt32,
+		},
+		{
+			dt:   BigInt,
+			want: goInt64,
+		},
+		{
+			dt:   Decimal,
+			want: goFloat64,
+		},
+		{
+			dt:   Varchar,
+			want: goString,
+		},
+		{
+			dt:   Text,
+			want: goString,
+		},
+		{
+			dt:   TinyText,
+			want: goString,
+		},
+		{
+			dt:   MediumText,
+			want: goString,
+		},
+		{
+			dt:   LongText,
+			want: goString,
+		},
+		{
+			dt:   Char,
+			want: goRune,
+		},
+		{
+			dt:   Blob,
+			want: goBlob,
+		},
+		{
+			dt:   Enum,
+			want: goString,
+		},
+		{
+			dt:   Boolean,
+			want: goBool,
+		},
+		{
+			dt:   123123,
+			want: "NONE",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.dt.GoTypeString(); got != tt.want {
+				t.Errorf("GoTypeString() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

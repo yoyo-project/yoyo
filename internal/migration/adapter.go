@@ -27,14 +27,14 @@ type Adapter interface {
 }
 
 // LoadAdapter loads and returns an implementation of Adapter corresponding to the given name string
-func LoadAdapter(name string) (d Adapter, err error) {
+func LoadAdapter(name string) (a Adapter, err error) {
 	switch name {
 	case dialect.MySQL:
-		d = mysql.NewAdapter()
+		a = mysql.NewAdapter()
 	case dialect.PostgreSQL:
-		d = postgres.NewAdapter()
+		a = postgres.NewAdapter()
 	default:
 		err = fmt.Errorf("unknown dialect `%s`", name)
 	}
-	return d, err
+	return a, err
 }

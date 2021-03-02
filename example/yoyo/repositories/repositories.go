@@ -28,11 +28,10 @@ type PersonRepository interface {
 	Delete(person.Query) error
 }
 
-
 func InitRepositories(db *sql.DB) (Repositories, Transact) {
 	baseRepo := &repository{db: db}
 	return Repositories{
-		CityRepository: &cityRepo{baseRepo},
+		CityRepository:   &cityRepo{baseRepo},
 		PersonRepository: &personRepo{baseRepo},
 	}, initTransact(baseRepo)
 }

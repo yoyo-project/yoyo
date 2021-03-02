@@ -102,7 +102,7 @@ func TestReference_UnmarshalYAML(t *testing.T) {
 			name: "on delete",
 			yml:  "has_one: true\non_delete: CASCADE",
 			wantRef: Reference{
-				HasOne: true,
+				HasOne:   true,
 				OnDelete: "CASCADE",
 			},
 		},
@@ -110,7 +110,7 @@ func TestReference_UnmarshalYAML(t *testing.T) {
 			name: "on update",
 			yml:  "has_one: true\non_update: CASCADE",
 			wantRef: Reference{
-				HasOne: true,
+				HasOne:   true,
 				OnUpdate: "CASCADE",
 			},
 		},

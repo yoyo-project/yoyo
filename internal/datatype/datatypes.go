@@ -1,6 +1,9 @@
 package datatype
 
-import "strings"
+import (
+	"gopkg.in/yaml.v3"
+	"strings"
+)
 
 // Datatype is used to encode information about types for use in repository or validation
 // The least-significant 8 bits are reserved for general metadata
@@ -63,14 +66,8 @@ const (
 )
 
 // UnmarshalYAML provides an implementation for yaml/v2.Unmarshaler to parse the yaml config
-func (dt *Datatype) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var s string
-	err := unmarshal(&s)
-	if err != nil {
-		return err
-	}
-
-	*dt, err = FromString(s)
+func (dt *Datatype) UnmarshalYAML(value *yaml.Node) (err error) {
+	*dt, err = FromString(value.Value)
 	return err
 }
 
@@ -79,78 +76,80 @@ func (dt Datatype) MarshalYAML() (interface{}, error) {
 	return strings.ToLower(dt.String()), nil
 }
 
-func (dt Datatype) String() string {
+func (dt Datatype) String() (s string) {
 	switch dt {
 	case Integer:
-		return integer
+		s = integer
 	case TinyInt:
-		return tinyint
+		s = tinyint
 	case SmallInt:
-		return smallint
+		s = smallint
 	case MediumInt:
-		return mediumint
+		s = mediumint
 	case BigInt:
-		return bigint
+		s = bigint
 	case Decimal:
-		return decimal
+		s = decimal
 	case Varchar:
-		return varchar
+		s = varchar
 	case Text:
-		return text
+		s = text
 	case TinyText:
-		return tinytext
+		s = tinytext
 	case MediumText:
-		return mediumtext
+		s = mediumtext
 	case LongText:
-		return longtext
+		s = longtext
 	case Char:
-		return char
+		s = char
 	case Blob:
-		return blob
+		s = blob
 	case Enum:
-		return enum
+		s = enum
 	case Boolean:
-		return boolean
+		s = boolean
 	default:
-		return "NONE"
+		s = "NONE"
 	}
+	return s
 }
 
-func (dt Datatype) GoTypeString() string {
+func (dt Datatype) GoTypeString() (s string) {
 	switch dt {
 	case Integer:
-		return goInt32
+		s = goInt32
 	case TinyInt:
-		return goInt8
+		s = goInt8
 	case SmallInt:
-		return goInt16
+		s = goInt16
 	case MediumInt:
-		return goInt32
+		s = goInt32
 	case BigInt:
-		return goInt64
+		s = goInt64
 	case Decimal:
-		return goFloat64
+		s = goFloat64
 	case Varchar:
-		return goString
+		s = goString
 	case Text:
-		return goString
+		s = goString
 	case TinyText:
-		return goString
+		s = goString
 	case MediumText:
-		return goString
+		s = goString
 	case LongText:
-		return goString
+		s = goString
 	case Char:
-		return goRune
+		s = goRune
 	case Blob:
-		return goBlob
+		s = goBlob
 	case Enum:
-		return goString
+		s = goString
 	case Boolean:
-		return goBool
+		s = goBool
 	default:
-		return "NONE"
+		s = "NONE"
 	}
+	return s
 }
 
 // IsInt returns true if the Datatype is an integer type
