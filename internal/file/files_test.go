@@ -18,8 +18,8 @@ func TestFindPackagePath(t *testing.T) {
 			want: "github.com/yoyo-project/yoyo/example/",
 		},
 		{
-			name: "root directory",
-			args: args{path: "/"},
+			name:    "root directory",
+			args:    args{path: "/"},
 			wantErr: true,
 		},
 	}

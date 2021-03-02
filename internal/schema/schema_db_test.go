@@ -59,7 +59,7 @@ func TestDatabase_GetTable(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			db := &Database{
-				Tables:  tt.fields.Tables,
+				Tables: tt.fields.Tables,
 			}
 			got, got1 := db.GetTable(tt.args.name)
 			if !reflect.DeepEqual(got, tt.want) {

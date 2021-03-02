@@ -3,7 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
-	
+
 	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/person"
 )
 
@@ -121,11 +121,9 @@ func (r *personRepo) update(in Person) (e Person, err error) {
 		}
 	}()
 
-
 	q, args := person.Query{}.
 		Id(in.persisted.Id).
 		SQL()
-
 
 	stmt, err = r.prepare(fmt.Sprintf(updatePerson, q))
 	if err != nil {
@@ -164,4 +162,3 @@ func (r *personRepo) Delete(query person.Query) (err error) {
 
 	return err
 }
-

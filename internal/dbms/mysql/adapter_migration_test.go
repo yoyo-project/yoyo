@@ -354,7 +354,7 @@ func Test_adapter_AddReference(t *testing.T) {
 		wantS  string
 	}{
 		"simple single foreign key": {
-			tName:  "local",
+			tName: "local",
 			fTable: schema.Table{
 				Name: "foreign",
 				Columns: []schema.Column{
@@ -370,7 +370,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
 		},
 		"optional single foreign key": {
-			tName:  "local",
+			tName: "local",
 			fTable: schema.Table{
 				Name: "foreign",
 				Columns: []schema.Column{
@@ -382,7 +382,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
 		},
 		"single foreign key with on delete": {
-			tName:  "local",
+			tName: "local",
 			fTable: schema.Table{
 				Name: "foreign",
 				Columns: []schema.Column{
@@ -398,7 +398,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON DELETE CASCADE;",
 		},
 		"single foreign key with on update": {
-			tName:  "local",
+			tName: "local",
 			fTable: schema.Table{
 				Name: "foreign",
 				Columns: []schema.Column{
@@ -414,7 +414,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON UPDATE CASCADE;",
 		},
 		"dual foreign key": {
-			tName:  "local",
+			tName: "local",
 			fTable: schema.Table{
 				Name: "foreign",
 				Columns: []schema.Column{
@@ -431,7 +431,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`, `fk_foreign_id2`) REFERENCES foreign(`id`, `id2`);",
 		},
 		"single foreign key with custom name": {
-			tName:  "local",
+			tName: "local",
 			fTable: schema.Table{
 				Name: "foreign",
 				Columns: []schema.Column{

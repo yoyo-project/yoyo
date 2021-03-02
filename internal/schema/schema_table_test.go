@@ -132,11 +132,10 @@ func TestTable_GetColumn(t1 *testing.T) {
 			want1: true,
 		},
 		{
-			name: "miss on empty table",
-			fields: fields{Columns: []Column{
-			}},
-			args:  args{name: "yes"},
-			want1: false,
+			name:   "miss on empty table",
+			fields: fields{Columns: []Column{}},
+			args:   args{name: "yes"},
+			want1:  false,
 		},
 		{
 			name: "miss on table with no matching column",
