@@ -2,9 +2,10 @@ package mysql
 
 import (
 	"database/sql"
-	"github.com/yoyo-project/yoyo/internal/dbms/base"
 	"reflect"
 	"testing"
+
+	"github.com/yoyo-project/yoyo/internal/dbms/base"
 )
 
 func Test_adapter_PreparedStatementPlaceholders(t *testing.T) {

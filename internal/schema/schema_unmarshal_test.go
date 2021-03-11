@@ -1,10 +1,11 @@
 package schema
 
 import (
-	"github.com/yoyo-project/yoyo/internal/datatype"
-	"gopkg.in/yaml.v3"
 	"reflect"
 	"testing"
+
+	"github.com/yoyo-project/yoyo/internal/datatype"
+	"gopkg.in/yaml.v3"
 )
 
 func TestDatabase_UnmarshalYAML(t *testing.T) {

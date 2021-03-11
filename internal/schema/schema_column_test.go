@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"github.com/yoyo-project/yoyo/internal/datatype"
 	"testing"
+
+	"github.com/yoyo-project/yoyo/internal/datatype"
 )
 
 func TestColumn_ExportedGoName(t *testing.T) {
