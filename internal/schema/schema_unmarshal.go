@@ -2,9 +2,10 @@ package schema
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"regexp"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 var invalidNameChars = regexp.MustCompile("[^a-zA-Z\\d_-]")

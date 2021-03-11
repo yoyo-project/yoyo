@@ -2,11 +2,12 @@ package repository
 
 import (
 	"fmt"
-	"github.com/yoyo-project/yoyo/internal/file"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/yoyo-project/yoyo/internal/file"
 
 	"github.com/yoyo-project/yoyo/internal/yoyo"
 

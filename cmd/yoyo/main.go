@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/yoyo-project/yoyo/internal/file"
 	"os"
+
+	"github.com/yoyo-project/yoyo/internal/file"
 
 	"github.com/dotvezz/lime"
 	"github.com/dotvezz/lime/cli"

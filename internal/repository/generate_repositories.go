@@ -2,9 +2,10 @@ package repository
 
 import (
 	"fmt"
-	"github.com/yoyo-project/yoyo/internal/repository/template"
 	"io"
 	"strings"
+
+	"github.com/yoyo-project/yoyo/internal/repository/template"
 
 	"github.com/yoyo-project/yoyo/internal/schema"
 )

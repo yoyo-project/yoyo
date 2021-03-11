@@ -1,8 +1,9 @@
 package datatype
 
 import (
-	"gopkg.in/yaml.v3"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Datatype is used to encode information about types for use in repository or validation

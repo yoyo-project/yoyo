@@ -10,7 +10,7 @@ import (
 	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
-func NewQueryFileGenerator(reposPath string, packagePath Finder) EntityGenerator {
+func NewQueryFileGenerator(reposPath string, findPackagePath Finder) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) error {
 		var methods, functions, imports []string
 		for _, c := range t.Columns {
@@ -20,7 +20,7 @@ func NewQueryFileGenerator(reposPath string, packagePath Finder) EntityGenerator
 			imports = append(imports, is...)
 		}
 
-		importPath, err := packagePath(reposPath + "/")
+		importPath, err := findPackagePath(reposPath + "/")
 		if err != nil {
 			return fmt.Errorf("unable to generate query file: %w", err)
 		}

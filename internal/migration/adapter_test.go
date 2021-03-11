@@ -1,11 +1,12 @@
 package migration
 
 import (
+	"reflect"
+	"testing"
+
 	"github.com/yoyo-project/yoyo/internal/dbms/dialect"
 	"github.com/yoyo-project/yoyo/internal/dbms/mysql"
 	"github.com/yoyo-project/yoyo/internal/dbms/postgres"
-	"reflect"
-	"testing"
 )
 
 func TestLoadAdapter(t *testing.T) {

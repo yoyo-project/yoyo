@@ -2,12 +2,13 @@ package migration
 
 import (
 	"errors"
-	"github.com/yoyo-project/yoyo/internal/reverse"
-	"github.com/yoyo-project/yoyo/internal/yoyo"
 	"io"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/yoyo-project/yoyo/internal/reverse"
+	"github.com/yoyo-project/yoyo/internal/yoyo"
 
 	"github.com/yoyo-project/yoyo/internal/datatype"
 	"github.com/yoyo-project/yoyo/internal/schema"
