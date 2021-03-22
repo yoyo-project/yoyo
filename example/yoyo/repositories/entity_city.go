@@ -3,11 +3,15 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
+
+	
 )
 
 type City struct {
-	Id   int32
+	Id int32
 	Name string
+
+	
 
 	persisted *City
 }

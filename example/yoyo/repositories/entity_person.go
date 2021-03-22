@@ -3,13 +3,15 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
+
+	
 )
 
 type Person struct {
-	Age           float64
+	Age float64
 	FavoriteColor string
-	Id            int32
-	Name          string
+	Id int32
+	Name string
 
 	CityId int32
 

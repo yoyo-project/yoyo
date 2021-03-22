@@ -31,7 +31,7 @@ func (es *` + EntityName + `s) Next() bool {
 	return es.rs.Next()
 }
 
-func (es *` + EntityName + `s) Scan(e * ` + EntityName + `) (err error) {
+func (es *` + EntityName + `s) Scan(e *` + EntityName + `) (err error) {
 	if e == nil {
 		return fmt.Errorf("in ` + EntityName + `s.Scan: passed a nil entity")
 	}
