@@ -65,6 +65,14 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 			colAssignments = append(colAssignments, fmt.Sprintf("%s = %s", colName, preparedStatementPlaceholders[i]))
 		}
 
+		var saveFuncs string
+
+		if len(t.PKColumns()) > 0 {
+			saveFuncs = template.SaveWithPK
+		} else {
+			saveFuncs = template.SaveWithoutPK
+		}
+
 		r := strings.NewReplacer(
 			template.PackageName,
 			packageName,
@@ -92,7 +100,7 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 			t.QueryPackageName(),
 		)
 
-		_, err = w.WriteString(r.Replace(template.RepositoryFile))
+		_, err = w.WriteString(r.Replace(strings.ReplaceAll(template.RepositoryFile, template.SaveFuncs, saveFuncs)))
 
 		return err
 	}

@@ -17,11 +17,11 @@ const (
 	deletePerson = "DELETE FROM person %s;"
 )
 
-type personRepo struct {
+type PersonRepository struct {
 	*repository
 }
 
-func (r *personRepo) FetchOne(query person.Query) (ent Person, err error) {
+func (r *PersonRepository) FetchOne(query person.Query) (ent Person, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
@@ -46,7 +46,7 @@ func (r *personRepo) FetchOne(query person.Query) (ent Person, err error) {
 	return ent, err
 }
 
-func (r *personRepo) Search(query person.Query) (es Persons, err error) {
+func (r *PersonRepository) Search(query person.Query) (es Persons, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
@@ -66,7 +66,7 @@ func (r *personRepo) Search(query person.Query) (es Persons, err error) {
 	return es, err
 }
 
-func (r *personRepo) Save(in Person) (Person, error) {
+func (r *PersonRepository) Save(in Person) (Person, error) {
 	if in.persisted == nil {
 		return r.insert(in)
 	} else {
@@ -74,7 +74,7 @@ func (r *personRepo) Save(in Person) (Person, error) {
 	}
 }
 
-func (r *personRepo) insert(in Person) (e Person, err error) {
+func (r *PersonRepository) insert(in Person) (e Person, err error) {
 	var (
 		stmt *sql.Stmt
 		res  sql.Result
@@ -110,7 +110,7 @@ func (r *personRepo) insert(in Person) (e Person, err error) {
 	return e, err
 }
 
-func (r *personRepo) update(in Person) (e Person, err error) {
+func (r *PersonRepository) update(in Person) (e Person, err error) {
 	var (
 		stmt *sql.Stmt
 	)
@@ -121,11 +121,9 @@ func (r *personRepo) update(in Person) (e Person, err error) {
 		}
 	}()
 
-
 	q, args := person.Query{}.
 		Id(in.persisted.Id).
 		SQL()
-
 
 	stmt, err = r.prepare(fmt.Sprintf(updatePerson, q))
 	if err != nil {
@@ -145,7 +143,7 @@ func (r *personRepo) update(in Person) (e Person, err error) {
 	return e, err
 }
 
-func (r *personRepo) Delete(query person.Query) (err error) {
+func (r *PersonRepository) Delete(query person.Query) (err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {

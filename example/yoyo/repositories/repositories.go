@@ -2,38 +2,20 @@ package repositories
 
 import (
 	"database/sql"
-
-	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/city"
-	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/person"
 )
 
-type Transact func(func() error) error
+type TransactFunc func(func() error) error
 
 type Repositories struct {
-	CityRepository
-	PersonRepository
+	*CityRepository
+	*PersonRepository
 }
 
-type CityRepository interface {
-	FetchOne(city.Query) (City, error)
-	Search(city.Query) (Citys, error)
-	Save(City) (City, error)
-	Delete(city.Query) error
-}
-
-type PersonRepository interface {
-	FetchOne(person.Query) (Person, error)
-	Search(person.Query) (Persons, error)
-	Save(Person) (Person, error)
-	Delete(person.Query) error
-}
-
-
-func InitRepositories(db *sql.DB) (Repositories, Transact) {
+func InitRepositories(db *sql.DB) (Repositories, TransactFunc) {
 	baseRepo := &repository{db: db}
 	return Repositories{
-		CityRepository: &cityRepo{baseRepo},
-		PersonRepository: &personRepo{baseRepo},
+		CityRepository: &CityRepository{baseRepo},
+		PersonRepository: &PersonRepository{baseRepo},
 	}, initTransact(baseRepo)
 }
 
@@ -51,7 +33,7 @@ func (r repository) prepare(query string) (*sql.Stmt, error) {
 	}
 }
 
-func initTransact(r *repository) Transact {
+func initTransact(r *repository) TransactFunc {
 	return func(f func() error) (err error) {
 		r.tx, err = r.db.Begin()
 		r.isTx = true

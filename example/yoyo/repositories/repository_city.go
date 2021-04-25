@@ -17,11 +17,11 @@ const (
 	deleteCity = "DELETE FROM city %s;"
 )
 
-type cityRepo struct {
+type CityRepository struct {
 	*repository
 }
 
-func (r *cityRepo) FetchOne(query city.Query) (ent City, err error) {
+func (r *CityRepository) FetchOne(query city.Query) (ent City, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
@@ -46,7 +46,7 @@ func (r *cityRepo) FetchOne(query city.Query) (ent City, err error) {
 	return ent, err
 }
 
-func (r *cityRepo) Search(query city.Query) (es Citys, err error) {
+func (r *CityRepository) Search(query city.Query) (es Citys, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
@@ -66,7 +66,7 @@ func (r *cityRepo) Search(query city.Query) (es Citys, err error) {
 	return es, err
 }
 
-func (r *cityRepo) Save(in City) (City, error) {
+func (r *CityRepository) Save(in City) (City, error) {
 	if in.persisted == nil {
 		return r.insert(in)
 	} else {
@@ -74,7 +74,7 @@ func (r *cityRepo) Save(in City) (City, error) {
 	}
 }
 
-func (r *cityRepo) insert(in City) (e City, err error) {
+func (r *CityRepository) insert(in City) (e City, err error) {
 	var (
 		stmt *sql.Stmt
 		res  sql.Result
@@ -110,7 +110,7 @@ func (r *cityRepo) insert(in City) (e City, err error) {
 	return e, err
 }
 
-func (r *cityRepo) update(in City) (e City, err error) {
+func (r *CityRepository) update(in City) (e City, err error) {
 	var (
 		stmt *sql.Stmt
 	)
@@ -121,11 +121,9 @@ func (r *cityRepo) update(in City) (e City, err error) {
 		}
 	}()
 
-
 	q, args := city.Query{}.
 		Id(in.persisted.Id).
 		SQL()
-
 
 	stmt, err = r.prepare(fmt.Sprintf(updateCity, q))
 	if err != nil {
@@ -145,7 +143,7 @@ func (r *cityRepo) update(in City) (e City, err error) {
 	return e, err
 }
 
-func (r *cityRepo) Delete(query city.Query) (err error) {
+func (r *CityRepository) Delete(query city.Query) (err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
