@@ -3,7 +3,6 @@ package template
 const (
 	Imports              = "$IMPORTS$"
 	ReposStructFields    = "$REPOS_STRUCT_FIELDS$"
-	RepositoryInterfaces = "$REPOSITORY_INTERFACES$"
 	RepoInits            = "$REPO_INITS$"
 )
 
@@ -15,15 +14,13 @@ import (
 	` + Imports + `
 )
 
-type Transact func(func() error) error
+type TransactFunc func(func() error) error
 
 type Repositories struct {
 	` + ReposStructFields + `
 }
 
-` + RepositoryInterfaces + `
-
-func InitRepositories(db *sql.DB) (Repositories, Transact) {
+func InitRepositories(db *sql.DB) (Repositories, TransactFunc) {
 	baseRepo := &repository{db: db}
 	return Repositories{
 		` + RepoInits + `
@@ -44,7 +41,7 @@ func (r repository) prepare(query string) (*sql.Stmt, error) {
 	}
 }
 
-func initTransact(r *repository) Transact {
+func initTransact(r *repository) TransactFunc {
 	return func(f func() error) (err error) {
 		r.tx, err = r.db.Begin()
 		r.isTx = true
@@ -63,13 +60,5 @@ func initTransact(r *repository) Transact {
 
 		return
 	}
-}
-`
-
-const RepositoryInterfaceTemplate = `type ` + EntityName + `Repository interface {
-	FetchOne(` + QueryPackageName + `.Query) (` + EntityName + `, error)
-	Search(` + QueryPackageName + `.Query) (` + EntityName + `s, error)
-	Save(` + EntityName + `) (` + EntityName + `, error)
-	Delete(` + QueryPackageName + `.Query) error
 }
 `

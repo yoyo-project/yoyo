@@ -12,18 +12,9 @@ import (
 
 func NewRepositoriesGenerator(packageName, reposPath string, packagePath Finder, db schema.Database) WriteGenerator {
 	return func(db schema.Database, w io.StringWriter) (err error) {
-		var repoInterfaces, imports, reposStructFields, repoInits []string
+		var imports, reposStructFields, repoInits []string
 
 		for _, t := range db.Tables {
-			// replacer for interface templates
-			ir := strings.NewReplacer(
-				template.EntityName,
-				t.ExportedGoName(),
-				template.QueryPackageName,
-				t.QueryPackageName(),
-			)
-			repoInterfaces = append(repoInterfaces, ir.Replace(template.RepositoryInterfaceTemplate))
-
 			imp, err := packagePath(fmt.Sprintf(`%s/query/%s`, reposPath, t.QueryPackageName()))
 			if err != nil {
 				return fmt.Errorf("unable to generate repositories file: %w", err)
@@ -33,9 +24,9 @@ func NewRepositoriesGenerator(packageName, reposPath string, packagePath Finder,
 			repoInits = append(
 				repoInits,
 				fmt.Sprintf(
-					"%sRepository: &%sRepo{baseRepo},",
+					"%sRepository: &%sRepository{baseRepo},",
 					t.ExportedGoName(),
-					t.QueryPackageName(),
+					t.ExportedGoName(),
 				),
 			)
 		}
@@ -43,12 +34,10 @@ func NewRepositoriesGenerator(packageName, reposPath string, packagePath Finder,
 		r := strings.NewReplacer(
 			template.PackageName,
 			packageName,
-			template.RepositoryInterfaces,
-			strings.Join(sortedUnique(repoInterfaces), "\n"),
 			template.Imports,
 			strings.Join(sortedUnique(imports), "\n	"),
 			template.ReposStructFields,
-			strings.Join(sortedUnique(reposStructFields), "\n	"),
+			fmt.Sprintf("*%s", strings.Join(sortedUnique(reposStructFields), "\n	*")),
 			template.RepoInits,
 			strings.Join(sortedUnique(repoInits), "\n		"),
 		)
