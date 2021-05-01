@@ -32,7 +32,9 @@ const (
 	Boolean    = idBoolean
 	Date       = idDate | metaTime
 	DateTime   = idDateTime | metaTime
+	Time       = idTime | metaTime
 	Timestamp  = idTimestamp | metaTime
+	Year       = idYear | metaTime
 )
 
 // These are the string representations of datatypes
@@ -54,6 +56,11 @@ const (
 	enum       = "ENUM"
 	boolean    = "BOOLEAN" // yoyo considers "BOOLEAN" to be the canonical string, however
 	sbool      = "BOOL"    // it still accepts "BOOL" as an alias and canonicalizes it to "BOOLEAN"
+	date       = "DATE"
+	time       = "TIME"
+	datetime   = "DATETIME"
+	timestamp  = "TIMESTAMP"
+	year       = "YEAR"
 
 	goInt64   = "int64"
 	goInt32   = "int32"
@@ -64,6 +71,7 @@ const (
 	goBool    = "bool"
 	goRune    = "rune"
 	goBlob    = "[]byte"
+	goTime    = "time.Time"
 )
 
 // UnmarshalYAML provides an implementation for yaml/v2.Unmarshaler to parse the yaml config
@@ -109,6 +117,16 @@ func (dt Datatype) String() (s string) {
 		s = enum
 	case Boolean:
 		s = boolean
+	case Date:
+		s = date
+	case Time:
+		s = time
+	case DateTime:
+		s = datetime
+	case Year:
+		s = year
+	case Timestamp:
+		s = timestamp
 	default:
 		s = "NONE"
 	}
@@ -147,6 +165,11 @@ func (dt Datatype) GoTypeString() (s string) {
 		s = goString
 	case Boolean:
 		s = goBool
+	case DateTime, Timestamp, Date:
+		s = goTime
+	case Year:
+		s = goInt16
+	//TODO: Work out sane go-type for Time
 	default:
 		s = "NONE"
 	}
@@ -189,7 +212,7 @@ func (dt Datatype) HasGoUnsigned() bool {
 	return dt&metaHasGoUnisgned > 0
 }
 
-// IsTime returns true if the Datatype can be stored as either a signed or unsigned value
+// IsTime returns true if the Datatype is a time type
 func (dt Datatype) IsTime() bool {
 	return dt&metaTime > 0
 }
@@ -227,6 +250,16 @@ func FromString(in string) (dt Datatype, err error) {
 		dt = Enum
 	case boolean, sbool:
 		dt = Boolean
+	case date:
+		dt = Date
+	case time:
+		dt = Time
+	case datetime:
+		dt = DateTime
+	case timestamp:
+		dt = Timestamp
+	case year:
+		dt = Year
 	default:
 		err = ErrUnknownDatatype
 	}
@@ -249,6 +282,7 @@ const (
 
 // These are the unique type identifiers
 // Unlike the others, these are not single-bit flags
+// 8 bits are reserved for this
 const (
 	idInteger Datatype = (iota + 1) << 24
 	idTinyInt
@@ -266,6 +300,8 @@ const (
 	idEnum
 	idBoolean
 	idDate
+	idTime
 	idDateTime
 	idTimestamp
+	idYear
 )

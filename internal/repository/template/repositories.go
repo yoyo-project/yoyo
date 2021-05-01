@@ -1,9 +1,9 @@
 package template
 
 const (
-	Imports              = "$IMPORTS$"
-	ReposStructFields    = "$REPOS_STRUCT_FIELDS$"
-	RepoInits            = "$REPO_INITS$"
+	Imports           = "$IMPORTS$"
+	ReposStructFields = "$REPOS_STRUCT_FIELDS$"
+	RepoInits         = "$REPO_INITS$"
 )
 
 const RepositoriesFile = `package ` + PackageName + `
