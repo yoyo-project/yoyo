@@ -1,7 +1,6 @@
 package template
 
 const (
-	Imports           = "$IMPORTS$"
 	ReposStructFields = "$REPOS_STRUCT_FIELDS$"
 	RepoInits         = "$REPO_INITS$"
 )
@@ -10,8 +9,6 @@ const RepositoriesFile = `package ` + PackageName + `
 
 import (
 	"database/sql"
-
-	` + Imports + `
 )
 
 type TransactFunc func(func() error) error

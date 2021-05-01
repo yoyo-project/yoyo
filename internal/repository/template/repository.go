@@ -1,6 +1,7 @@
 package template
 
 const (
+	Imports               = "$IMPORTS$"
 	TableName             = "$TABLE_NAME$"
 	QueryPackageName      = "$ENTITY_PACKAGE_NAME$"
 	ColumnNames           = "$COLUMN_NAMES$"
