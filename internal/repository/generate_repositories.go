@@ -30,7 +30,7 @@ func NewRepositoriesGenerator(packageName, reposPath string, packagePath Finder,
 			template.PackageName,
 			packageName,
 			template.ReposStructFields,
-			fmt.Sprintf("*%s", strings.Join(sortedUnique(reposStructFields), "\n	*")),
+			fmt.Sprintf("*%s", strings.Join(reposStructFields, "\n	*")),
 			template.RepoInits,
 			strings.Join(sortedUnique(repoInits), "\n		"),
 		)

@@ -44,15 +44,15 @@ func NewEntityGenerator(packageName string, db schema.Database) EntityGenerator 
 			template.PackageName,
 			packageName,
 			template.EntityFields,
-			strings.Join(sortedUnique(fields), "\n	"),
+			strings.Join(fields, "\n	"),
 			template.ScanFields,
-			strings.Join(sortedUnique(scanFields), ", "),
+			strings.Join(scanFields, ", "),
 			template.Imports,
 			strings.Join(sortedUnique(imports), "\n	"),
 			template.EntityName,
 			t.ExportedGoName(),
 			template.ReferenceFields,
-			strings.Join(sortedUnique(referenceFields), "\n	"),
+			strings.Join(referenceFields, "\n	"),
 		)
 
 		_, err := w.WriteString(r.Replace(template.EntityFile))

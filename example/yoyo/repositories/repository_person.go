@@ -9,11 +9,11 @@ import (
 
 const (
 	insertPerson = "INSERT INTO person" +
-		" (age, favorite_color, name) " +
-		" VALUES (?);"
+		" (name, favorite_color, age) " +
+		" VALUES (?, ?, ?);"
 	updatePerson = "UPDATE person" +
-		" SET age = ?, favorite_color = ?, name = ? %s;"
-	selectPerson = "SELECT age, favorite_color, name FROM person %s;"
+		" SET name = ?, favorite_color = ?, age = ? %s;"
+	selectPerson = "SELECT name, favorite_color, age FROM person %s;"
 	deletePerson = "DELETE FROM person %s;"
 )
 
@@ -38,7 +38,7 @@ func (r *PersonRepository) FetchOne(query person.Query) (ent Person, err error) 
 
 	row := stmt.QueryRow(args...)
 
-	err = row.Scan(&ent.Age, &ent.FavoriteColor, &ent.Id, &ent.Name)
+	err = row.Scan(&ent.Id, &ent.Name, &ent.FavoriteColor, &ent.Age)
 
 	persisted := ent
 	ent.persisted = &persisted
@@ -91,7 +91,7 @@ func (r *PersonRepository) insert(in Person) (e Person, err error) {
 		return e, err
 	}
 
-	res, err = stmt.Exec(in.Age, in.FavoriteColor, in.Id, in.Name)
+	res, err = stmt.Exec(in.Id, in.Name, in.FavoriteColor, in.Age)
 	if err != nil {
 		return e, err
 	}
@@ -130,7 +130,7 @@ func (r *PersonRepository) update(in Person) (e Person, err error) {
 		return e, err
 	}
 
-	fields := []interface{}{in.Age, in.FavoriteColor, in.Id, in.Name}
+	fields := []interface{}{in.Id, in.Name, in.FavoriteColor, in.Age}
 	_, err = stmt.Exec(append(fields, args...)...)
 	if err != nil {
 		return e, err
