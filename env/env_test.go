@@ -11,7 +11,6 @@ func TestEnvs(t *testing.T) {
 	os.Setenv("YOYO_DB_PORT", "test")
 	os.Setenv("YOYO_DB_HOST", "test")
 	os.Setenv("YOYO_DB_NAME", "test")
-	os.Setenv("YOYO_DB", "test")
 
 	if DBUser() != "test" {
 		t.Errorf("DBUser result unexpected")
@@ -27,8 +26,5 @@ func TestEnvs(t *testing.T) {
 	}
 	if DBName() != "test" {
 		t.Errorf("DBName result unexpected")
-	}
-	if DB() != "test" {
-		t.Errorf("DB result unexpected")
 	}
 }

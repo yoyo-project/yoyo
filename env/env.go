@@ -26,8 +26,3 @@ func DBHost() string {
 func DBName() string {
 	return os.Getenv("YOYO_DB_NAME")
 }
-
-// DB returns the environment value of YOYO_DB
-func DB() string {
-	return os.Getenv("YOYO_DB")
-}
