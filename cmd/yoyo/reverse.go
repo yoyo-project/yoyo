@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/dotvezz/lime"
 	"github.com/yoyo-project/yoyo/internal/reverse"
@@ -9,7 +10,7 @@ import (
 )
 
 func newReverser(readDatabase reverse.DatabaseReader) lime.Func {
-	return func(args []string) (err error) {
+	return func(args []string, w io.Writer) (err error) {
 		var config yoyo.Config
 
 		config.Schema, err = readDatabase(config)

@@ -18,7 +18,7 @@ func main() {
 	ucs := usecases.Init()
 
 	c := cli.New()
-	_ = c.SetOptions(options.NoShell)
+	_ = c.SetOptions(options.NoInteractiveMode)
 	_ = c.SetCommands(
 		lime.Command{
 			Keyword: "generate",

@@ -1,7 +1,7 @@
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
-github.com/dotvezz/lime v0.2.0 h1:4oufwxdL7vVIbunGQf5VaYDE0e4NlJYT+ON3As/2Evg=
-github.com/dotvezz/lime v0.2.0/go.mod h1:TyGfUraSwOyY4aLBtu0dgjg4DMutLx0hM9w8aRpGd6I=
+github.com/dotvezz/lime v0.3.0 h1:5hERNx+3N9l0jUKDsV846vrhQDjk5xxZdp5TjUy55vo=
+github.com/dotvezz/lime v0.3.0/go.mod h1:TyGfUraSwOyY4aLBtu0dgjg4DMutLx0hM9w8aRpGd6I=
 github.com/go-sql-driver/mysql v1.5.0 h1:ozyZYNQW3x3HtqT1jira07DN2PArx2v7/mN66gGcHOs=
 github.com/go-sql-driver/mysql v1.5.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

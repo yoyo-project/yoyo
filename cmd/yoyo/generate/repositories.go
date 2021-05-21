@@ -2,6 +2,7 @@ package generate
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/dotvezz/lime"
 	"github.com/yoyo-project/yoyo/internal/repository"
@@ -11,7 +12,7 @@ import (
 func Repos(
 	loadGenerator repository.GeneratorLoader,
 ) lime.Func {
-	return func(args []string) error {
+	return func(args []string, w io.Writer) error {
 		config, err := yoyo.LoadConfig()
 		if err != nil {
 			return fmt.Errorf("unable to load config: %w", err)

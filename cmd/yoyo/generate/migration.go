@@ -2,6 +2,7 @@ package generate
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,7 +20,7 @@ func Migrations(
 	loadGenerator migration.GeneratorLoader,
 	create FileOpener,
 ) lime.Func {
-	return func(args []string) error {
+	return func(args []string, w io.Writer) error {
 		config, err := yoyo.LoadConfig()
 		if err != nil {
 			return fmt.Errorf("unable to load config: %w", err)
@@ -45,7 +46,7 @@ func Migrations(
 
 		var f *os.File
 		defer func() { _ = f.Close() }()
-		f, err = create(filepath.Join(config.Paths.Migrations, "%s%s.sql", now().Format("20060102150405"), name))
+		f, err = create(filepath.Join(config.Paths.Migrations, fmt.Sprintf("%s%s.sql", now().Format("20060102150405"), name)))
 		if err != nil {
 			return fmt.Errorf("cannot create migration file '%s': %w", config.Paths.Migrations, err)
 		}
