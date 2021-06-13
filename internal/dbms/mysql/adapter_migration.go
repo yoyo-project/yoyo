@@ -109,7 +109,14 @@ func (a *adapter) AddReference(tName string, fTable schema.Table, r schema.Refer
 
 	for i, lColName := range lCols {
 		fCol, _ := fTable.GetColumn(fCols[i])
+
+		// Remove possibly invalid properties of fCol
+		fCol.AutoIncrement = false
+		fCol.PrimaryKey = false
+
+		// Set properties of fCol to be correct for the current operation
 		fCol.Nullable = !r.Required
+
 		sw.WriteString(a.AddColumn(tName, lColName, fCol)) // use fCol because the column's definition needs to match
 		sw.WriteRune('\n')
 	}

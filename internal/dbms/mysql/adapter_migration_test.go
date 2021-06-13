@@ -110,7 +110,7 @@ func Test_adapter_CreateTable(t *testing.T) {
 					},
 				},
 			},
-			wantS: "CREATE TABLE `table` (\n    `column` INT SIGNED NOT NULL\n);",
+			wantS: "CREATE TABLE `table` (\n    `column` INT SIGNED NOT NULL,\n);",
 		},
 		"two column with primary key": {
 			tName: "table",
@@ -129,7 +129,7 @@ func Test_adapter_CreateTable(t *testing.T) {
 			},
 			wantS: "CREATE TABLE `table` (\n" +
 				"    `column` INT SIGNED NOT NULL,\n" +
-				"    `column2` INT SIGNED NOT NULL\n" +
+				"    `column2` INT SIGNED NOT NULL,\n" +
 				"    PRIMARY KEY (`column`)\n);",
 		},
 	}
