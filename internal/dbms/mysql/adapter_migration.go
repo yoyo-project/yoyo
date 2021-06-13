@@ -48,12 +48,13 @@ func (a *adapter) CreateTable(tName string, t schema.Table) string {
 	)
 	for _, c := range t.Columns {
 		if !first {
-			sb.WriteString(",\n")
+			sb.WriteString("\n")
 		} else {
 			first = false
 		}
 		sb.WriteString("    ")
 		sb.WriteString(a.generateColumn(c.Name, c))
+		sb.WriteRune(',')
 		if c.PrimaryKey {
 			pks = append(pks, c.Name)
 		}
