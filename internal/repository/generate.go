@@ -160,7 +160,7 @@ func InitGeneratorLoader(
 		return newGenerator(
 			NewEntityGenerator(packageName, config.Schema),
 			NewEntityRepositoryGenerator(packageName, adapter, reposPath, findPackagePath),
-			NewQueryFileGenerator(reposPath, findPackagePath),
+			NewQueryFileGenerator(reposPath, findPackagePath, config.Schema),
 			NewRepositoriesGenerator(packageName, reposPath, findPackagePath, config.Schema),
 			NewQueryNodeGenerator(),
 			file.CreateWithDirs,
