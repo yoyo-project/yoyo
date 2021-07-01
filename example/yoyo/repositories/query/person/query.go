@@ -62,6 +62,48 @@ func (q Query) AgeNot(in float64) Query {
 	}}
 }
 
+func (q Query) CityId(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, CityId(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) CityIdGreaterOrEqual(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, CityIdGreaterOrEqual(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) CityIdGreaterThan(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, CityIdGreaterThan(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) CityIdLessOrEqual(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, CityIdLessOrEqual(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) CityIdLessThan(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, CityIdLessThan(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) CityIdNot(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, CityIdNot(in).n},
+		Operator: query.And,
+	}}
+}
+
 func (q Query) FavoriteColor(in string) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, FavoriteColor(in).n},
@@ -269,6 +311,66 @@ func AgeNot(in float64) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "age",
+			Operator: query.NotEquals,
+			Value:    in,
+		},
+	}}
+}
+
+func CityId(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "fk_city_id",
+			Operator: query.Equals,
+			Value:    in,
+		},
+	}}
+}
+
+func CityIdGreaterOrEqual(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "fk_city_id",
+			Operator: query.GreaterOrEqual,
+			Value:    in,
+		},
+	}}
+}
+
+func CityIdGreaterThan(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "fk_city_id",
+			Operator: query.GreaterThan,
+			Value:    in,
+		},
+	}}
+}
+
+func CityIdLessOrEqual(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "fk_city_id",
+			Operator: query.LessOrEqual,
+			Value:    in,
+		},
+	}}
+}
+
+func CityIdLessThan(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "fk_city_id",
+			Operator: query.LessThan,
+			Value:    in,
+		},
+	}}
+}
+
+func CityIdNot(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "fk_city_id",
 			Operator: query.NotEquals,
 			Value:    in,
 		},
