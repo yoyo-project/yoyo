@@ -151,6 +151,8 @@ func (r *Reference) UnmarshalYAML(value *yaml.Node) (err error) {
 			err = value.Content[i+1].Decode(&r.OnDelete)
 		case "on_update":
 			err = value.Content[i+1].Decode(&r.OnUpdate)
+		case "go_name":
+			err = value.Content[i+1].Decode(&r.GoName)
 		}
 
 		if err != nil {

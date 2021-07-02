@@ -35,7 +35,7 @@ func NewQueryFileGenerator(reposPath string, findPackagePath Finder, db schema.D
 			for i, n := range r.ColNames(ft) {
 				c := ft.PKColumns()[i]
 				// Override the GoName in order to generate correct method/function names
-				c.GoName = ft.ExportedGoName() + c.ExportedGoName()
+				c.GoName = r.ExportedGoName() + c.ExportedGoName()
 				ms, fs, is = template.GenerateQueryLogic(n, c)
 			}
 

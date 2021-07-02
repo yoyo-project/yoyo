@@ -72,3 +72,48 @@ func TestReference_ColNames(t *testing.T) {
 		})
 	}
 }
+
+func TestReference_ExportedGoName(t *testing.T) {
+	type fields struct {
+		GoName    string
+		TableName string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "from table name",
+			fields: fields{
+				TableName: "tableName",
+			},
+			want: "TableName",
+		},
+		{
+			name: "from goname",
+			fields: fields{
+				GoName: "goTable",
+			},
+			want: "GoTable",
+		},
+		{
+			name: "from table name with underscore",
+			fields: fields{
+				GoName: "table_name",
+			},
+			want: "TableName",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Reference{
+				GoName:    tt.fields.GoName,
+				TableName: tt.fields.TableName,
+			}
+			if got := r.ExportedGoName(); got != tt.want {
+				t.Errorf("ExportedGoName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

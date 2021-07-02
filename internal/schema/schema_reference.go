@@ -31,3 +31,12 @@ func (r *Reference) ColNames(ft Table) []string {
 
 	return fknames
 }
+
+// ExportedGoName returns the string that will be used for naming Exported types, functions, etc in generated Go code
+func (r *Reference) ExportedGoName() string {
+	if r.GoName != "" {
+		return pascal(r.GoName)
+	}
+
+	return pascal(r.TableName)
+}
