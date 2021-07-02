@@ -33,5 +33,6 @@ schema:
             - favorite_color
       references:
         city:
+          go_name: Hometown
           has_one: true
           required: false
