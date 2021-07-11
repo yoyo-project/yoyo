@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/yoyo-project/yoyo/internal/validation"
+
 	"github.com/yoyo-project/yoyo/internal/file"
 
 	"github.com/dotvezz/lime"
@@ -25,7 +27,7 @@ func main() {
 			Commands: []lime.Command{
 				{
 					Keyword: "migration",
-					Func:    generate.Migrations(ucs.GetCurrentTime, ucs.LoadMigrationGenerator, file.CreateWithDirs),
+					Func:    generate.Migrations(ucs.GetCurrentTime, ucs.LoadMigrationGenerator, file.CreateWithDirs, validation.ValidateDatabase),
 				},
 				{
 					Keyword: "repos",

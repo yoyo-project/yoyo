@@ -1,4 +1,4 @@
-package mysql
+package sqlite
 
 import (
 	"fmt"
@@ -12,8 +12,8 @@ import (
 // An error will be returned if the datatype.Datatype is invalid or not supported by MySQL
 func (a *adapter) TypeString(dt datatype.Datatype) (s string, err error) {
 	switch dt {
-	case datatype.Integer:
-		s = "INT"
+	case datatype.Char:
+		s = "CHARACTER"
 	default:
 		s, err = a.Base.TypeString(dt)
 	}
@@ -40,14 +40,14 @@ func (a *adapter) CreateTable(tName string, t schema.Table) string {
 			first = false
 		}
 		sb.WriteString("    ")
-		sb.WriteString(a.generateColumn(c.Name, c))
+		sb.WriteString(a.generateColumn(c.Name, c, len(t.PKColumns()) <= 1))
 		sb.WriteRune(',')
 		if c.PrimaryKey {
 			pks = append(pks, c.Name)
 		}
 	}
 
-	if len(pks) > 0 {
+	if len(pks) > 1 {
 		sb.WriteString(fmt.Sprintf("\n    PRIMARY KEY (`%s`)", strings.Join(pks, ",")))
 	}
 
@@ -58,7 +58,7 @@ func (a *adapter) CreateTable(tName string, t schema.Table) string {
 
 // AddColumn returns a string query which adds a column to an existing table
 func (a *adapter) AddColumn(tName, cName string, c schema.Column) string {
-	return fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN %s;", tName, a.generateColumn(cName, c))
+	return fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN %s;", tName, a.generateColumn(cName, c, false))
 }
 
 // AddIndex returns a string query which adds the specified index to an existing table
@@ -124,7 +124,7 @@ func (a *adapter) AddReference(tName string, fTable schema.Table, r schema.Refer
 	return sw.String()
 }
 
-func (a *adapter) generateColumn(cName string, c schema.Column) string {
+func (a *adapter) generateColumn(cName string, c schema.Column, inlinePK bool) string {
 	sb := strings.Builder{}
 	ts, _ := a.TypeString(c.Datatype)
 
@@ -158,8 +158,12 @@ func (a *adapter) generateColumn(cName string, c schema.Column) string {
 	}
 	sb.WriteString(" NULL")
 
+	if c.PrimaryKey && inlinePK {
+		sb.WriteString(" PRIMARY KEY")
+	}
+
 	if c.AutoIncrement {
-		sb.WriteString(" AUTO_INCREMENT")
+		sb.WriteString(" AUTOINCREMENT")
 	}
 
 	return sb.String()

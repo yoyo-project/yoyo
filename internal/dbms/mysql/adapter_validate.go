@@ -1,11 +1,10 @@
 package mysql
 
-import "github.com/yoyo-project/yoyo/internal/datatype"
+import (
+	"github.com/yoyo-project/yoyo/internal/datatype"
+)
 
-type validator struct {
-}
-
-func (*validator) SupportsDatatype(dt datatype.Datatype) bool {
+func (*adapter) SupportsDatatype(dt datatype.Datatype) bool {
 	switch dt {
 	case datatype.Integer,
 		datatype.TinyInt,
@@ -13,12 +12,24 @@ func (*validator) SupportsDatatype(dt datatype.Datatype) bool {
 		datatype.MediumInt,
 		datatype.BigInt,
 		datatype.Decimal,
+		datatype.Real,
+		datatype.Numeric,
+		datatype.Double,
+		datatype.Float,
 		datatype.Varchar,
 		datatype.Text,
 		datatype.Blob,
-		datatype.Enum:
+		datatype.Enum,
+		datatype.DateTime,
+		datatype.Date,
+		datatype.Timestamp,
+		datatype.Year:
 		return true
 	}
 
 	return false
+}
+
+func (*adapter) SupportsAutoIncrement() bool {
+	return true
 }

@@ -34,7 +34,7 @@ type Column struct {
 	AutoIncrement bool
 }
 
-// Reference represents a relationship boetween tables.
+// Reference represents a relationship between tables.
 // Not a SQL-native concept, more of an ORM-style design. Translates to foreign keys and constraints in SQL
 type Reference struct {
 	GoName      string

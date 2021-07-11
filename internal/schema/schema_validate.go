@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/yoyo-project/yoyo/internal/dbms/dialect"
 )
 
 const (
@@ -14,12 +12,7 @@ const (
 
 	actions = ":" + setCascade + ":"
 
-	asc    = "ASC"
-	desc   = "DESC"
-	orders = ":" + asc + ":" + desc + ":"
-
 	nameCharacterLimit = 30
-	dialects           = ":mysql:postgresql:"
 )
 
 func validateName(name string) error {
@@ -34,6 +27,10 @@ func validateName(name string) error {
 }
 
 func (c *Column) validate() error {
+	if err := validateName(c.Name); err != nil {
+		return err
+	}
+
 	if c.Unsigned && !c.Datatype.IsSignable() {
 		return fmt.Errorf("unsigned flag is set but '%s' does not use a signing bit", c.Datatype)
 	}
@@ -64,6 +61,10 @@ func (c *Column) validate() error {
 }
 
 func (i *Index) validate() error {
+	if err := validateName(i.Name); err != nil {
+		return err
+	}
+
 	if len(i.Columns) == 0 {
 		return fmt.Errorf("index must have at least one column")
 	}
@@ -72,6 +73,9 @@ func (i *Index) validate() error {
 }
 
 func (r *Reference) validate() error {
+	if err := validateName(r.GoName); err != nil {
+		return err
+	}
 	if r.HasMany == r.HasOne {
 		return fmt.Errorf("reference must be either HasOne or HasMany")
 	}
@@ -87,15 +91,16 @@ func (r *Reference) validate() error {
 }
 
 func (t *Table) validate() (err error) {
+	if err = validateName(t.Name); err != nil {
+		return err
+	}
+
 	if len(t.Columns) == 0 {
 		return fmt.Errorf("must have at least one column")
 	}
 
 	cNames := make(map[string]bool)
 	for _, col := range t.Columns {
-		if err = validateName(col.Name); err != nil {
-			return err
-		}
 		if err = col.validate(); err != nil {
 			return fmt.Errorf("column '%s' validation error: %w", col.Name, err)
 		}
@@ -108,9 +113,6 @@ func (t *Table) validate() (err error) {
 	}
 
 	for _, i := range t.Indices {
-		if err = validateName(i.Name); err != nil {
-			return err
-		}
 		if err = i.validate(); err != nil {
 			return fmt.Errorf("index '%s' validation error: %w", i.Name, err)
 		}
@@ -138,38 +140,16 @@ func (t *Table) validate() (err error) {
 }
 
 func (db *Database) validate() (err error) {
-	if !strings.Contains(dialects, fmt.Sprintf(":%s:", db.Dialect)) {
-		return fmt.Errorf("unknown dialect: %s", db.Dialect)
-	}
-
 	tNames := make(map[string]bool)
 	for _, t := range db.Tables {
-		if err = validateName(t.Name); err != nil {
-			return err
-		}
-
 		if err = t.validate(); err != nil {
 			return fmt.Errorf("%w for table `%s`", err, t.Name)
 		}
-		var ai bool
 
 		if _, ok := tNames[t.Name]; ok {
 			return fmt.Errorf("duplicate table name '%s'", t.Name)
 		} else {
 			tNames[t.Name] = true
-		}
-
-		// doing this here because db is in scope
-		for _, c := range t.Columns {
-			if c.AutoIncrement {
-				if db.Dialect != dialect.MySQL {
-					return fmt.Errorf("only mysql is supported for autoIncrement (column `%s`.`%s`)", t.Name, c.Name)
-				}
-				if ai {
-					return fmt.Errorf("only one autoincrement column allowed")
-				}
-				ai = true
-			}
 		}
 
 		for _, r := range t.References {

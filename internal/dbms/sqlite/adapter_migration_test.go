@@ -1,4 +1,4 @@
-package mysql
+package sqlite
 
 import (
 	"reflect"
@@ -20,7 +20,7 @@ func TestNewAdapter(t *testing.T) {
 			name: "just an adapter",
 			want: &adapter{
 				Base: base.Base{
-					Dialect: dialect.MySQL,
+					Dialect: dialect.SQLite,
 				},
 			},
 		},
@@ -40,9 +40,9 @@ func Test_adapter_TypeString(t *testing.T) {
 		wantS   string
 		wantErr string
 	}{
-		datatype.Integer.String(): {
-			dt:    datatype.Integer,
-			wantS: "INT",
+		datatype.Char.String(): {
+			dt:    datatype.Char,
+			wantS: "CHARACTER",
 		},
 		datatype.BigInt.String(): {
 			dt:    datatype.BigInt,
@@ -63,7 +63,7 @@ func Test_adapter_TypeString(t *testing.T) {
 	}
 
 	m := &adapter{
-		Base: base.Base{Dialect: dialect.MySQL},
+		Base: base.Base{Dialect: dialect.SQLite},
 	}
 
 	for name, tt := range tests {
@@ -108,7 +108,7 @@ func Test_adapter_CreateTable(t *testing.T) {
 					},
 				},
 			},
-			wantS: "CREATE TABLE `table` (\n    `column` INT SIGNED NOT NULL,\n);",
+			wantS: "CREATE TABLE `table` (\n    `column` INTEGER SIGNED NOT NULL,\n);",
 		},
 		"two column with primary key": {
 			tName: "table",
@@ -126,14 +126,14 @@ func Test_adapter_CreateTable(t *testing.T) {
 				},
 			},
 			wantS: "CREATE TABLE `table` (\n" +
-				"    `column` INT SIGNED NOT NULL,\n" +
-				"    `column2` INT SIGNED NOT NULL,\n" +
-				"    PRIMARY KEY (`column`)\n);",
+				"    `column` INTEGER SIGNED NOT NULL PRIMARY KEY,\n" +
+				"    `column2` INTEGER SIGNED NOT NULL,\n" +
+				");",
 		},
 	}
 
 	m := &adapter{
-		Base: base.Base{Dialect: dialect.MySQL},
+		Base: base.Base{Dialect: dialect.SQLite},
 	}
 
 	for name, tt := range tests {
@@ -159,12 +159,12 @@ func Test_adapter_AddColumn(t *testing.T) {
 			c: schema.Column{
 				Datatype: datatype.Integer,
 			},
-			wantS: "ALTER TABLE `table` ADD COLUMN `column` INT SIGNED NOT NULL;",
+			wantS: "ALTER TABLE `table` ADD COLUMN `column` INTEGER SIGNED NOT NULL;",
 		},
 	}
 
 	m := &adapter{
-		Base: base.Base{Dialect: dialect.MySQL},
+		Base: base.Base{Dialect: dialect.SQLite},
 	}
 
 	for name, tt := range tests {
@@ -223,7 +223,7 @@ func Test_adapter_AddIndex(t *testing.T) {
 	}
 
 	m := &adapter{
-		Base: base.Base{Dialect: dialect.MySQL},
+		Base: base.Base{Dialect: dialect.SQLite},
 	}
 
 	for name, tt := range tests {
@@ -241,16 +241,17 @@ func Test_adapter_generateColumn(t *testing.T) {
 		return &s
 	}
 	tests := map[string]struct {
-		cName string
-		c     schema.Column
-		wantS string
+		cName    string
+		c        schema.Column
+		inlinePK bool
+		wantS    string
 	}{
 		"int": {
 			cName: "col",
 			c: schema.Column{
 				Datatype: datatype.Integer,
 			},
-			wantS: "`col` INT SIGNED NOT NULL",
+			wantS: "`col` INTEGER SIGNED NOT NULL",
 		},
 		"nullable int": {
 			cName: "col",
@@ -258,7 +259,7 @@ func Test_adapter_generateColumn(t *testing.T) {
 				Datatype: datatype.Integer,
 				Nullable: true,
 			},
-			wantS: "`col` INT SIGNED DEFAULT NULL NULL",
+			wantS: "`col` INTEGER SIGNED DEFAULT NULL NULL",
 		},
 		"int default 1": {
 			cName: "col",
@@ -266,7 +267,7 @@ func Test_adapter_generateColumn(t *testing.T) {
 				Datatype: datatype.Integer,
 				Default:  point("1"),
 			},
-			wantS: "`col` INT SIGNED DEFAULT 1 NOT NULL",
+			wantS: "`col` INTEGER SIGNED DEFAULT 1 NOT NULL",
 		},
 		"unsigned int": {
 			cName: "col",
@@ -274,7 +275,7 @@ func Test_adapter_generateColumn(t *testing.T) {
 				Datatype: datatype.Integer,
 				Unsigned: true,
 			},
-			wantS: "`col` INT UNSIGNED NOT NULL",
+			wantS: "`col` INTEGER UNSIGNED NOT NULL",
 		},
 		"int auto_increment": {
 			cName: "col",
@@ -283,7 +284,7 @@ func Test_adapter_generateColumn(t *testing.T) {
 				PrimaryKey:    true,
 				AutoIncrement: true,
 			},
-			wantS: "`col` INT SIGNED NOT NULL AUTO_INCREMENT",
+			wantS: "`col` INTEGER SIGNED NOT NULL AUTOINCREMENT",
 		},
 		"decimal": {
 			cName: "col",
@@ -327,12 +328,12 @@ func Test_adapter_generateColumn(t *testing.T) {
 	}
 
 	m := &adapter{
-		Base: base.Base{Dialect: dialect.MySQL},
+		Base: base.Base{Dialect: dialect.SQLite},
 	}
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			gotS := m.generateColumn(tt.cName, tt.c)
+			gotS := m.generateColumn(tt.cName, tt.c, tt.inlinePK)
 			if gotS != tt.wantS {
 				t.Errorf("expected string `%s`, got string `%s`", tt.wantS, gotS)
 			}
@@ -360,7 +361,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				TableName: "foreign",
 				Required:  true,
 			},
-			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
 		},
 		"optional single foreign key": {
@@ -372,7 +373,7 @@ func Test_adapter_AddReference(t *testing.T) {
 					{Name: "otherCol", Datatype: datatype.Integer},
 				},
 			},
-			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED DEFAULT NULL NULL;\n" +
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED DEFAULT NULL NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
 		},
 		"single foreign key with on delete": {
@@ -388,7 +389,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				OnDelete: "CASCADE",
 				Required: true,
 			},
-			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON DELETE CASCADE;",
 		},
 		"single foreign key with on update": {
@@ -404,7 +405,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				OnUpdate: "CASCADE",
 				Required: true,
 			},
-			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON UPDATE CASCADE;",
 		},
 		"dual foreign key": {
@@ -420,8 +421,8 @@ func Test_adapter_AddReference(t *testing.T) {
 			r: schema.Reference{
 				Required: true,
 			},
-			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INT SIGNED NOT NULL;\n" +
-				"ALTER TABLE `local` ADD COLUMN `fk_foreign_id2` INT SIGNED NOT NULL;\n" +
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED NOT NULL;\n" +
+				"ALTER TABLE `local` ADD COLUMN `fk_foreign_id2` INTEGER SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`, `fk_foreign_id2`) REFERENCES foreign(`id`, `id2`);",
 		},
 		"single foreign key with custom name": {
@@ -436,13 +437,13 @@ func Test_adapter_AddReference(t *testing.T) {
 				ColumnNames: []string{"fk"},
 				Required:    true,
 			},
-			wantS: "ALTER TABLE `local` ADD COLUMN `fk` INT SIGNED NOT NULL;\n" +
+			wantS: "ALTER TABLE `local` ADD COLUMN `fk` INTEGER SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk`) REFERENCES foreign(`id`);",
 		},
 	}
 
 	m := &adapter{
-		Base: base.Base{Dialect: dialect.MySQL},
+		Base: base.Base{Dialect: dialect.SQLite},
 	}
 
 	for name, tt := range tests {

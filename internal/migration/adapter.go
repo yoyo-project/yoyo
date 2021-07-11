@@ -33,6 +33,8 @@ func LoadAdapter(name string) (a Adapter, err error) {
 		a = mysql.NewAdapter()
 	case dialect.PostgreSQL:
 		a = postgres.NewAdapter()
+	case dialect.SQLite:
+		a = postgres.NewAdapter()
 	default:
 		err = fmt.Errorf("unknown dialect `%s`", name)
 	}

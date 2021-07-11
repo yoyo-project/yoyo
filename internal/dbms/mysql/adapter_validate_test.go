@@ -30,7 +30,7 @@ func Test_validator_SupportsDatatype(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.args.dt.String(), func(t *testing.T) {
-			va := &validator{}
+			va := &adapter{}
 			if got := va.SupportsDatatype(tt.args.dt); got != tt.want {
 				t.Errorf("SupportsDatatype() = %v, want %v", got, tt.want)
 			}

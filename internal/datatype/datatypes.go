@@ -20,7 +20,11 @@ const (
 	SmallInt   = idSmallInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
 	MediumInt  = idMediumInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
 	BigInt     = idBigInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
-	Decimal    = idDecimal | metaNumeric | metaSignable | metaRequiresParams
+	Decimal    = idDecimal | metaNumeric | metaSignable
+	Numeric    = idNumeric | metaNumeric | metaSignable
+	Real       = idReal | metaNumeric | metaSignable
+	Float      = idFloat | metaNumeric | metaSignable
+	Double     = idDouble | metaNumeric | metaSignable
 	Varchar    = idVarchar | metaString
 	Text       = idText | metaString
 	TinyText   = idTinyText | metaString
@@ -46,6 +50,12 @@ const (
 	mediumint  = "MEDIUMINT"
 	bigint     = "BIGINT"
 	decimal    = "DECIMAL"
+	dec        = "DEC"
+	numeric    = "NUMERIC"
+	sreal      = "REAL"
+	float      = "FLOAT"
+	double     = "DOUBLE"
+	doubleP    = "DOUBLE PRECISION"
 	varchar    = "VARCHAR"
 	text       = "TEXT"
 	tinytext   = "TINYTEXT"
@@ -69,7 +79,6 @@ const (
 	goFloat64 = "float64"
 	goString  = "string"
 	goBool    = "bool"
-	goRune    = "rune"
 	goBlob    = "[]byte"
 	goTime    = "time.Time"
 )
@@ -99,6 +108,14 @@ func (dt Datatype) String() (s string) {
 		s = bigint
 	case Decimal:
 		s = decimal
+	case Numeric:
+		s = numeric
+	case Real:
+		s = sreal
+	case Float:
+		s = float
+	case Double:
+		s = double
 	case Varchar:
 		s = varchar
 	case Text:
@@ -147,6 +164,14 @@ func (dt Datatype) GoTypeString() (s string) {
 		s = goInt64
 	case Decimal:
 		s = goFloat64
+	case Numeric:
+		s = goFloat64
+	case Real:
+		s = goFloat64
+	case Float:
+		s = goFloat64
+	case Double:
+		s = goFloat64
 	case Varchar:
 		s = goString
 	case Text:
@@ -158,7 +183,7 @@ func (dt Datatype) GoTypeString() (s string) {
 	case LongText:
 		s = goString
 	case Char:
-		s = goRune
+		s = goString
 	case Blob:
 		s = goBlob
 	case Enum:
@@ -166,10 +191,10 @@ func (dt Datatype) GoTypeString() (s string) {
 	case Boolean:
 		s = goBool
 	case DateTime, Timestamp, Date:
+		//TODO: Work out sane better go-type for Time?
 		s = goTime
 	case Year:
 		s = goInt16
-	//TODO: Work out sane go-type for Time
 	default:
 		s = "NONE"
 	}
@@ -230,8 +255,16 @@ func FromString(in string) (dt Datatype, err error) {
 		dt = SmallInt
 	case tinyint:
 		dt = TinyInt
-	case decimal:
+	case decimal, dec:
 		dt = Decimal
+	case numeric:
+		dt = Numeric
+	case sreal:
+		dt = Real
+	case float:
+		dt = Float
+	case double, doubleP:
+		dt = Double
 	case varchar:
 		dt = Varchar
 	case text:
@@ -275,8 +308,8 @@ const (
 	metaBinary
 	metaString
 	metaTime
-	metaSignable
-	metaHasGoUnisgned
+	metaSignable      // TODO: Remove because it is synonymous with metaNumeric?
+	metaHasGoUnisgned // TODO: Remove because it is synonymous with metaInteger?
 	metaRequiresParams
 )
 
@@ -290,6 +323,10 @@ const (
 	idMediumInt
 	idBigInt
 	idDecimal
+	idNumeric
+	idReal
+	idFloat
+	idDouble
 	idVarchar
 	idText
 	idTinyText
