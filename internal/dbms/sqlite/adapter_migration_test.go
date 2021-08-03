@@ -191,7 +191,7 @@ func Test_adapter_AddIndex(t *testing.T) {
 				Columns: []string{"col"},
 				Unique:  false,
 			},
-			wantS: "ALTER TABLE `table` ADD INDEX `foreign` (`col`);",
+			wantS: "CREATE INDEX `foreign` ON `table` (`col`);",
 		},
 		"non-unique two columns": {
 			tName: "table",
@@ -200,7 +200,7 @@ func Test_adapter_AddIndex(t *testing.T) {
 				Columns: []string{"col", "col2"},
 				Unique:  false,
 			},
-			wantS: "ALTER TABLE `table` ADD INDEX `foreign` (`col`, `col2`);",
+			wantS: "CREATE INDEX `foreign` ON `table` (`col`, `col2`);",
 		},
 		"unique single-column": {
 			tName: "table",
@@ -209,7 +209,7 @@ func Test_adapter_AddIndex(t *testing.T) {
 				Columns: []string{"col"},
 				Unique:  true,
 			},
-			wantS: "ALTER TABLE `table` ADD UNIQUE INDEX `foreign` (`col`);",
+			wantS: "CREATE UNIQUE INDEX `foreign` ON `table` (`col`);",
 		},
 		"unique two columns": {
 			tName: "table",
@@ -218,7 +218,7 @@ func Test_adapter_AddIndex(t *testing.T) {
 				Columns: []string{"col", "col2"},
 				Unique:  true,
 			},
-			wantS: "ALTER TABLE `table` ADD UNIQUE INDEX `foreign` (`col`, `col2`);",
+			wantS: "CREATE UNIQUE INDEX `foreign` ON `table` (`col`, `col2`);",
 		},
 	}
 
@@ -362,7 +362,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				Required:  true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED NOT NULL;\n" +
-				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_local_foreign_id` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
 		},
 		"optional single foreign key": {
 			tName: "local",
@@ -374,7 +374,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				},
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED DEFAULT NULL NULL;\n" +
-				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_local_foreign_id` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`);",
 		},
 		"single foreign key with on delete": {
 			tName: "local",
@@ -390,7 +390,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				Required: true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED NOT NULL;\n" +
-				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON DELETE CASCADE;",
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_local_foreign_id` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON DELETE CASCADE;",
 		},
 		"single foreign key with on update": {
 			tName: "local",
@@ -406,7 +406,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				Required: true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED NOT NULL;\n" +
-				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON UPDATE CASCADE;",
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_local_foreign_id` FOREIGN KEY (`fk_foreign_id`) REFERENCES foreign(`id`) ON UPDATE CASCADE;",
 		},
 		"dual foreign key": {
 			tName: "local",
@@ -423,7 +423,7 @@ func Test_adapter_AddReference(t *testing.T) {
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk_foreign_id` INTEGER SIGNED NOT NULL;\n" +
 				"ALTER TABLE `local` ADD COLUMN `fk_foreign_id2` INTEGER SIGNED NOT NULL;\n" +
-				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk_foreign_id`, `fk_foreign_id2`) REFERENCES foreign(`id`, `id2`);",
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_local_foreign_id_id2` FOREIGN KEY (`fk_foreign_id`, `fk_foreign_id2`) REFERENCES foreign(`id`, `id2`);",
 		},
 		"single foreign key with custom name": {
 			tName: "local",
@@ -438,7 +438,7 @@ func Test_adapter_AddReference(t *testing.T) {
 				Required:    true,
 			},
 			wantS: "ALTER TABLE `local` ADD COLUMN `fk` INTEGER SIGNED NOT NULL;\n" +
-				"ALTER TABLE `local` ADD CONSTRAINT `reference_foreign` FOREIGN KEY (`fk`) REFERENCES foreign(`id`);",
+				"ALTER TABLE `local` ADD CONSTRAINT `reference_local_foreign_id` FOREIGN KEY (`fk`) REFERENCES foreign(`id`);",
 		},
 	}
 

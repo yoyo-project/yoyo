@@ -108,8 +108,8 @@ func (a *adapter) AddReference(tName string, fTable schema.Table, r schema.Refer
 		sw.WriteRune('\n')
 	}
 
-	sw.WriteString(fmt.Sprintf("ALTER TABLE `%s` ADD CONSTRAINT `reference_%s` FOREIGN KEY (`%s`) REFERENCES %s(`%s`)",
-		tName, ftName, strings.Join(lCols, "`, `"), ftName, strings.Join(fCols, "`, `")))
+	sw.WriteString(fmt.Sprintf("ALTER TABLE `%s` ADD CONSTRAINT `reference_%s_%s_%s` FOREIGN KEY (`%s`) REFERENCES %s(`%s`)",
+		tName, tName, ftName, strings.Join(fCols, "_"), strings.Join(lCols, "`, `"), ftName, strings.Join(fCols, "`, `")))
 
 	if r.OnDelete != "" {
 		sw.WriteString(fmt.Sprintf(" ON DELETE %s", r.OnDelete))
