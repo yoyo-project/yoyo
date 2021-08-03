@@ -283,7 +283,7 @@ func TestDatatype_IsBinary(t *testing.T) {
 	}
 }
 
-func TestDatatype_RequiresScale(t *testing.T) {
+func TestDatatype_RequiresParams(t *testing.T) {
 	tests := []struct {
 		dt   Datatype
 		want bool
@@ -294,7 +294,7 @@ func TestDatatype_RequiresScale(t *testing.T) {
 		},
 		{
 			dt:   Decimal,
-			want: true,
+			want: false,
 		},
 		{
 			dt:   Text,
@@ -445,7 +445,7 @@ func TestDatatype_GoTypeString(t *testing.T) {
 		},
 		{
 			dt:   Char,
-			want: goRune,
+			want: goString,
 		},
 		{
 			dt:   Blob,

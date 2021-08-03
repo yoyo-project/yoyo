@@ -9,16 +9,20 @@ import (
 	"time"
 
 	"github.com/dotvezz/lime"
+
 	"github.com/yoyo-project/yoyo/internal/migration"
+	"github.com/yoyo-project/yoyo/internal/schema"
 	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
 type FileOpener func(string) (*os.File, error)
+type DatabaseValidator func(database schema.Database) error
 
 func Migrations(
 	now func() time.Time,
 	loadGenerator migration.GeneratorLoader,
 	create FileOpener,
+	validate DatabaseValidator,
 ) lime.Func {
 	return func(args []string, w io.Writer) error {
 		config, err := yoyo.LoadConfig()
@@ -26,7 +30,12 @@ func Migrations(
 			return fmt.Errorf("unable to load config: %w", err)
 		}
 
-		generate, err := loadGenerator(config)
+		if err := validate(config.Schema); err != nil {
+			return err
+		}
+
+		var generate migration.Generator
+		generate, err = loadGenerator(config)
 		if err != nil {
 			return fmt.Errorf("unable to initialize migration generator: %w", err)
 		}

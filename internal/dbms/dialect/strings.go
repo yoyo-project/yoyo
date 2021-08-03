@@ -5,4 +5,6 @@ const (
 	MySQL = "mysql"
 	// PostgreSQL is for the SQL dialect of the same name
 	PostgreSQL = "postgresql"
+	// SQLite is for the SQL dialect of the same name
+	SQLite = "sqlite"
 )

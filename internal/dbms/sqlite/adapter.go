@@ -1,4 +1,4 @@
-package mysql
+package sqlite
 
 import (
 	"database/sql"
@@ -12,11 +12,11 @@ type adapter struct {
 	base.Base
 }
 
-// NewAdapter returns an implementation of migration.Dialect for MySQL
+// NewAdapter returns an implementation of migration.Dialect for SQLite
 func NewAdapter() *adapter {
 	return &adapter{
 		Base: base.Base{
-			Dialect: dialect.MySQL,
+			Dialect: dialect.SQLite,
 		},
 	}
 }

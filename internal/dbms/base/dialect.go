@@ -2,6 +2,7 @@ package base
 
 import (
 	"github.com/yoyo-project/yoyo/internal/datatype"
+	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
 // Base is a partial implementation of migration.Dialect. It provides the TypeString method.
@@ -20,4 +21,12 @@ func (d *Base) TypeString(dt datatype.Datatype) (string, error) {
 	}
 
 	return s, nil
+}
+
+func (*Base) ValidateTable(t schema.Table) error {
+	return nil
+}
+
+func (*Base) SupportsAutoIncrement() bool {
+	return false
 }
