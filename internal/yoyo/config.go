@@ -51,10 +51,14 @@ func LoadConfig() (yml Config, err error) {
 
 	if yml.Paths.Migrations == "" {
 		yml.Paths.Migrations = fmt.Sprintf("%s/%s", dir, defaultMigrationsPath)
+	} else {
+		yml.Paths.Migrations = fmt.Sprintf("%s/%s", dir, yml.Paths.Migrations)
 	}
 
 	if yml.Paths.Repositories == "" {
 		yml.Paths.Repositories = fmt.Sprintf("%s/%s", dir, defaultRepositoryPath)
+	} else {
+		yml.Paths.Repositories = fmt.Sprintf("%s/%s", dir, yml.Paths.Repositories)
 	}
 
 	return

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	
-	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/city"
+	"github.com/yoyo-project/yoyo/example/mysql/yoyo/repositories/query/city"
 )
 
 const (

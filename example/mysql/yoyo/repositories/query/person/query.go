@@ -3,7 +3,7 @@ package person
 import (
 	"fmt"
 
-	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query"
+	"github.com/yoyo-project/yoyo/example/mysql/yoyo/repositories/query"
 )
 
 type Query struct {
@@ -254,6 +254,62 @@ func (q Query) NameStartsWith(in string) Query {
 func (q Query) NameStartsWithNot(in string) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, NameStartsWithNot(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) Nickname(in string) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, Nickname(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) NicknameContains(in string) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, NicknameContains(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) NicknameContainsNot(in string) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, NicknameContainsNot(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) NicknameEndsWith(in string) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, NicknameEndsWith(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) NicknameEndsWithNot(in string) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, NicknameEndsWithNot(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) NicknameNot(in string) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, NicknameNot(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) NicknameStartsWith(in string) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, NicknameStartsWith(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) NicknameStartsWithNot(in string) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, NicknameStartsWithNot(in).n},
 		Operator: query.And,
 	}}
 }
@@ -591,6 +647,86 @@ func NameStartsWithNot(in string) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "name",
+			Operator: query.NotLike,
+			Value:    fmt.Sprintf("'%s%%'", in),
+		},
+	}}
+}
+
+func Nickname(in string) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "nickname",
+			Operator: query.Equals,
+			Value:    in,
+		},
+	}}
+}
+
+func NicknameContains(in string) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "nickname",
+			Operator: query.Like,
+			Value:    fmt.Sprintf("'%%%s%%'", in),
+		},
+	}}
+}
+
+func NicknameContainsNot(in string) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "nickname",
+			Operator: query.NotLike,
+			Value:    fmt.Sprintf("'%%%s%%'", in),
+		},
+	}}
+}
+
+func NicknameEndsWith(in string) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "nickname",
+			Operator: query.Like,
+			Value:    fmt.Sprintf("'%%%s'", in),
+		},
+	}}
+}
+
+func NicknameEndsWithNot(in string) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "nickname",
+			Operator: query.NotLike,
+			Value:    fmt.Sprintf("'%%%s'", in),
+		},
+	}}
+}
+
+func NicknameNot(in string) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "nickname",
+			Operator: query.NotEquals,
+			Value:    in,
+		},
+	}}
+}
+
+func NicknameStartsWith(in string) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "nickname",
+			Operator: query.Like,
+			Value:    fmt.Sprintf("'%s%%'", in),
+		},
+	}}
+}
+
+func NicknameStartsWithNot(in string) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "nickname",
 			Operator: query.NotLike,
 			Value:    fmt.Sprintf("'%s%%'", in),
 		},
