@@ -3,7 +3,7 @@ package city
 import (
 	"fmt"
 
-	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query"
+	"github.com/yoyo-project/yoyo/example/mysql/yoyo/repositories/query"
 )
 
 type Query struct {

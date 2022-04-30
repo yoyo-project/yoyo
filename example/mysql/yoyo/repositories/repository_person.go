@@ -4,16 +4,16 @@ import (
 	"database/sql"
 	"fmt"
 	
-	"github.com/yoyo-project/yoyo/example/yoyo/repositories/query/person"
+	"github.com/yoyo-project/yoyo/example/mysql/yoyo/repositories/query/person"
 )
 
 const (
 	insertPerson = "INSERT INTO person" +
-		" (name, favorite_color, age) " +
-		" VALUES (?, ?, ?);"
+		" (name, nickname, favorite_color, age) " +
+		" VALUES (?, ?, ?, ?);"
 	updatePerson = "UPDATE person" +
-		" SET name = ?, favorite_color = ?, age = ? %s;"
-	selectPerson = "SELECT name, favorite_color, age FROM person %s;"
+		" SET name = ?, nickname = ?, favorite_color = ?, age = ? %s;"
+	selectPerson = "SELECT name, nickname, favorite_color, age FROM person %s;"
 	deletePerson = "DELETE FROM person %s;"
 )
 
@@ -38,7 +38,7 @@ func (r *PersonRepository) FetchOne(query person.Query) (ent Person, err error) 
 
 	row := stmt.QueryRow(args...)
 
-	err = row.Scan(&ent.Id, &ent.Name, &ent.FavoriteColor, &ent.Age)
+	err = row.Scan(&ent.Id, &ent.Name, &ent.Nickname, &ent.FavoriteColor, &ent.Age)
 
 	persisted := ent
 	ent.persisted = &persisted
@@ -91,7 +91,7 @@ func (r *PersonRepository) insert(in Person) (e Person, err error) {
 		return e, err
 	}
 
-	res, err = stmt.Exec(in.Id, in.Name, in.FavoriteColor, in.Age)
+	res, err = stmt.Exec(in.Id, in.Name, in.Nickname, in.FavoriteColor, in.Age)
 	if err != nil {
 		return e, err
 	}
@@ -130,7 +130,7 @@ func (r *PersonRepository) update(in Person) (e Person, err error) {
 		return e, err
 	}
 
-	fields := []interface{}{in.Id, in.Name, in.FavoriteColor, in.Age}
+	fields := []interface{}{in.Id, in.Name, in.Nickname, in.FavoriteColor, in.Age}
 	_, err = stmt.Exec(append(fields, args...)...)
 	if err != nil {
 		return e, err

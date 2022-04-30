@@ -1,3 +1,5 @@
+paths:
+  repositories: yoyo/repositories
 schema:
   dialect: mysql
   tables:
@@ -21,6 +23,9 @@ schema:
         name:
           type: varchar(32)
           default: ""
+        nickname:
+          type: varchar(32)
+          default: ''
         favorite_color:
           type: enum("blue", "red", "green", "yellow", "orange", "purple")
           nullable: true

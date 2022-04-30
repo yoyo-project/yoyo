@@ -4,13 +4,11 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/yoyo-project/yoyo/internal/file"
-
-	"github.com/yoyo-project/yoyo/internal/repository"
-
 	"github.com/yoyo-project/yoyo/internal/dbms/mysql"
 	"github.com/yoyo-project/yoyo/internal/dbms/postgres"
+	"github.com/yoyo-project/yoyo/internal/file"
 	"github.com/yoyo-project/yoyo/internal/migration"
+	"github.com/yoyo-project/yoyo/internal/repository"
 	"github.com/yoyo-project/yoyo/internal/reverse"
 )
 
