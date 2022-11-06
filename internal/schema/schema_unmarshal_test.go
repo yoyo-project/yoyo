@@ -284,7 +284,7 @@ primary_key: true`,
 			yml:  `type: enum("red", "blue")`,
 			want: Column{
 				Datatype: datatype.Enum,
-				Params:   []string{"red", "blue"},
+				Params:   []string{"\"red\"", "\"blue\""},
 			},
 		},
 		{

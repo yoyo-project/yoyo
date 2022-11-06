@@ -8,8 +8,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var invalidNameChars = regexp.MustCompile("[^a-zA-Z\\d_-]")
-var paramIsolator = regexp.MustCompile("(^.*?(\\(|$)|[\"\\)\\s])")
+var disallowedNameChars = regexp.MustCompile("[^a-zA-Z\\d_-]")
+var paramIsolator = regexp.MustCompile("(^.*?(\\(|$)|[\\)\\s])")
 
 func (db *Database) UnmarshalYAML(value *yaml.Node) (err error) {
 	for i, n := range value.Content {
