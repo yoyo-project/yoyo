@@ -3,6 +3,10 @@ paths:
 schema:
   dialect: mysql
   tables:
+    no_pk_table:
+      columns:
+        col:
+          type: int
     city:
       columns:
         id:

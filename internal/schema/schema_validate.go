@@ -16,7 +16,7 @@ const (
 )
 
 func validateName(name string) error {
-	invalid := invalidNameChars.Match([]byte(name))
+	invalid := disallowedNameChars.Match([]byte(name))
 	if invalid {
 		return fmt.Errorf("invalid characters in Name: %s", name)
 	}

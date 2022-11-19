@@ -7,6 +7,7 @@ import (
 type TransactFunc func(func() error) error
 
 type Repositories struct {
+	*NoPkTableRepository
 	*CityRepository
 	*PersonRepository
 }
@@ -15,6 +16,7 @@ func InitRepositories(db *sql.DB) (Repositories, TransactFunc) {
 	baseRepo := &repository{db: db}
 	return Repositories{
 		CityRepository: &CityRepository{baseRepo},
+		NoPkTableRepository: &NoPkTableRepository{baseRepo},
 		PersonRepository: &PersonRepository{baseRepo},
 	}, initTransact(baseRepo)
 }

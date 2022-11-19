@@ -7,7 +7,6 @@ import (
 	"github.com/yoyo-project/yoyo/internal/dbms/dialect"
 	"github.com/yoyo-project/yoyo/internal/dbms/mysql"
 	"github.com/yoyo-project/yoyo/internal/dbms/postgres"
-	"github.com/yoyo-project/yoyo/internal/dbms/sqlite"
 	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
@@ -27,8 +26,6 @@ func LoadValidator(name string) (a Adapter, err error) {
 		a = mysql.NewAdapter()
 	case dialect.PostgreSQL:
 		a = postgres.NewAdapter()
-	case dialect.SQLite:
-		a = sqlite.NewAdapter()
 	default:
 		err = fmt.Errorf("unknown dialect `%s`", name)
 	}

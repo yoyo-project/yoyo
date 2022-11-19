@@ -101,10 +101,9 @@ func (r *` + EntityName + `Repository) Delete(query ` + QueryPackageName + `.Que
 	return err
 }`
 
-const SaveWithoutPK = `func (r *` + EntityName + `Repository) Save(in ` + EntityName + `) (` + EntityName + `, error) {
+const SaveWithoutPK = `func (r *` + EntityName + `Repository) Save(in ` + EntityName + `) (e ` + EntityName + `, err error) {
 	var (
 		stmt *sql.Stmt
-		res  sql.Result
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
@@ -118,7 +117,7 @@ const SaveWithoutPK = `func (r *` + EntityName + `Repository) Save(in ` + Entity
 		return e, err
 	}
 
-	res, err = stmt.Exec(` + InFields + `)
+	_, err = stmt.Exec(` + InFields + `)
 	if err != nil {
 		return e, err
 	}
