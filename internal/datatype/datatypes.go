@@ -31,6 +31,7 @@ const (
 	MediumText = idMediumText | metaString
 	LongText   = idLongText | metaString
 	Char       = idChar | metaString
+	Binary     = idBinary | metaBinary
 	Blob       = idBlob | metaBinary
 	Enum       = idEnum | metaString | metaRequiresParams
 	Boolean    = idBoolean
@@ -63,6 +64,7 @@ const (
 	longtext   = "LONGTEXT"
 	char       = "CHAR"
 	blob       = "BLOB"
+	binary     = "BINARY"
 	enum       = "ENUM"
 	boolean    = "BOOLEAN" // yoyo considers "BOOLEAN" to be the canonical string, however
 	sbool      = "BOOL"    // it still accepts "BOOL" as an alias and canonicalizes it to "BOOLEAN"
@@ -80,6 +82,7 @@ const (
 	goString  = "string"
 	goBool    = "bool"
 	goBlob    = "[]byte"
+	goBinary  = "[]byte"
 	goTime    = "time.Time"
 )
 
@@ -130,6 +133,8 @@ func (dt Datatype) String() (s string) {
 		s = char
 	case Blob:
 		s = blob
+	case Binary:
+		s = binary
 	case Enum:
 		s = enum
 	case Boolean:
@@ -186,6 +191,8 @@ func (dt Datatype) GoTypeString() (s string) {
 		s = goString
 	case Blob:
 		s = goBlob
+	case Binary:
+		s = goBinary
 	case Enum:
 		s = goString
 	case Boolean:
@@ -293,6 +300,8 @@ func FromString(in string) (dt Datatype, err error) {
 		dt = Timestamp
 	case year:
 		dt = Year
+	case binary:
+		dt = Binary
 	default:
 		err = ErrUnknownDatatype
 	}
@@ -333,6 +342,7 @@ const (
 	idMediumText
 	idLongText
 	idChar
+	idBinary
 	idBlob
 	idEnum
 	idBoolean
