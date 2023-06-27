@@ -200,6 +200,10 @@ func (r *` + EntityName + `Repository) Search(query ` + QueryPackageName + `.Que
 
 `
 
+const NoPKCapture = `
+	_ = res
+`
+
 const SinglePKCaptureTemplate = `
 	e = in
 	var eid int64

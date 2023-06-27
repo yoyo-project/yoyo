@@ -37,7 +37,12 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 			// Do nothing
 		case 1:
 			col := t.PKColumns()[0]
-			pkCapTemplate = template.SinglePKCaptureTemplate
+			switch col.AutoIncrement {
+			case true:
+				pkCapTemplate = template.SinglePKCaptureTemplate
+			case false:
+				pkCapTemplate = template.NoPKCapture
+			}
 			pkReplacer = strings.NewReplacer(
 				template.FieldName,
 				col.ExportedGoName(),

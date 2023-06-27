@@ -23,6 +23,7 @@ func (*adapter) SupportsDatatype(dt datatype.Datatype) bool {
 		datatype.DateTime,
 		datatype.Date,
 		datatype.Timestamp,
+		datatype.Binary,
 		datatype.Year:
 		return true
 	}

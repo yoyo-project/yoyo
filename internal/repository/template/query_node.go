@@ -19,6 +19,11 @@ const (
 	LessThan       ComparisonOperator = "<"
 	LessOrEqual    ComparisonOperator = "<="
 
+	Before        = LessThan
+	After         = GreaterThan
+	BeforeOrEqual = LessOrEqual
+	AfterOrEqual  = GreaterOrEqual
+
 	And LogicalOperator = "AND"
 	Or  LogicalOperator = "OR"
 )

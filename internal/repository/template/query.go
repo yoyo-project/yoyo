@@ -85,6 +85,15 @@ func GenerateQueryLogic(col string, column schema.Column) (methods, functions, i
 		goType string
 	)
 	switch {
+	case column.Datatype.IsTime():
+		ops = []operation{
+			{Equals},
+			{Not},
+			{Before},
+			{After},
+			{BeforeOrEqual},
+			{AfterOrEqual},
+		}
 	case column.Datatype.IsNumeric():
 		ops = []operation{
 			{Equals},
@@ -117,7 +126,7 @@ func GenerateQueryLogic(col string, column schema.Column) (methods, functions, i
 
 	var imports2 []string
 	methods, functions, imports2 = buildOperations(goName, col, goType, ops)
-	sort.Strings(imports)
+	sort.Strings(imports2)
 
 	exists := make(map[string]bool)
 	for _, s := range imports2 {
@@ -181,7 +190,7 @@ func (o operation) imports() (imports []string) {
 	case Contains, ContainsNot, StartsWith, StartsWithNot, EndsWith, EndsWithNot:
 		imports = append(imports, `"fmt"`)
 	case Before, After, BeforeOrEqual, AfterOrEqual:
-		imports = append(imports, `"time"'`)
+		imports = append(imports, `"time"`)
 	}
 	return imports
 }
