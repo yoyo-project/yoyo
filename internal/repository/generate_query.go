@@ -13,6 +13,10 @@ import (
 func NewQueryFileGenerator(reposPath string, findPackagePath Finder, db schema.Database) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) error {
 		var methods, functions, imports []string
+
+		// We always need fmt
+		imports = []string{`"fmt"`}
+
 		for _, c := range t.Columns {
 			ms, fs, is := template.GenerateQueryLogic(c.Name, c)
 			methods = append(methods, ms...)

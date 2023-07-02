@@ -53,7 +53,8 @@ type Query struct {
 }
 
 func (q Query) SQL() (string, []interface{}) {
-	return q.n.SQL()
+	cs, ps := q.n.SQL()
+	return fmt.Sprintf("WHERE %s", cs), ps
 }
 
 func (q Query) Or(in Query) Query {
