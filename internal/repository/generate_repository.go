@@ -9,7 +9,7 @@ import (
 	"github.com/yoyo-project/yoyo/internal/schema"
 )
 
-func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath string, packagePath Finder) EntityGenerator {
+func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath string, packagePath Finder, db schema.Database) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) (err error) {
 		var pkNames, cNames, scanFields, inFields, pkFields, colAssignments []string
 		for _, col := range t.Columns {
@@ -22,6 +22,34 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 			scanFields = append(scanFields, fmt.Sprintf("&ent.%s", col.ExportedGoName()))
 			inFields = append(inFields, fmt.Sprintf("in.%s", col.ExportedGoName()))
 		}
+
+		for _, r := range t.References {
+			if r.HasOne {
+				ft, _ := db.GetTable(r.TableName)
+				for _, cn := range r.ColNames(ft) {
+					cNames = append(cNames, cn)
+				}
+				for _, cn := range ft.PKColNames() {
+					c, _ := ft.GetColumn(cn)
+					goName := fmt.Sprintf("%s%s", ft.ExportedGoName(), c.ExportedGoName())
+					scanFields = append(scanFields, fmt.Sprintf("&ent.%s", goName))
+					inFields = append(inFields, fmt.Sprintf("in.%s", goName))
+				}
+			}
+		}
+
+		for _, t2 := range db.Tables {
+			for _, r := range t2.References {
+				if r.HasMany && r.TableName == t.Name {
+					for _, col := range t2.PKColumns() {
+						cNames = append(cNames, col.Name)
+						scanFields = append(scanFields, fmt.Sprintf("&ent.%s", col.ExportedGoName()))
+						inFields = append(inFields, fmt.Sprintf("in.%s", col.ExportedGoName()))
+					}
+				}
+			}
+		}
+
 
 		var queryImportPath string
 		queryImportPath, err = packagePath(fmt.Sprintf("%s/query/%s", reposPath, t.QueryPackageName()))
@@ -69,6 +97,7 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 		for i, colName := range cNames {
 			colAssignments = append(colAssignments, fmt.Sprintf("%s = %s", colName, preparedStatementPlaceholders[i]))
 		}
+
 
 		var saveFuncs string
 
