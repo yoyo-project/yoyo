@@ -31,7 +31,7 @@ func (r *` + EntityName + `Repository) insert(in ` + EntityName + `) (e ` + Enti
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -58,7 +58,7 @@ func (r *` + EntityName + `Repository) update(in ` + EntityName + `) (e ` + Enti
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -85,7 +85,7 @@ func (r *` + EntityName + `Repository) Delete(query ` + QueryPackageName + `.Que
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -107,7 +107,7 @@ const SaveWithoutPK = `func (r *` + EntityName + `Repository) Save(in ` + Entity
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -155,7 +155,7 @@ func (r *` + EntityName + `Repository) FetchOne(query ` + QueryPackageName + `.Q
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -180,7 +180,7 @@ func (r *` + EntityName + `Repository) Search(query ` + QueryPackageName + `.Que
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
