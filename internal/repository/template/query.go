@@ -145,7 +145,11 @@ func GenerateQueryLogic(col string, column schema.Column) (methods, functions, i
 		ops = append(ops, operation{IsNull}, operation{IsNotNull})
 	}
 
-	goType = column.GoTypeString()
+	// For query builder inputs, we don't ever care about nullable typing
+	noNullColumn := column
+	noNullColumn.Nullable = false
+
+	goType = noNullColumn.GoTypeString()
 	goName := column.ExportedGoName()
 
 	var imports2 []string

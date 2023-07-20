@@ -43,7 +43,7 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 				if r.HasMany && r.TableName == t.Name {
 					for _, col := range t2.PKColumns() {
 						cNames = append(cNames, col.Name)
-						scanFields = append(scanFields, fmt.Sprintf("&ent.%s", col.ExportedGoName()))
+						scanFields = append(scanFields, fmt.Sprintf("&ent.%s", t2.ExportedGoName() + col.ExportedGoName()))
 						inFields = append(inFields, fmt.Sprintf("in.%s", col.ExportedGoName()))
 					}
 				}

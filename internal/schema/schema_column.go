@@ -13,19 +13,28 @@ func (c *Column) ExportedGoName() string {
 
 // GoTypeString returns the string keyword of the column type's corresponding Go type
 func (c *Column) GoTypeString() string {
-	s := c.Datatype.GoTypeString()
-
-	if c.Unsigned == false && c.Datatype.IsSignable() && c.Datatype.HasGoUnsigned() {
-		s = fmt.Sprintf("u%s", s)
+	var s string
+	if c.Nullable {
+		s = c.Datatype.GoNullableTypeString()
+	} else {
+		s = c.Datatype.GoTypeString()
+		if c.Unsigned && c.Datatype.IsSignable() && c.Datatype.HasGoUnsigned() {
+			s = fmt.Sprintf("u%s", s)
+		}
 	}
+
 
 	return s
 }
 
 // RequiredImport returns any packages that need to be imported to support the Go type of a column in generated  Go code
-func (c *Column) RequiredImport() string {
-	if c.Datatype.IsTime() {
+func (c *Column) RequiredImport(nullPath string) string {
+	if c.Datatype.IsTime() && !c.Nullable {
 		return `"time"`
+	}
+
+	if c.Nullable && c.Datatype.GoNullableTypeString() != "NONE" {
+		return `"` + nullPath + `"`
 	}
 
 	return ""

@@ -89,6 +89,7 @@ func TestColumn_GoTypeString(t *testing.T) {
 func TestColumn_RequiredImport(t *testing.T) {
 	type fields struct {
 		Datatype datatype.Datatype
+		Nullable bool
 	}
 	tests := []struct {
 		name   string
@@ -105,13 +106,19 @@ func TestColumn_RequiredImport(t *testing.T) {
 			fields: fields{Datatype: datatype.Date},
 			want:   `"time"`,
 		},
+		{
+			name:   "optionalTime",
+			fields: fields{Datatype: datatype.Date},
+			want:   `"time"`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Column{
 				Datatype: tt.fields.Datatype,
+				Nullable: tt.fields.Nullable,
 			}
-			if got := c.RequiredImport(); got != tt.want {
+			if got := c.RequiredImport("nullable"); got != tt.want {
 				t.Errorf("RequiredImport() = %v, want %v", got, tt.want)
 			}
 		})
