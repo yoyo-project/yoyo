@@ -11,14 +11,16 @@ import (
 
 func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath string, packagePath Finder, db schema.Database) EntityGenerator {
 	return func(t schema.Table, w io.StringWriter) (err error) {
-		var pkNames, cNames, scanFields, inFields, pkFields, colAssignments []string
+		var pkNames, insertCNames, selectCNames, scanFields, inFields, pkFields, colAssignments []string
 		for _, col := range t.Columns {
-			if !col.PrimaryKey {
-				cNames = append(cNames, col.Name)
-			} else {
+			if col.PrimaryKey {
 				pkFields = append(pkFields, strings.ReplaceAll(template.PKFieldTemplate, template.FieldName, col.ExportedGoName()))
 				pkNames = append(pkNames, col.Name)
 			}
+			if !col.AutoIncrement {
+				insertCNames = append(insertCNames, col.Name)
+			}
+			selectCNames = append(selectCNames, col.Name)
 			scanFields = append(scanFields, fmt.Sprintf("&ent.%s", col.ExportedGoName()))
 			inFields = append(inFields, fmt.Sprintf("in.%s", col.ExportedGoName()))
 		}
@@ -27,7 +29,8 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 			if r.HasOne {
 				ft, _ := db.GetTable(r.TableName)
 				for _, cn := range r.ColNames(ft) {
-					cNames = append(cNames, cn)
+					selectCNames = append(selectCNames, cn)
+					insertCNames = append(insertCNames, cn)
 				}
 				for _, cn := range ft.PKColNames() {
 					c, _ := ft.GetColumn(cn)
@@ -42,7 +45,8 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 			for _, r := range t2.References {
 				if r.HasMany && r.TableName == t.Name {
 					for _, col := range t2.PKColumns() {
-						cNames = append(cNames, col.Name)
+						selectCNames = append(selectCNames, col.Name)
+						insertCNames = append(insertCNames, col.Name)
 						scanFields = append(scanFields, fmt.Sprintf("&ent.%s", t2.ExportedGoName() + col.ExportedGoName()))
 						inFields = append(inFields, fmt.Sprintf("in.%s", col.ExportedGoName()))
 					}
@@ -93,8 +97,8 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 
 		pkQuery := pkQueryReplacer.Replace(template.PKQueryTemplate)
 
-		preparedStatementPlaceholders := adapter.PreparedStatementPlaceholders(len(cNames))
-		for i, colName := range cNames {
+		preparedStatementPlaceholders := adapter.PreparedStatementPlaceholders(len(selectCNames))
+		for i, colName := range selectCNames {
 			colAssignments = append(colAssignments, fmt.Sprintf("%s = %s", colName, preparedStatementPlaceholders[i]))
 		}
 
@@ -120,8 +124,10 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 			t.ExportedGoName(),
 			template.TableName,
 			t.Name,
-			template.ColumnNames,
-			strings.Join(cNames, ", "),
+			template.InsertColumnNames,
+			strings.Join(insertCNames, ", "),
+			template.SelectColumnNames,
+			strings.Join(selectCNames, ", "),
 			template.StatementPlaceholders,
 			strings.Join(preparedStatementPlaceholders, ", "),
 			template.PKCapture,

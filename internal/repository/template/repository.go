@@ -4,7 +4,8 @@ const (
 	Imports               = "$IMPORTS$"
 	TableName             = "$TABLE_NAME$"
 	QueryPackageName      = "$ENTITY_PACKAGE_NAME$"
-	ColumnNames           = "$COLUMN_NAMES$"
+	InsertColumnNames     = "$INSERT_COLUMN_NAMES$"
+	SelectColumnNames     = "$SELECT_COLUMN_NAMES$"
 	StatementPlaceholders = "$STATEMENT_PLACEHOLDERS$"
 	ColumnAssignments     = "$COLUMN_ASSIGNMENTS$"
 	EntityName            = "$ENTITY_NAME$"
@@ -139,11 +140,11 @@ import (
 
 const (
 	insert` + EntityName + ` = "INSERT INTO ` + TableName + `" +
-		" (` + ColumnNames + `) " +
+		" (` + InsertColumnNames + `) " +
 		" VALUES (` + StatementPlaceholders + `);"
 	update` + EntityName + ` = "UPDATE ` + TableName + `" +
 		" SET ` + ColumnAssignments + ` %s;"
-	select` + EntityName + ` = "SELECT ` + ColumnNames + ` FROM ` + TableName + ` %s;"
+	select` + EntityName + ` = "SELECT ` + SelectColumnNames + ` FROM ` + TableName + ` %s;"
 	delete` + EntityName + ` = "DELETE FROM ` + TableName + ` %s;"
 )
 
