@@ -192,6 +192,28 @@ func (r *` + EntityName + `Repository) Search(query ` + QueryPackageName + `.Que
 		return es, err
 	}
 
+	// If we're in a transaction, take the full result set into memory to free up the sql connection's buffer
+	if r.isTx {
+		var rs *sql.Rows
+		rs, err = stmt.Query()
+		if err != nil {
+			return es, err
+		}
+
+		for rs.Next() {
+			var ent ` + EntityName + `
+			err = rs.Scan(` + ScanFields + `)
+			if err != nil {
+				return es, err
+			}
+			es.es = append(es.es, ent)
+		}
+
+		es.i = -1
+
+		return es, nil
+	}
+
 	es.rs, err = stmt.Query(args...)
 
 	return es, err
