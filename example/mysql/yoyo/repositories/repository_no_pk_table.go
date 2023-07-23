@@ -9,11 +9,11 @@ import (
 
 const (
 	insertNoPkTable = "INSERT INTO no_pk_table" +
-		" (col) " +
-		" VALUES (?);"
+		" (col, col2) " +
+		" VALUES (?, ?);"
 	updateNoPkTable = "UPDATE no_pk_table" +
-		" SET col = ? %s;"
-	selectNoPkTable = "SELECT col FROM no_pk_table %s;"
+		" SET col = ?, col2 = ? %s;"
+	selectNoPkTable = "SELECT col, col2 FROM no_pk_table %s;"
 	deleteNoPkTable = "DELETE FROM no_pk_table %s;"
 )
 
@@ -25,7 +25,7 @@ func (r *NoPkTableRepository) FetchOne(query no_pk_table.Query) (ent NoPkTable, 
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -38,7 +38,7 @@ func (r *NoPkTableRepository) FetchOne(query no_pk_table.Query) (ent NoPkTable, 
 
 	row := stmt.QueryRow(args...)
 
-	err = row.Scan(&ent.Col)
+	err = row.Scan(&ent.Col, &ent.Col2)
 
 	persisted := ent
 	ent.persisted = &persisted
@@ -50,7 +50,7 @@ func (r *NoPkTableRepository) Search(query no_pk_table.Query) (es NoPkTables, er
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -62,7 +62,7 @@ func (r *NoPkTableRepository) Search(query no_pk_table.Query) (es NoPkTables, er
 	}
 
 	// If we're in a transaction, take the full result set into memory to free up the sql connection's buffer
-	if r.isTx {
+	if r.tx != nil {
 		var rs *sql.Rows
 		rs, err = stmt.Query()
 		if err != nil {
@@ -71,7 +71,7 @@ func (r *NoPkTableRepository) Search(query no_pk_table.Query) (es NoPkTables, er
 
 		for rs.Next() {
 			var ent NoPkTable
-			err = rs.Scan(&ent.Col)
+			err = rs.Scan(&ent.Col, &ent.Col2)
 			if err != nil {
 				return es, err
 			}
@@ -94,7 +94,7 @@ func (r *NoPkTableRepository) Save(in NoPkTable) (e NoPkTable, err error) {
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -104,7 +104,7 @@ func (r *NoPkTableRepository) Save(in NoPkTable) (e NoPkTable, err error) {
 		return e, err
 	}
 
-	_, err = stmt.Exec(in.Col)
+	_, err = stmt.Exec(in.Col, in.Col2)
 	if err != nil {
 		return e, err
 	}

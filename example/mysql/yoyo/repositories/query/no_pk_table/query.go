@@ -28,6 +28,48 @@ func (q Query) Col(in int32) Query {
 	}}
 }
 
+func (q Query) Col2(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, Col2(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) Col2GreaterOrEqual(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, Col2GreaterOrEqual(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) Col2GreaterThan(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, Col2GreaterThan(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) Col2LessOrEqual(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, Col2LessOrEqual(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) Col2LessThan(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, Col2LessThan(in).n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) Col2Not(in int32) Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, Col2Not(in).n},
+		Operator: query.And,
+	}}
+}
+
 func (q Query) ColGreaterOrEqual(in int32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, ColGreaterOrEqual(in).n},
@@ -67,6 +109,66 @@ func Col(in int32) Query {
 		Condition: query.Condition{
 			Column:   "col",
 			Operator: query.Equals,
+			Value:    in,
+		},
+	}}
+}
+
+func Col2(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "col2",
+			Operator: query.Equals,
+			Value:    in,
+		},
+	}}
+}
+
+func Col2GreaterOrEqual(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "col2",
+			Operator: query.GreaterOrEqual,
+			Value:    in,
+		},
+	}}
+}
+
+func Col2GreaterThan(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "col2",
+			Operator: query.GreaterThan,
+			Value:    in,
+		},
+	}}
+}
+
+func Col2LessOrEqual(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "col2",
+			Operator: query.LessOrEqual,
+			Value:    in,
+		},
+	}}
+}
+
+func Col2LessThan(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "col2",
+			Operator: query.LessThan,
+			Value:    in,
+		},
+	}}
+}
+
+func Col2Not(in int32) Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "col2",
+			Operator: query.NotEquals,
 			Value:    in,
 		},
 	}}

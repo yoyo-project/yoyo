@@ -25,7 +25,7 @@ func (r *PersonRepository) FetchOne(query person.Query) (ent Person, err error) 
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -50,7 +50,7 @@ func (r *PersonRepository) Search(query person.Query) (es Persons, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -62,7 +62,7 @@ func (r *PersonRepository) Search(query person.Query) (es Persons, err error) {
 	}
 
 	// If we're in a transaction, take the full result set into memory to free up the sql connection's buffer
-	if r.isTx {
+	if r.tx != nil {
 		var rs *sql.Rows
 		rs, err = stmt.Query()
 		if err != nil {
@@ -103,7 +103,7 @@ func (r *PersonRepository) insert(in Person) (e Person, err error) {
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -138,7 +138,7 @@ func (r *PersonRepository) update(in Person) (e Person, err error) {
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -169,7 +169,7 @@ func (r *PersonRepository) Delete(query person.Query) (err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()

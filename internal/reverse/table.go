@@ -21,7 +21,7 @@ func InitHasIndex(getIndex func(table, column string) (schema.Index, error)) Tab
 		if err != nil {
 			return false
 		}
-		return i.Name != ""
+		return len(i.Columns) > 0
 	}
 }
 
