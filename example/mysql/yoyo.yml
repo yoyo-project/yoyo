@@ -7,6 +7,8 @@ schema:
       columns:
         col:
           type: int
+        col2:
+          type: int
     city:
       columns:
         id:
@@ -31,13 +33,13 @@ schema:
           type: varchar(32)
           default: ''
         favorite_color:
-          type: enum("blue", "red", "green", "yellow", "orange", "purple")
+          type: enum('blue', 'red', 'green', 'yellow', 'orange', 'purple')
           nullable: true
         age:
           type: decimal(10,5)
           default: 0.0
       indices:
-        color:
+        - name: color
           columns:
             - favorite_color
       references:

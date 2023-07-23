@@ -9,11 +9,11 @@ import (
 
 const (
 	insertPerson = "INSERT INTO person" +
-		" (name, nickname, favorite_color, age) " +
-		" VALUES (?, ?, ?, ?);"
+		" (name, nickname, favorite_color, age, fk_city_id) " +
+		" VALUES (?, ?, ?, ?, ?, ?);"
 	updatePerson = "UPDATE person" +
-		" SET name = ?, nickname = ?, favorite_color = ?, age = ? %s;"
-	selectPerson = "SELECT name, nickname, favorite_color, age FROM person %s;"
+		" SET id = ?, name = ?, nickname = ?, favorite_color = ?, age = ?, fk_city_id = ? %s;"
+	selectPerson = "SELECT id, name, nickname, favorite_color, age, fk_city_id FROM person %s;"
 	deletePerson = "DELETE FROM person %s;"
 )
 
@@ -25,7 +25,7 @@ func (r *PersonRepository) FetchOne(query person.Query) (ent Person, err error) 
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -38,7 +38,7 @@ func (r *PersonRepository) FetchOne(query person.Query) (ent Person, err error) 
 
 	row := stmt.QueryRow(args...)
 
-	err = row.Scan(&ent.Id, &ent.Name, &ent.Nickname, &ent.FavoriteColor, &ent.Age)
+	err = row.Scan(&ent.Id, &ent.Name, &ent.Nickname, &ent.FavoriteColor, &ent.Age, &ent.CityId)
 
 	persisted := ent
 	ent.persisted = &persisted
@@ -50,7 +50,7 @@ func (r *PersonRepository) Search(query person.Query) (es Persons, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -59,6 +59,28 @@ func (r *PersonRepository) Search(query person.Query) (es Persons, err error) {
 	stmt, err = r.prepare(fmt.Sprintf(selectPerson, conditions))
 	if err != nil {
 		return es, err
+	}
+
+	// If we're in a transaction, take the full result set into memory to free up the sql connection's buffer
+	if r.isTx {
+		var rs *sql.Rows
+		rs, err = stmt.Query()
+		if err != nil {
+			return es, err
+		}
+
+		for rs.Next() {
+			var ent Person
+			err = rs.Scan(&ent.Id, &ent.Name, &ent.Nickname, &ent.FavoriteColor, &ent.Age, &ent.CityId)
+			if err != nil {
+				return es, err
+			}
+			es.es = append(es.es, ent)
+		}
+
+		es.i = -1
+
+		return es, nil
 	}
 
 	es.rs, err = stmt.Query(args...)
@@ -81,7 +103,7 @@ func (r *PersonRepository) insert(in Person) (e Person, err error) {
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -91,7 +113,7 @@ func (r *PersonRepository) insert(in Person) (e Person, err error) {
 		return e, err
 	}
 
-	res, err = stmt.Exec(in.Id, in.Name, in.Nickname, in.FavoriteColor, in.Age)
+	res, err = stmt.Exec(in.Id, in.Name, in.Nickname, in.FavoriteColor, in.Age, in.CityId)
 	if err != nil {
 		return e, err
 	}
@@ -99,7 +121,7 @@ func (r *PersonRepository) insert(in Person) (e Person, err error) {
 	e = in
 	var eid int64
 	eid, err = res.LastInsertId()
-	e.Id = int32(eid)
+	e.Id = uint32(eid)
 	if err != nil {
 		return e, err
 	}
@@ -116,7 +138,7 @@ func (r *PersonRepository) update(in Person) (e Person, err error) {
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -130,7 +152,7 @@ func (r *PersonRepository) update(in Person) (e Person, err error) {
 		return e, err
 	}
 
-	fields := []interface{}{in.Id, in.Name, in.Nickname, in.FavoriteColor, in.Age}
+	fields := []interface{}{in.Id, in.Name, in.Nickname, in.FavoriteColor, in.Age, in.CityId}
 	_, err = stmt.Exec(append(fields, args...)...)
 	if err != nil {
 		return e, err
@@ -147,7 +169,7 @@ func (r *PersonRepository) Delete(query person.Query) (err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()

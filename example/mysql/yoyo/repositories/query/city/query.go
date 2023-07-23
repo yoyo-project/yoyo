@@ -11,7 +11,8 @@ type Query struct {
 }
 
 func (q Query) SQL() (string, []interface{}) {
-	return q.n.SQL()
+	cs, ps := q.n.SQL()
+	return fmt.Sprintf("WHERE %s", cs), ps
 }
 
 func (q Query) Or(in Query) Query {
@@ -20,42 +21,42 @@ func (q Query) Or(in Query) Query {
 		Operator: query.Or,
 	}}
 }
-func (q Query) Id(in int32) Query {
+func (q Query) Id(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, Id(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdGreaterOrEqual(in int32) Query {
+func (q Query) IdGreaterOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdGreaterOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdGreaterThan(in int32) Query {
+func (q Query) IdGreaterThan(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdGreaterThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdLessOrEqual(in int32) Query {
+func (q Query) IdLessOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdLessOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdLessThan(in int32) Query {
+func (q Query) IdLessThan(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdLessThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdNot(in int32) Query {
+func (q Query) IdNot(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdNot(in).n},
 		Operator: query.And,
@@ -117,7 +118,7 @@ func (q Query) NameStartsWithNot(in string) Query {
 		Operator: query.And,
 	}}
 }
-func Id(in int32) Query {
+func Id(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -127,7 +128,7 @@ func Id(in int32) Query {
 	}}
 }
 
-func IdGreaterOrEqual(in int32) Query {
+func IdGreaterOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -137,7 +138,7 @@ func IdGreaterOrEqual(in int32) Query {
 	}}
 }
 
-func IdGreaterThan(in int32) Query {
+func IdGreaterThan(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -147,7 +148,7 @@ func IdGreaterThan(in int32) Query {
 	}}
 }
 
-func IdLessOrEqual(in int32) Query {
+func IdLessOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -157,7 +158,7 @@ func IdLessOrEqual(in int32) Query {
 	}}
 }
 
-func IdLessThan(in int32) Query {
+func IdLessThan(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -167,7 +168,7 @@ func IdLessThan(in int32) Query {
 	}}
 }
 
-func IdNot(in int32) Query {
+func IdNot(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
