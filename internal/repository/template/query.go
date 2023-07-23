@@ -34,6 +34,9 @@ const (
 	BeforeOrEqual  = "BeforeOrEqual"
 	After          = "After"
 	AfterOrEqual   = "AfterOrEqual"
+
+	IsNull = "IsNull"
+	IsNotNull = "IsNotNull"
 )
 
 const (
@@ -50,7 +53,8 @@ type Query struct {
 }
 
 func (q Query) SQL() (string, []interface{}) {
-	return q.n.SQL()
+	cs, ps := q.n.SQL()
+	return fmt.Sprintf("WHERE %s", cs), ps
 }
 
 func (q Query) Or(in Query) Query {
@@ -77,6 +81,22 @@ func (q Query) Or(in Query) Query {
 	}}
 }
 `
+	NullQueryMethod = `func (q Query) ` + FuncName + `() Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, ` + FuncName + `().n},
+		Operator: query.And,
+	}}
+}
+`
+	NullQueryFunction = `func ` + FuncName + `() Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "` + ColumnName + `",
+			Operator: query.` + Operator + `,
+		},
+	}}
+}
+`
 )
 
 func GenerateQueryLogic(col string, column schema.Column) (methods, functions, imports []string) {
@@ -85,6 +105,15 @@ func GenerateQueryLogic(col string, column schema.Column) (methods, functions, i
 		goType string
 	)
 	switch {
+	case column.Datatype.IsTime():
+		ops = []operation{
+			{Equals},
+			{Not},
+			{Before},
+			{After},
+			{BeforeOrEqual},
+			{AfterOrEqual},
+		}
 	case column.Datatype.IsNumeric():
 		ops = []operation{
 			{Equals},
@@ -112,12 +141,20 @@ func GenerateQueryLogic(col string, column schema.Column) (methods, functions, i
 		}
 	}
 
-	goType = column.GoTypeString()
+	if column.Nullable {
+		ops = append(ops, operation{IsNull}, operation{IsNotNull})
+	}
+
+	// For query builder inputs, we don't ever care about nullable typing
+	noNullColumn := column
+	noNullColumn.Nullable = false
+
+	goType = noNullColumn.GoTypeString()
 	goName := column.ExportedGoName()
 
 	var imports2 []string
 	methods, functions, imports2 = buildOperations(goName, col, goType, ops)
-	sort.Strings(imports)
+	sort.Strings(imports2)
 
 	exists := make(map[string]bool)
 	for _, s := range imports2 {
@@ -149,6 +186,8 @@ func (o operation) val() string {
 		return `fmt.Sprintf("'%s%%'", in)`
 	case EndsWith, EndsWithNot:
 		return `fmt.Sprintf("'%%%s'", in)`
+	case IsNull, IsNotNull:
+		return `nil`
 	default:
 		return "in"
 	}
@@ -181,20 +220,26 @@ func (o operation) imports() (imports []string) {
 	case Contains, ContainsNot, StartsWith, StartsWithNot, EndsWith, EndsWithNot:
 		imports = append(imports, `"fmt"`)
 	case Before, After, BeforeOrEqual, AfterOrEqual:
-		imports = append(imports, `"time"'`)
+		imports = append(imports, `"time"`)
 	}
 	return imports
 }
 
-func buildMethod(fnc, typ string) string {
+func buildMethod(fnc, typ string, nullCheck bool) string {
 	r := strings.NewReplacer(
 		FuncName, fnc,
 		Type, typ,
 	)
-	return r.Replace(QueryMethod)
+
+	template := QueryMethod
+	if nullCheck {
+		template = NullQueryMethod
+	}
+
+	return r.Replace(template)
 }
 
-func buildFunc(fnc, col, typ, op, val string) string {
+func buildFunc(fnc, col, typ, op, val string, nullCheck bool) string {
 	r := strings.NewReplacer(
 		FuncName, fnc,
 		Type, typ,
@@ -202,15 +247,22 @@ func buildFunc(fnc, col, typ, op, val string) string {
 		Operator, op,
 		Value, val,
 	)
-	return r.Replace(QueryFunction)
+
+	template := QueryFunction
+	if nullCheck {
+		template = NullQueryFunction
+	}
+
+	return r.Replace(template)
 }
 
 func buildOperations(field, col, typ string, ops []operation) (methods, functions, imports []string) {
 	for _, op := range ops {
 		funcName := op.funcName(field)
 		val := op.val()
-		methods = append(methods, buildMethod(funcName, typ))
-		functions = append(functions, buildFunc(funcName, col, typ, op.operator(), val))
+		nullCheck := op.name == IsNotNull || op.name == IsNull
+		methods = append(methods, buildMethod(funcName, typ, nullCheck))
+		functions = append(functions, buildFunc(funcName, col, typ, op.operator(), val, nullCheck))
 		imports = append(imports, op.imports()...)
 	}
 

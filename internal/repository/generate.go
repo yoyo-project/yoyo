@@ -28,6 +28,7 @@ func NewGenerator(
 	generateQueryFile EntityGenerator,
 	generateRepositoriesFile WriteGenerator,
 	generateQueryNodeFile SimpleWriteGenerator,
+	generateNullableTypesFile SimpleWriteGenerator,
 	create FileOpener,
 ) Generator {
 	return func(db schema.Database, repositoriesPath string) error {
@@ -141,6 +142,27 @@ func NewGenerator(
 			}
 			return nil
 		}()
+
+		err = func() error {
+			fName := filepath.Join(repositoriesPath, "/nullable/types.go")
+			f, err := create(fName)
+			defer func() {
+				if f != nil {
+					_ = f.Close()
+				}
+			}()
+			defer func() { _ = f.Close() }()
+			if err != nil {
+				return fmt.Errorf("unable to create nullable types file %s: %w", fName, err)
+			}
+
+			err = generateNullableTypesFile(f)
+			if err != nil {
+				return fmt.Errorf("unable to write to nullable types file %s: %w", fName, err)
+			}
+			return nil
+		}()
+
 		if err != nil {
 			return err
 		}
@@ -149,7 +171,7 @@ func NewGenerator(
 }
 
 func InitGeneratorLoader(
-	newGenerator func(EntityGenerator, EntityGenerator, EntityGenerator, WriteGenerator, SimpleWriteGenerator, FileOpener) Generator,
+	newGenerator func(EntityGenerator, EntityGenerator, EntityGenerator, WriteGenerator, SimpleWriteGenerator, SimpleWriteGenerator, FileOpener) Generator,
 	loadAdapter AdapterLoader,
 	findPackagePath Finder,
 ) GeneratorLoader {
@@ -158,11 +180,12 @@ func InitGeneratorLoader(
 		reposPath := strings.TrimRight(config.Paths.Repositories, "/\\")
 		_, packageName := filepath.Split(strings.Trim(config.Paths.Repositories, "/\\"))
 		return newGenerator(
-			NewEntityGenerator(packageName, config.Schema),
-			NewEntityRepositoryGenerator(packageName, adapter, reposPath, findPackagePath),
+			NewEntityGenerator(packageName, config.Schema, findPackagePath, reposPath),
+			NewEntityRepositoryGenerator(packageName, adapter, reposPath, findPackagePath, config.Schema),
 			NewQueryFileGenerator(reposPath, findPackagePath, config.Schema),
 			NewRepositoriesGenerator(packageName, reposPath, findPackagePath, config.Schema),
 			NewQueryNodeGenerator(),
+			NewNullTypesFileGenerator(),
 			file.CreateWithDirs,
 		)
 	}

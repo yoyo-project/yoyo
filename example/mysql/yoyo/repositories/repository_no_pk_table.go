@@ -25,7 +25,7 @@ func (r *NoPkTableRepository) FetchOne(query no_pk_table.Query) (ent NoPkTable, 
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -50,7 +50,7 @@ func (r *NoPkTableRepository) Search(query no_pk_table.Query) (es NoPkTables, er
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -59,6 +59,28 @@ func (r *NoPkTableRepository) Search(query no_pk_table.Query) (es NoPkTables, er
 	stmt, err = r.prepare(fmt.Sprintf(selectNoPkTable, conditions))
 	if err != nil {
 		return es, err
+	}
+
+	// If we're in a transaction, take the full result set into memory to free up the sql connection's buffer
+	if r.isTx {
+		var rs *sql.Rows
+		rs, err = stmt.Query()
+		if err != nil {
+			return es, err
+		}
+
+		for rs.Next() {
+			var ent NoPkTable
+			err = rs.Scan(&ent.Col)
+			if err != nil {
+				return es, err
+			}
+			es.es = append(es.es, ent)
+		}
+
+		es.i = -1
+
+		return es, nil
 	}
 
 	es.rs, err = stmt.Query(args...)
@@ -72,7 +94,7 @@ func (r *NoPkTableRepository) Save(in NoPkTable) (e NoPkTable, err error) {
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()

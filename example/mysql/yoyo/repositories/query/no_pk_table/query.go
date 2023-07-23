@@ -1,7 +1,7 @@
 package no_pk_table
 
 import (
-	
+	"fmt"
 
 	"github.com/yoyo-project/yoyo/example/mysql/yoyo/repositories/query"
 )
@@ -11,7 +11,8 @@ type Query struct {
 }
 
 func (q Query) SQL() (string, []interface{}) {
-	return q.n.SQL()
+	cs, ps := q.n.SQL()
+	return fmt.Sprintf("WHERE %s", cs), ps
 }
 
 func (q Query) Or(in Query) Query {
@@ -20,48 +21,48 @@ func (q Query) Or(in Query) Query {
 		Operator: query.Or,
 	}}
 }
-func (q Query) Col(in uint32) Query {
+func (q Query) Col(in int32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, Col(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) ColGreaterOrEqual(in uint32) Query {
+func (q Query) ColGreaterOrEqual(in int32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, ColGreaterOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) ColGreaterThan(in uint32) Query {
+func (q Query) ColGreaterThan(in int32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, ColGreaterThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) ColLessOrEqual(in uint32) Query {
+func (q Query) ColLessOrEqual(in int32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, ColLessOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) ColLessThan(in uint32) Query {
+func (q Query) ColLessThan(in int32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, ColLessThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) ColNot(in uint32) Query {
+func (q Query) ColNot(in int32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, ColNot(in).n},
 		Operator: query.And,
 	}}
 }
-func Col(in uint32) Query {
+func Col(in int32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "col",
@@ -71,7 +72,7 @@ func Col(in uint32) Query {
 	}}
 }
 
-func ColGreaterOrEqual(in uint32) Query {
+func ColGreaterOrEqual(in int32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "col",
@@ -81,7 +82,7 @@ func ColGreaterOrEqual(in uint32) Query {
 	}}
 }
 
-func ColGreaterThan(in uint32) Query {
+func ColGreaterThan(in int32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "col",
@@ -91,7 +92,7 @@ func ColGreaterThan(in uint32) Query {
 	}}
 }
 
-func ColLessOrEqual(in uint32) Query {
+func ColLessOrEqual(in int32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "col",
@@ -101,7 +102,7 @@ func ColLessOrEqual(in uint32) Query {
 	}}
 }
 
-func ColLessThan(in uint32) Query {
+func ColLessThan(in int32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "col",
@@ -111,7 +112,7 @@ func ColLessThan(in uint32) Query {
 	}}
 }
 
-func ColNot(in uint32) Query {
+func ColNot(in int32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "col",

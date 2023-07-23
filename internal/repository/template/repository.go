@@ -4,7 +4,8 @@ const (
 	Imports               = "$IMPORTS$"
 	TableName             = "$TABLE_NAME$"
 	QueryPackageName      = "$ENTITY_PACKAGE_NAME$"
-	ColumnNames           = "$COLUMN_NAMES$"
+	InsertColumnNames     = "$INSERT_COLUMN_NAMES$"
+	SelectColumnNames     = "$SELECT_COLUMN_NAMES$"
 	StatementPlaceholders = "$STATEMENT_PLACEHOLDERS$"
 	ColumnAssignments     = "$COLUMN_ASSIGNMENTS$"
 	EntityName            = "$ENTITY_NAME$"
@@ -31,7 +32,7 @@ func (r *` + EntityName + `Repository) insert(in ` + EntityName + `) (e ` + Enti
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -58,7 +59,7 @@ func (r *` + EntityName + `Repository) update(in ` + EntityName + `) (e ` + Enti
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -85,7 +86,7 @@ func (r *` + EntityName + `Repository) Delete(query ` + QueryPackageName + `.Que
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -107,7 +108,7 @@ const SaveWithoutPK = `func (r *` + EntityName + `Repository) Save(in ` + Entity
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -139,11 +140,11 @@ import (
 
 const (
 	insert` + EntityName + ` = "INSERT INTO ` + TableName + `" +
-		" (` + ColumnNames + `) " +
+		" (` + InsertColumnNames + `) " +
 		" VALUES (` + StatementPlaceholders + `);"
 	update` + EntityName + ` = "UPDATE ` + TableName + `" +
 		" SET ` + ColumnAssignments + ` %s;"
-	select` + EntityName + ` = "SELECT ` + ColumnNames + ` FROM ` + TableName + ` %s;"
+	select` + EntityName + ` = "SELECT ` + SelectColumnNames + ` FROM ` + TableName + ` %s;"
 	delete` + EntityName + ` = "DELETE FROM ` + TableName + ` %s;"
 )
 
@@ -155,7 +156,7 @@ func (r *` + EntityName + `Repository) FetchOne(query ` + QueryPackageName + `.Q
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -180,7 +181,7 @@ func (r *` + EntityName + `Repository) Search(query ` + QueryPackageName + `.Que
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil {
+		if stmt != nil && !r.isTx {
 			_ = stmt.Close()
 		}
 	}()
@@ -191,6 +192,28 @@ func (r *` + EntityName + `Repository) Search(query ` + QueryPackageName + `.Que
 		return es, err
 	}
 
+	// If we're in a transaction, take the full result set into memory to free up the sql connection's buffer
+	if r.isTx {
+		var rs *sql.Rows
+		rs, err = stmt.Query()
+		if err != nil {
+			return es, err
+		}
+
+		for rs.Next() {
+			var ent ` + EntityName + `
+			err = rs.Scan(` + ScanFields + `)
+			if err != nil {
+				return es, err
+			}
+			es.es = append(es.es, ent)
+		}
+
+		es.i = -1
+
+		return es, nil
+	}
+
 	es.rs, err = stmt.Query(args...)
 
 	return es, err
@@ -198,6 +221,10 @@ func (r *` + EntityName + `Repository) Search(query ` + QueryPackageName + `.Que
 
 ` + SaveFuncs + `
 
+`
+
+const NoPKCapture = `
+	_ = res
 `
 
 const SinglePKCaptureTemplate = `

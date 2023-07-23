@@ -145,7 +145,7 @@ func NewIndexAdder(
 					continue
 				}
 			}
-			_, err := sw.WriteString(a.AddIndex(t.Name, i.Name, i))
+			_, err := sw.WriteString(a.AddIndex(t.Name, i.Name, i) + "\n")
 			if err != nil {
 				return fmt.Errorf("unable to generate migration: %sw", err)
 			}

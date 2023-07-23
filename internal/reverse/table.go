@@ -17,8 +17,11 @@ func InitHasColumn(getColumn func(table, column string) (schema.Column, error)) 
 
 func InitHasIndex(getIndex func(table, column string) (schema.Index, error)) TableSearcher {
 	return func(table, col string) bool {
-		_, err := getIndex(table, col)
-		return err == nil
+		i, err := getIndex(table, col)
+		if err != nil {
+			return false
+		}
+		return i.Name != ""
 	}
 }
 

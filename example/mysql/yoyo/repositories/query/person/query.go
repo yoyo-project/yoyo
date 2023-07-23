@@ -11,7 +11,8 @@ type Query struct {
 }
 
 func (q Query) SQL() (string, []interface{}) {
-	return q.n.SQL()
+	cs, ps := q.n.SQL()
+	return fmt.Sprintf("WHERE %s", cs), ps
 }
 
 func (q Query) Or(in Query) Query {
@@ -97,6 +98,20 @@ func (q Query) FavoriteColorEndsWithNot(in string) Query {
 	}}
 }
 
+func (q Query) FavoriteColorIsNotNull() Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, FavoriteColorIsNotNull().n},
+		Operator: query.And,
+	}}
+}
+
+func (q Query) FavoriteColorIsNull() Query {
+	return Query{query.Node{
+		Children: &[2]query.Node{q.n, FavoriteColorIsNull().n},
+		Operator: query.And,
+	}}
+}
+
 func (q Query) FavoriteColorNot(in string) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, FavoriteColorNot(in).n},
@@ -118,84 +133,84 @@ func (q Query) FavoriteColorStartsWithNot(in string) Query {
 	}}
 }
 
-func (q Query) HometownId(in int32) Query {
+func (q Query) HometownId(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, HometownId(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) HometownIdGreaterOrEqual(in int32) Query {
+func (q Query) HometownIdGreaterOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, HometownIdGreaterOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) HometownIdGreaterThan(in int32) Query {
+func (q Query) HometownIdGreaterThan(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, HometownIdGreaterThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) HometownIdLessOrEqual(in int32) Query {
+func (q Query) HometownIdLessOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, HometownIdLessOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) HometownIdLessThan(in int32) Query {
+func (q Query) HometownIdLessThan(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, HometownIdLessThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) HometownIdNot(in int32) Query {
+func (q Query) HometownIdNot(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, HometownIdNot(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) Id(in int32) Query {
+func (q Query) Id(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, Id(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdGreaterOrEqual(in int32) Query {
+func (q Query) IdGreaterOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdGreaterOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdGreaterThan(in int32) Query {
+func (q Query) IdGreaterThan(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdGreaterThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdLessOrEqual(in int32) Query {
+func (q Query) IdLessOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdLessOrEqual(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdLessThan(in int32) Query {
+func (q Query) IdLessThan(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdLessThan(in).n},
 		Operator: query.And,
 	}}
 }
 
-func (q Query) IdNot(in int32) Query {
+func (q Query) IdNot(in uint32) Query {
 	return Query{query.Node{
 		Children: &[2]query.Node{q.n, IdNot(in).n},
 		Operator: query.And,
@@ -423,6 +438,24 @@ func FavoriteColorEndsWithNot(in string) Query {
 	}}
 }
 
+func FavoriteColorIsNotNull() Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "favorite_color",
+			Operator: query.IsNotNull,
+		},
+	}}
+}
+
+func FavoriteColorIsNull() Query {
+	return Query{query.Node{
+		Condition: query.Condition{
+			Column:   "favorite_color",
+			Operator: query.IsNull,
+		},
+	}}
+}
+
 func FavoriteColorNot(in string) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
@@ -453,7 +486,7 @@ func FavoriteColorStartsWithNot(in string) Query {
 	}}
 }
 
-func HometownId(in int32) Query {
+func HometownId(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "fk_city_id",
@@ -463,7 +496,7 @@ func HometownId(in int32) Query {
 	}}
 }
 
-func HometownIdGreaterOrEqual(in int32) Query {
+func HometownIdGreaterOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "fk_city_id",
@@ -473,7 +506,7 @@ func HometownIdGreaterOrEqual(in int32) Query {
 	}}
 }
 
-func HometownIdGreaterThan(in int32) Query {
+func HometownIdGreaterThan(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "fk_city_id",
@@ -483,7 +516,7 @@ func HometownIdGreaterThan(in int32) Query {
 	}}
 }
 
-func HometownIdLessOrEqual(in int32) Query {
+func HometownIdLessOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "fk_city_id",
@@ -493,7 +526,7 @@ func HometownIdLessOrEqual(in int32) Query {
 	}}
 }
 
-func HometownIdLessThan(in int32) Query {
+func HometownIdLessThan(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "fk_city_id",
@@ -503,7 +536,7 @@ func HometownIdLessThan(in int32) Query {
 	}}
 }
 
-func HometownIdNot(in int32) Query {
+func HometownIdNot(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "fk_city_id",
@@ -513,7 +546,7 @@ func HometownIdNot(in int32) Query {
 	}}
 }
 
-func Id(in int32) Query {
+func Id(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -523,7 +556,7 @@ func Id(in int32) Query {
 	}}
 }
 
-func IdGreaterOrEqual(in int32) Query {
+func IdGreaterOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -533,7 +566,7 @@ func IdGreaterOrEqual(in int32) Query {
 	}}
 }
 
-func IdGreaterThan(in int32) Query {
+func IdGreaterThan(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -543,7 +576,7 @@ func IdGreaterThan(in int32) Query {
 	}}
 }
 
-func IdLessOrEqual(in int32) Query {
+func IdLessOrEqual(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -553,7 +586,7 @@ func IdLessOrEqual(in int32) Query {
 	}}
 }
 
-func IdLessThan(in int32) Query {
+func IdLessThan(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",
@@ -563,7 +596,7 @@ func IdLessThan(in int32) Query {
 	}}
 }
 
-func IdNot(in int32) Query {
+func IdNot(in uint32) Query {
 	return Query{query.Node{
 		Condition: query.Condition{
 			Column:   "id",

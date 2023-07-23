@@ -19,6 +19,14 @@ const (
 	LessThan       ComparisonOperator = "<"
 	LessOrEqual    ComparisonOperator = "<="
 
+	Before        = LessThan
+	After         = GreaterThan
+	BeforeOrEqual = LessOrEqual
+	AfterOrEqual  = GreaterOrEqual
+
+	IsNull    ComparisonOperator = "IS NULL"
+	IsNotNull ComparisonOperator = "IS NOT NULL"
+
 	And LogicalOperator = "AND"
 	Or  LogicalOperator = "OR"
 )
@@ -30,7 +38,12 @@ type Condition struct {
 }
 
 func (c Condition) SQL() (string, []interface{}) {
-	return fmt.Sprintf("%s %s ?", c.Column, c.Operator), []interface{}{c.Value}
+	switch c.Operator {
+	case IsNull, IsNotNull:
+		return fmt.Sprintf("%s %s", c.Column, c.Operator), []interface{}{}
+	default:
+		return fmt.Sprintf("%s %s ?", c.Column, c.Operator), []interface{}{c.Value}
+	}
 }
 
 type Node struct {

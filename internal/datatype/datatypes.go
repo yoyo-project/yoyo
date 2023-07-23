@@ -80,10 +80,19 @@ const (
 	goInt8    = "int8"
 	goFloat64 = "float64"
 	goString  = "string"
+	goByte    = "byte"
 	goBool    = "bool"
 	goBlob    = "[]byte"
-	goBinary  = "[]byte"
 	goTime    = "time.Time"
+
+	goNullableInt64   = "nullable.Int64"
+	goNullableInt32   = "nullable.Int32"
+	goNullableInt16   = "nullable.Int16"
+	goNullableTime    = "nullable.Time"
+	goNullableBool    = "nullable.Bool"
+	goNullableByte    = "nullable.Byte"
+	goNullableFloat64 = "nullable.Float64"
+	goNullableString  = "nullable.String"
 )
 
 // UnmarshalYAML provides an implementation for yaml/v2.Unmarshaler to parse the yaml config
@@ -155,53 +164,54 @@ func (dt Datatype) String() (s string) {
 	return s
 }
 
+func (dt Datatype) GoNullableTypeString() (s string) {
+	switch dt {
+	case Integer, MediumInt:
+		s = goNullableInt32
+	case TinyInt, SmallInt, Year:
+		s = goNullableInt16
+	case BigInt:
+		s = goNullableInt64
+	case Decimal, Numeric, Real, Float, Double:
+		s = goNullableFloat64
+	case Varchar, Text, TinyText, MediumText, LongText, Enum:
+		s = goNullableString
+	case Char:
+		s = goNullableByte
+	case Blob, Binary:
+		s = goBlob
+	case Boolean:
+		s = goNullableBool
+	case DateTime, Timestamp, Date:
+		s = goNullableTime
+	default:
+		s = "NONE"
+	}
+	return s
+}
+
 func (dt Datatype) GoTypeString() (s string) {
 	switch dt {
-	case Integer:
+	case Integer, MediumInt:
 		s = goInt32
 	case TinyInt:
 		s = goInt8
-	case SmallInt:
+	case SmallInt, Year:
 		s = goInt16
-	case MediumInt:
-		s = goInt32
 	case BigInt:
 		s = goInt64
-	case Decimal:
+	case Decimal, Numeric, Real, Float, Double:
 		s = goFloat64
-	case Numeric:
-		s = goFloat64
-	case Real:
-		s = goFloat64
-	case Float:
-		s = goFloat64
-	case Double:
-		s = goFloat64
-	case Varchar:
-		s = goString
-	case Text:
-		s = goString
-	case TinyText:
-		s = goString
-	case MediumText:
-		s = goString
-	case LongText:
+	case Varchar, Text, TinyText, MediumText, LongText, Enum:
 		s = goString
 	case Char:
-		s = goString
-	case Blob:
+		s = goByte
+	case Blob, Binary:
 		s = goBlob
-	case Binary:
-		s = goBinary
-	case Enum:
-		s = goString
 	case Boolean:
 		s = goBool
 	case DateTime, Timestamp, Date:
-		//TODO: Work out sane better go-type for Time?
 		s = goTime
-	case Year:
-		s = goInt16
 	default:
 		s = "NONE"
 	}
