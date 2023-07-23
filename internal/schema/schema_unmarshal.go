@@ -56,25 +56,23 @@ func (t *Table) UnmarshalYAML(value *yaml.Node) (err error) {
 				}
 			}
 		case "indices", "indexes":
-			colsNode := value.Content[i+1]
-			for ci, in := range colsNode.Content {
-				if in.Tag == "!!str" {
-					ix := Index{}
-					ix.Name = in.Value
-					err = colsNode.Content[ci+1].Decode(&ix)
-					if err != nil {
-						return fmt.Errorf("unable to unmarshal table: %w", err)
-					}
-					t.Indices = append(t.Indices, ix)
+			indsNode := value.Content[i+1]
+
+			for _, in := range indsNode.Content {
+				index := unmarshalIndex(in)
+				if index.Name == "" {
+					index.Name = fmt.Sprintf("%s_i_%s", t.Name, strings.Join(index.Columns, "-"))
 				}
+
+				t.Indices = append(t.Indices, index)
 			}
 		case "references":
-			colsNode := value.Content[i+1]
-			for ri, rn := range colsNode.Content {
+			refsNode := value.Content[i+1]
+			for ri, rn := range refsNode.Content {
 				if rn.Tag == "!!str" {
 					r := Reference{}
 					r.TableName = rn.Value
-					err = colsNode.Content[ri+1].Decode(&r)
+					err = refsNode.Content[ri+1].Decode(&r)
 					if err != nil {
 						return fmt.Errorf("unable to unmarshal table: %w", err)
 					}
@@ -161,4 +159,26 @@ func (r *Reference) UnmarshalYAML(value *yaml.Node) (err error) {
 	}
 
 	return r.validate()
+}
+
+func unmarshalIndex(node *yaml.Node) Index {
+	index := Index{}
+
+	for i := 0; i < len(node.Content); i++ {
+		switch node.Content[i].Value {
+		case "name":
+			i++
+			index.Name = node.Content[i].Value
+		case "columns":
+			i++
+			for j := 0; j < len(node.Content[i].Content); j++ {
+				index.Columns = append(index.Columns, node.Content[i].Content[j].Value)
+			}
+		case "unique":
+			i++
+			index.Unique = node.Content[i].Value == "true"
+		}
+	}
+
+	return index
 }
