@@ -9,6 +9,7 @@ import (
 
 type NoPkTable struct {
 	Col int32
+	Col2 int32
 
 	
 
@@ -50,7 +51,7 @@ func (es *NoPkTables) Scan(e *NoPkTable) (err error) {
 }
 
 func (es *NoPkTables) scan(e *NoPkTable) (err error) {
-	err = es.rs.Scan(&e.Col)
+	err = es.rs.Scan(&e.Col, &e.Col2)
 	persisted := *e
 	e.persisted = &persisted
 	return err

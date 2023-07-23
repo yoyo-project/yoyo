@@ -32,7 +32,7 @@ func (r *` + EntityName + `Repository) insert(in ` + EntityName + `) (e ` + Enti
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -59,7 +59,7 @@ func (r *` + EntityName + `Repository) update(in ` + EntityName + `) (e ` + Enti
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -86,7 +86,7 @@ func (r *` + EntityName + `Repository) Delete(query ` + QueryPackageName + `.Que
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -108,7 +108,7 @@ const SaveWithoutPK = `func (r *` + EntityName + `Repository) Save(in ` + Entity
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -156,7 +156,7 @@ func (r *` + EntityName + `Repository) FetchOne(query ` + QueryPackageName + `.Q
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -181,7 +181,7 @@ func (r *` + EntityName + `Repository) Search(query ` + QueryPackageName + `.Que
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -193,7 +193,7 @@ func (r *` + EntityName + `Repository) Search(query ` + QueryPackageName + `.Que
 	}
 
 	// If we're in a transaction, take the full result set into memory to free up the sql connection's buffer
-	if r.isTx {
+	if r.tx != nil {
 		var rs *sql.Rows
 		rs, err = stmt.Query()
 		if err != nil {

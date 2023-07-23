@@ -25,7 +25,7 @@ func (r *CityRepository) FetchOne(query city.Query) (ent City, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -50,7 +50,7 @@ func (r *CityRepository) Search(query city.Query) (es Citys, err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -62,7 +62,7 @@ func (r *CityRepository) Search(query city.Query) (es Citys, err error) {
 	}
 
 	// If we're in a transaction, take the full result set into memory to free up the sql connection's buffer
-	if r.isTx {
+	if r.tx != nil {
 		var rs *sql.Rows
 		rs, err = stmt.Query()
 		if err != nil {
@@ -103,7 +103,7 @@ func (r *CityRepository) insert(in City) (e City, err error) {
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -138,7 +138,7 @@ func (r *CityRepository) update(in City) (e City, err error) {
 	)
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
@@ -169,7 +169,7 @@ func (r *CityRepository) Delete(query city.Query) (err error) {
 	var stmt *sql.Stmt
 	// ensure the *sql.Stmt is closed after we're done with it
 	defer func() {
-		if stmt != nil && !r.isTx {
+		if stmt != nil && r.tx == nil {
 			_ = stmt.Close()
 		}
 	}()
