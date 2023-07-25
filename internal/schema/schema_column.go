@@ -1,6 +1,9 @@
 package schema
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // ExportedGoName returns the string that will be used for naming Exported types, functions, etc in generated Go code
 func (c *Column) ExportedGoName() string {
@@ -33,7 +36,7 @@ func (c *Column) RequiredImport(nullPath string) string {
 		return `"time"`
 	}
 
-	if c.Nullable && c.Datatype.GoNullableTypeString() != "NONE" {
+	if c.Nullable && strings.HasPrefix(c.Datatype.GoNullableTypeString(), "nullable") {
 		return `"` + nullPath + `"`
 	}
 
