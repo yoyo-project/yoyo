@@ -65,12 +65,12 @@ func TestColumn_GoTypeString(t *testing.T) {
 		{
 			name:   "int",
 			fields: fields{Datatype: datatype.Integer, Unsigned: true},
-			want:   "int32",
+			want:   "uint32",
 		},
 		{
 			name:   "unsigned int",
 			fields: fields{Datatype: datatype.Integer},
-			want:   "uint32",
+			want:   "int32",
 		},
 	}
 	for _, tt := range tests {

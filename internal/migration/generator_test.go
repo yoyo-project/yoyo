@@ -62,6 +62,7 @@ func TestNewIndexAdder(t *testing.T) {
 			fields: fields{
 				options: AddAll,
 			},
+			want: "\n",
 			args: args{
 				tableName: "myTable",
 				table: schema.Table{

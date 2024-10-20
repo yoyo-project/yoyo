@@ -445,7 +445,7 @@ func TestDatatype_GoTypeString(t *testing.T) {
 		},
 		{
 			dt:   Char,
-			want: goString,
+			want: goRune,
 		},
 		{
 			dt:   Blob,

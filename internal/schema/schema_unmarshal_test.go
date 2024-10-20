@@ -205,7 +205,7 @@ columns:
   col:
     type: INT
 indices:
-  idx_col:
+  - name: idx_col
     columns:
       - col`,
 			want: Table{

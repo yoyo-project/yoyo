@@ -99,7 +99,7 @@ func (t *Table) validate() (err error) {
 		return fmt.Errorf("must have at least one column")
 	}
 
-	cNames := make(map[string]bool)
+	cNames := make(map[string]struct{})
 	for _, col := range t.Columns {
 		if err = col.validate(); err != nil {
 			return fmt.Errorf("column '%s' validation error: %w", col.Name, err)
@@ -108,7 +108,7 @@ func (t *Table) validate() (err error) {
 		if _, ok := cNames[col.Name]; ok {
 			return fmt.Errorf("duplicate column name '%s'", col.Name)
 		} else {
-			cNames[col.Name] = true
+			cNames[col.Name] = struct{}{}
 		}
 	}
 
@@ -140,7 +140,7 @@ func (t *Table) validate() (err error) {
 }
 
 func (db *Database) validate() (err error) {
-	tNames := make(map[string]bool)
+	tNames := make(map[string]struct{})
 	for _, t := range db.Tables {
 		if err = t.validate(); err != nil {
 			return fmt.Errorf("%w for table `%s`", err, t.Name)
@@ -149,7 +149,7 @@ func (db *Database) validate() (err error) {
 		if _, ok := tNames[t.Name]; ok {
 			return fmt.Errorf("duplicate table name '%s'", t.Name)
 		} else {
-			tNames[t.Name] = true
+			tNames[t.Name] = struct{}{}
 		}
 
 		for _, r := range t.References {

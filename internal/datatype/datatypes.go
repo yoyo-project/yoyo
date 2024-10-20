@@ -81,6 +81,7 @@ const (
 	goFloat64 = "float64"
 	goString  = "string"
 	goByte    = "byte"
+	goRune    = "rune"
 	goBool    = "bool"
 	goBlob    = "[]byte"
 	goTime    = "time.Time"
@@ -205,7 +206,7 @@ func (dt Datatype) GoTypeString() (s string) {
 	case Varchar, Text, TinyText, MediumText, LongText, Enum:
 		s = goString
 	case Char:
-		s = goByte
+		s = goRune
 	case Blob, Binary:
 		s = goBlob
 	case Boolean:
