@@ -6,7 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	goMysql "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/yoyo-project/yoyo/internal/datatype"
 	"github.com/yoyo-project/yoyo/internal/reverse"
 	"github.com/yoyo-project/yoyo/internal/schema"
@@ -64,22 +65,12 @@ const getReferenceColumnsQuery = `SELECT kcu.COLUMN_NAME, NOT c.IS_NULLABLE
         AND kcu.CONSTRAINT_NAME = '%s'`
 
 // InitReverserBuilder returns a `NewReverser` function, which returns a reverse.Adapter.
-func InitReverserBuilder(open func(driver, dsn string) (*sql.DB, error)) func(host, user, dbname, password, port string) (reverse.Adapter, error) {
-	return func(host, user, dbname, password, port string) (reverse.Adapter, error) {
+func InitReverserBuilder(open func(driver, dsn string) (*sql.DB, error)) func(dbURL string) (reverse.Adapter, error) {
+	return func(dbURL string) (reverse.Adapter, error) {
 		r := adapter{}
-		cnf := goMysql.NewConfig()
-
-		cnf.User = user
-		cnf.Passwd = password
-		cnf.Net = "tcp"
-		cnf.Addr = host
-		if port != "" {
-			cnf.Addr += port
-		}
-		cnf.DBName = dbname
 
 		var err error
-		r.db, err = open("mysql", cnf.FormatDSN())
+		r.db, err = open("mysql", dbURL)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open database connection for mysql r: %w", err)
 		}
@@ -143,7 +134,7 @@ func (a *adapter) ListIndices(table string) ([]string, error) {
 func (a *adapter) ListColumns(table string) ([]string, error) {
 	rs, err := a.db.Query(fmt.Sprintf(listColumnsQuery, table))
 	if err != nil {
-		return nil, fmt.Errorf("unable to list indices: %w", err)
+		return nil, fmt.Errorf("unable to list columns: %w", err)
 	}
 
 	var (
@@ -265,7 +256,7 @@ func (a *adapter) GetIndex(tableName, indexName string) (schema.Index, error) {
 	return index, nil
 }
 
-// GetReference returns a schema.Reference representing the given tableName and indexName.
+// GetReference returns a schema.Reference representing the given tableName and referenceName.
 func (a *adapter) GetReference(tableName, referenceName string) (schema.Reference, error) {
 	var (
 		ref            schema.Reference

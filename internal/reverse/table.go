@@ -26,8 +26,8 @@ func InitHasIndex(getIndex func(table, column string) (schema.Index, error)) Tab
 }
 
 func InitHasReference(getReference func(table, reference string) (schema.Reference, error)) TableSearcher {
-	return func(table, col string) bool {
-		_, err := getReference(table, col)
+	return func(table, refName string) bool {
+		_, err := getReference(table, refName)
 		return err == nil
 	}
 }

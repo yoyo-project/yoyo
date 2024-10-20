@@ -3,7 +3,6 @@ package yoyo
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,7 +32,7 @@ func LoadConfig() (yml Config, err error) {
 	}
 
 	for len(dir) >= 3 {
-		f, err = ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, filename))
+		f, err = os.ReadFile(fmt.Sprintf("%s/%s", dir, filename))
 		if err == nil {
 			break
 		}

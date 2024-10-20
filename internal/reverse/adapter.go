@@ -11,10 +11,11 @@ import (
 
 type AdapterLoader func(dia string) (adapter Adapter, err error)
 type DatabaseReader func(config yoyo.Config) (db schema.Database, err error)
-type AdapterBuilder func(host, userName, dbName, password, port string) (Adapter, error)
+type AdapterBuilder func(connectionString string) (Adapter, error)
 
 // Adapter is the yoyo interface for reverse-engineering databases to a schema.Database for creating diff migrations
 // and for creating a yoyo.yml from an existing database.
+// TODO: rename?
 type Adapter interface {
 	ListTables() ([]string, error)
 
@@ -44,9 +45,9 @@ func InitAdapterSelector(newMysqlReverser, newPostgresReverser AdapterBuilder) f
 	return func(dia string) (adapter Adapter, err error) {
 		switch dia {
 		case dialect.MySQL:
-			adapter, err = newMysqlReverser(env.DBHost(), env.DBUser(), env.DBName(), env.DBPassword(), env.DBPort())
+			adapter, err = newMysqlReverser(env.DBURL())
 		case dialect.PostgreSQL:
-			adapter, err = newPostgresReverser(env.DBHost(), env.DBUser(), env.DBName(), env.DBPassword(), env.DBPort())
+			adapter, err = newPostgresReverser(env.DBURL())
 		default:
 			err = fmt.Errorf("unknown dialect `%s`", dia)
 		}

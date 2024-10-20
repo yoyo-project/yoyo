@@ -7,7 +7,7 @@ import (
 	"github.com/yoyo-project/yoyo/internal/yoyo"
 )
 
-// ReadDatabase uses the given Adapter to scan and write the database into a schema.Database
+// InitDatabaseReader uses the given AdapterLoader to scan and write the database into a schema.Database
 func InitDatabaseReader(loadAdapter AdapterLoader) DatabaseReader {
 	return func(config yoyo.Config) (db schema.Database, err error) {
 		var adapter Adapter

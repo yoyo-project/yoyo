@@ -35,7 +35,7 @@ type Column struct {
 }
 
 // Reference represents a relationship between tables.
-// Not a SQL-native concept, more of an ORM-style design. Translates to foreign keys and constraints in SQL
+// Translates to foreign keys and constraints in SQL
 type Reference struct {
 	GoName      string
 	TableName   string

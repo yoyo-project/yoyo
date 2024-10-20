@@ -15,11 +15,7 @@ import (
 
 func TestInitNewReverser(t *testing.T) {
 	type args struct {
-		host     string
-		user     string
-		dbname   string
-		password string
-		port     string
+		dbURL string
 	}
 	tests := []struct {
 		name      string
@@ -37,7 +33,7 @@ func TestInitNewReverser(t *testing.T) {
 		{
 			name: "with port",
 			args: args{
-				port: "123",
+				dbURL: ":123",
 			},
 			open: func(_, _ string) (*sql.DB, error) {
 				db, _, _ := sqlmock.New()
@@ -55,7 +51,7 @@ func TestInitNewReverser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := InitReverserBuilder(tt.open)
-			_, err := got(tt.args.host, tt.args.user, tt.args.dbname, tt.args.password, tt.args.port)
+			_, err := got(tt.args.dbURL)
 
 			if err != nil && tt.wantError == false {
 				t.Errorf("got unexpected error: %s", err)

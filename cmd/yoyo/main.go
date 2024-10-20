@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/yoyo-project/yoyo/internal/validation"
-
 	"github.com/yoyo-project/yoyo/internal/file"
+	"github.com/yoyo-project/yoyo/internal/validation"
 
 	"github.com/dotvezz/lime"
 	"github.com/dotvezz/lime/cli"
 	"github.com/dotvezz/lime/options"
+
 	"github.com/yoyo-project/yoyo/cmd/yoyo/generate"
 	"github.com/yoyo-project/yoyo/cmd/yoyo/usecases"
 )

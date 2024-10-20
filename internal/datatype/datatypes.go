@@ -58,6 +58,7 @@ const (
 	double     = "DOUBLE"
 	doubleP    = "DOUBLE PRECISION"
 	varchar    = "VARCHAR"
+	charvar    = "CHARACTER VARYING"
 	text       = "TEXT"
 	tinytext   = "TINYTEXT"
 	mediumtext = "MEDIUMTEXT"
@@ -283,7 +284,7 @@ func FromString(in string) (dt Datatype, err error) {
 		dt = Float
 	case double, doubleP:
 		dt = Double
-	case varchar:
+	case varchar, charvar:
 		dt = Varchar
 	case text:
 		dt = Text
