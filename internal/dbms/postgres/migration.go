@@ -9,7 +9,7 @@ import (
 
 // TypeString returns the string representation of a given datatype.Datatype for PostgreSQL
 // An error will be returned if the datatype.Datatype is invalid or not supported by PostgreSQL
-func (a *adapter) TypeString(dt datatype.Datatype) (s string, err error) {
+func (a adapter) TypeString(dt datatype.Datatype) (s string, err error) {
 	if !a.SupportsDatatype(dt) {
 		return "", fmt.Errorf("datatype %s is not supported in postgresql", dt)
 	}
@@ -21,7 +21,7 @@ func (a *adapter) TypeString(dt datatype.Datatype) (s string, err error) {
 }
 
 // CreateTable generates a query to create a given table.
-func (a *adapter) CreateTable(tName string, t schema.Table) string {
+func (a adapter) CreateTable(tName string, t schema.Table) string {
 	sb := strings.Builder{}
 
 	sb.WriteString(fmt.Sprintf("CREATE TABLE `%s` (\n", tName))
@@ -54,12 +54,12 @@ func (a *adapter) CreateTable(tName string, t schema.Table) string {
 }
 
 // AddColumn generates a query that adds a column to an existing table
-func (a *adapter) AddColumn(tName, cName string, c schema.Column) string {
+func (a adapter) AddColumn(tName, cName string, c schema.Column) string {
 	return fmt.Sprintf(`ALTER TABLE "%s" ADD COLUMN %s;`, tName, a.generateColumn(cName, c))
 }
 
 // AddIndex returns a string query which adds the specified index to a table
-func (a *adapter) AddIndex(tName, iName string, i schema.Index) string {
+func (a adapter) AddIndex(tName, iName string, i schema.Index) string {
 	indexType := "INDEX"
 	if i.Unique {
 		indexType = "UNIQUE INDEX"
@@ -68,7 +68,7 @@ func (a *adapter) AddIndex(tName, iName string, i schema.Index) string {
 }
 
 // AddReference generates a query that adds columns and foreign keys for the given table, foreign table, and schema.Reference
-func (a *adapter) AddReference(tName string, fTable schema.Table, r schema.Reference) string {
+func (a adapter) AddReference(tName string, fTable schema.Table, r schema.Reference) string {
 	var (
 		fCols  = fTable.PKColNames()
 		lCols  = r.ColNames(fTable)
@@ -106,7 +106,7 @@ func (a *adapter) AddReference(tName string, fTable schema.Table, r schema.Refer
 	return sw.String()
 }
 
-func (a *adapter) generateColumn(cName string, c schema.Column) string {
+func (a adapter) generateColumn(cName string, c schema.Column) string {
 	sb := strings.Builder{}
 	ts, _ := a.TypeString(c.Datatype)
 

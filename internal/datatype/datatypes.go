@@ -15,16 +15,16 @@ type Datatype uint64
 
 // These are the actual Datatype constants with all the metadata and unique identifiers encoded into them
 const (
-	Integer    = idInteger | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
-	TinyInt    = idTinyInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
-	SmallInt   = idSmallInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
-	MediumInt  = idMediumInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
-	BigInt     = idBigInt | metaNumeric | metaInteger | metaSignable | metaHasGoUnisgned
-	Decimal    = idDecimal | metaNumeric | metaSignable
-	Numeric    = idNumeric | metaNumeric | metaSignable
-	Real       = idReal | metaNumeric | metaSignable
-	Float      = idFloat | metaNumeric | metaSignable
-	Double     = idDouble | metaNumeric | metaSignable
+	Integer    = idInteger | metaNumeric | metaInteger
+	TinyInt    = idTinyInt | metaNumeric | metaInteger
+	SmallInt   = idSmallInt | metaNumeric | metaInteger
+	MediumInt  = idMediumInt | metaNumeric | metaInteger
+	BigInt     = idBigInt | metaNumeric | metaInteger
+	Decimal    = idDecimal | metaNumeric
+	Numeric    = idNumeric | metaNumeric
+	Real       = idReal | metaNumeric
+	Float      = idFloat | metaNumeric
+	Double     = idDouble | metaNumeric
 	Varchar    = idVarchar | metaString
 	Text       = idText | metaString
 	TinyText   = idTinyText | metaString
@@ -40,9 +40,11 @@ const (
 	Time       = idTime | metaTime
 	Timestamp  = idTimestamp | metaTime
 	Year       = idYear | metaTime
+	UUID       = idUUID
 )
 
 // These are the string representations of datatypes
+// TODO: Canonicalization of postgres synonyms?
 const (
 	integer    = "INTEGER" // yoyo considers "INTEGER" to be the canonical string, however
 	sint       = "INT"     // it still accepts "INT" as an alias and canonicalizes it to "INTEGER"
@@ -74,6 +76,7 @@ const (
 	datetime   = "DATETIME"
 	timestamp  = "TIMESTAMP"
 	year       = "YEAR"
+	uuid       = "UUID"
 
 	goInt64   = "int64"
 	goInt32   = "int32"
@@ -86,6 +89,7 @@ const (
 	goBool    = "bool"
 	goBlob    = "[]byte"
 	goTime    = "time.Time"
+	goUUID    = "uuid.UUID"
 
 	goNullableInt64   = "nullable.Int64"
 	goNullableInt32   = "nullable.Int32"
@@ -160,6 +164,8 @@ func (dt Datatype) String() (s string) {
 		s = year
 	case Timestamp:
 		s = timestamp
+	case UUID:
+		s = uuid
 	default:
 		s = "NONE"
 	}
@@ -186,6 +192,8 @@ func (dt Datatype) GoNullableTypeString() (s string) {
 		s = goNullableBool
 	case DateTime, Timestamp, Date:
 		s = goNullableTime
+	case UUID:
+		s = goUUID
 	default:
 		s = "NONE"
 	}
@@ -214,6 +222,8 @@ func (dt Datatype) GoTypeString() (s string) {
 		s = goBool
 	case DateTime, Timestamp, Date:
 		s = goTime
+	case UUID:
+		s = goUUID
 	default:
 		s = "NONE"
 	}
@@ -248,12 +258,12 @@ func (dt Datatype) IsString() bool {
 
 // IsSignable returns true if the Datatype can be stored as either a signed or unsigned value
 func (dt Datatype) IsSignable() bool {
-	return dt&metaSignable > 0
+	return dt&metaNumeric > 0
 }
 
 // HasGoUnsigned returns true if the Datatype has an unsigned variant Go type like int and uint
 func (dt Datatype) HasGoUnsigned() bool {
-	return dt&metaHasGoUnisgned > 0
+	return dt&metaNumeric > 0
 }
 
 // IsTime returns true if the Datatype is a time type
@@ -314,6 +324,8 @@ func FromString(in string) (dt Datatype, err error) {
 		dt = Year
 	case binary:
 		dt = Binary
+	case uuid:
+		dt = UUID
 	default:
 		err = ErrUnknownDatatype
 	}
@@ -329,8 +341,6 @@ const (
 	metaBinary
 	metaString
 	metaTime
-	metaSignable      // TODO: Remove because it is synonymous with metaNumeric?
-	metaHasGoUnisgned // TODO: Remove because it is synonymous with metaInteger?
 	metaRequiresParams
 )
 
@@ -363,4 +373,5 @@ const (
 	idDateTime
 	idTimestamp
 	idYear
+	idUUID
 )

@@ -1,12 +1,4 @@
-package template
-
-const (
-	IdentifierQuote      = "$IDENTIFIER_QUOTE$"
-	PlaceholderStatement = "$PLACEHOLDER_STATEMENT$"
-	PlaceholderAdd       = "$PLACEHOLDER_ADD$"
-)
-
-const NodeFile = `package query
+package query
 
 import (
 	"fmt"
@@ -46,15 +38,15 @@ type Condition struct {
 func (c Condition) sql(i *int) (string, []interface{}) {
 	switch c.Operator {
 	case IsNull, IsNotNull:
-		return fmt.Sprintf("` + IdentifierQuote + `%s` + IdentifierQuote + ` %s", c.Column, c.Operator), []interface{}{}
+		return fmt.Sprintf("\"%s\" %s", c.Column, c.Operator), []interface{}{}
 	default:
 		defer func() { *i++ }()
-		return fmt.Sprintf("` + IdentifierQuote + `%s` + IdentifierQuote + ` %s %s", c.Column, c.Operator, placeholder(*i)), []interface{}{c.Value}
+		return fmt.Sprintf("\"%s\" %s %s", c.Column, c.Operator, placeholder(*i)), []interface{}{c.Value}
 	}
 }
 
 func placeholder(i int) string {
-	return fmt.Sprintf("` + PlaceholderStatement + `", i+` + PlaceholderAdd + `)
+	return fmt.Sprintf("$%d", i+1)
 }
 
 type Node struct {
@@ -94,4 +86,3 @@ func (n Node) SQL() (s string, args []any) {
 
 	return n.Condition.sql(&i)
 }
-`

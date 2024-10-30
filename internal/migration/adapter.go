@@ -13,7 +13,7 @@ type AdapterLoader func(name string) (d Adapter, err error)
 
 // Adapter describes an internal dialect to be used by Yoyo for generating Migration code for a given DBMS.
 type Adapter interface {
-	// CreateTable returns a string query which creates a full table with columns columns and primary key
+	// CreateTable returns a string query which creates a full table with columns and primary key
 	CreateTable(table string, t schema.Table) string
 
 	// AddColumn returns a string query which adds the specified column to a table

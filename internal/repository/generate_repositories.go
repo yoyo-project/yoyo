@@ -27,12 +27,9 @@ func NewRepositoriesGenerator(packageName, reposPath string, packagePath Finder,
 		}
 
 		r := strings.NewReplacer(
-			template.PackageName,
-			packageName,
-			template.ReposStructFields,
-			fmt.Sprintf("*%s", strings.Join(reposStructFields, "\n	*")),
-			template.RepoInits,
-			strings.Join(sortedUnique(repoInits), "\n		"),
+			template.PackageName, packageName,
+			template.ReposStructFields, fmt.Sprintf("*%s", strings.Join(reposStructFields, "\n	*")),
+			template.RepoInits, strings.Join(sortedUnique(repoInits), "\n		"),
 		)
 
 		_, err = w.WriteString(r.Replace(template.RepositoriesFile))
