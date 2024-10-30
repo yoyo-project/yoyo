@@ -80,7 +80,7 @@ func InitReverserBuilder(open func(driver, dsn string) (*sql.DB, error)) func(db
 }
 
 // ListTables returns a list of tables on the selected database.
-func (a *adapter) ListTables() ([]string, error) {
+func (a adapter) ListTables() ([]string, error) {
 	rs, err := a.db.Query("SHOW TABLES")
 	if err != nil {
 		return nil, fmt.Errorf("unable to list tables: %w", err)
@@ -106,7 +106,7 @@ func (a *adapter) ListTables() ([]string, error) {
 // ListIndices returns a []string of index names for the given table.
 // It will NOT return information referring to PrimaryKey or Foreign Keys, which will instead come from GetColumn and
 // ListReferences respectively
-func (a *adapter) ListIndices(table string) ([]string, error) {
+func (a adapter) ListIndices(table string) ([]string, error) {
 	query := fmt.Sprintf(listIndicesQuery, table)
 	rs, err := a.db.Query(query)
 	if err != nil {
@@ -131,7 +131,7 @@ func (a *adapter) ListIndices(table string) ([]string, error) {
 
 // ListColumns returns a []string of column names for the given table
 // It does NOT return any columns which are foreign key columns. These will instead come from ListReferences
-func (a *adapter) ListColumns(table string) ([]string, error) {
+func (a adapter) ListColumns(table string) ([]string, error) {
 	rs, err := a.db.Query(fmt.Sprintf(listColumnsQuery, table))
 	if err != nil {
 		return nil, fmt.Errorf("unable to list columns: %w", err)
@@ -154,7 +154,7 @@ func (a *adapter) ListColumns(table string) ([]string, error) {
 }
 
 // ListReferences returns a []string of tables referenced from the given table.
-func (a *adapter) ListReferences(table string) ([]string, error) {
+func (a adapter) ListReferences(table string) ([]string, error) {
 	rs, err := a.db.Query(fmt.Sprintf(listReferencesQuery, table))
 	if err != nil {
 		return nil, fmt.Errorf("unable to list indices: %w", err)
@@ -179,7 +179,7 @@ func (a *adapter) ListReferences(table string) ([]string, error) {
 
 // GetColumn returns a schema.Column representing the given tableName and colName.
 // TODO: Charset and Collation
-func (a *adapter) GetColumn(tableName, colName string) (schema.Column, error) {
+func (a adapter) GetColumn(tableName, colName string) (schema.Column, error) {
 	var (
 		dt         string
 		nullable   string
@@ -230,7 +230,7 @@ func (a *adapter) GetColumn(tableName, colName string) (schema.Column, error) {
 }
 
 // GetIndex returns a schema.Index representing the given tableName and indexName.
-func (a *adapter) GetIndex(tableName, indexName string) (schema.Index, error) {
+func (a adapter) GetIndex(tableName, indexName string) (schema.Index, error) {
 	var (
 		tempColName string
 		columns     []string
@@ -257,7 +257,7 @@ func (a *adapter) GetIndex(tableName, indexName string) (schema.Index, error) {
 }
 
 // GetReference returns a schema.Reference representing the given tableName and referenceName.
-func (a *adapter) GetReference(tableName, referenceName string) (schema.Reference, error) {
+func (a adapter) GetReference(tableName, referenceName string) (schema.Reference, error) {
 	var (
 		ref            schema.Reference
 		constraintName string

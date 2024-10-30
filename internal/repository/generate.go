@@ -108,7 +108,6 @@ func NewGenerator(
 					_ = f.Close()
 				}
 			}()
-			defer func() { _ = f.Close() }()
 			if err != nil {
 				return fmt.Errorf("unable to create query file %s: %w", fName, err)
 			}
@@ -131,7 +130,6 @@ func NewGenerator(
 					_ = f.Close()
 				}
 			}()
-			defer func() { _ = f.Close() }()
 			if err != nil {
 				return fmt.Errorf("unable to create query file %s: %w", fName, err)
 			}
@@ -151,7 +149,6 @@ func NewGenerator(
 					_ = f.Close()
 				}
 			}()
-			defer func() { _ = f.Close() }()
 			if err != nil {
 				return fmt.Errorf("unable to create nullable types file %s: %w", fName, err)
 			}
@@ -162,10 +159,10 @@ func NewGenerator(
 			}
 			return nil
 		}()
-
 		if err != nil {
 			return err
 		}
+
 		return nil
 	}
 }
@@ -184,7 +181,7 @@ func InitGeneratorLoader(
 			NewEntityRepositoryGenerator(packageName, adapter, reposPath, findPackagePath, config.Schema),
 			NewQueryFileGenerator(reposPath, findPackagePath, config.Schema),
 			NewRepositoriesGenerator(packageName, reposPath, findPackagePath, config.Schema),
-			NewQueryNodeGenerator(),
+			NewQueryNodeGenerator(adapter),
 			NewNullTypesFileGenerator(),
 			file.CreateWithDirs,
 		)

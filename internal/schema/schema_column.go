@@ -3,6 +3,8 @@ package schema
 import (
 	"fmt"
 	"strings"
+
+	"github.com/yoyo-project/yoyo/internal/datatype"
 )
 
 // ExportedGoName returns the string that will be used for naming Exported types, functions, etc in generated Go code
@@ -26,7 +28,6 @@ func (c *Column) GoTypeString() string {
 		}
 	}
 
-
 	return s
 }
 
@@ -34,6 +35,10 @@ func (c *Column) GoTypeString() string {
 func (c *Column) RequiredImport(nullPath string) string {
 	if c.Datatype.IsTime() && !c.Nullable {
 		return `"time"`
+	}
+
+	if c.Datatype == datatype.UUID {
+		return `"github.com/google/uuid"`
 	}
 
 	if c.Nullable && strings.HasPrefix(c.Datatype.GoNullableTypeString(), "nullable") {

@@ -47,13 +47,12 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 					for _, col := range t2.PKColumns() {
 						selectCNames = append(selectCNames, col.Name)
 						insertCNames = append(insertCNames, col.Name)
-						scanFields = append(scanFields, fmt.Sprintf("&ent.%s", t2.ExportedGoName() + col.ExportedGoName()))
+						scanFields = append(scanFields, fmt.Sprintf("&ent.%s", t2.ExportedGoName()+col.ExportedGoName()))
 						inFields = append(inFields, fmt.Sprintf("in.%s", col.ExportedGoName()))
 					}
 				}
 			}
 		}
-
 
 		var queryImportPath string
 		queryImportPath, err = packagePath(fmt.Sprintf("%s/query/%s", reposPath, t.QueryPackageName()))
@@ -101,7 +100,6 @@ func NewEntityRepositoryGenerator(packageName string, adapter Adapter, reposPath
 		for i, colName := range selectCNames {
 			colAssignments = append(colAssignments, fmt.Sprintf("%s = %s", colName, preparedStatementPlaceholders[i]))
 		}
-
 
 		var saveFuncs string
 

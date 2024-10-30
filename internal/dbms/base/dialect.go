@@ -13,7 +13,7 @@ type Base struct {
 // TypeString is implemented because, with most datatype.Datatype values in most SQL dialects, the datatype.Datatype String()
 // method will probably be correct. Dialect-specific implementations can extend this TypeString method with any specific
 // exceptions. For one example, check the mysql.migrator's TypeString method.
-func (d *Base) TypeString(dt datatype.Datatype) (string, error) {
+func (d Base) TypeString(dt datatype.Datatype) (string, error) {
 	s := dt.String()
 
 	if s == "NONE" {
@@ -23,10 +23,10 @@ func (d *Base) TypeString(dt datatype.Datatype) (string, error) {
 	return s, nil
 }
 
-func (*Base) ValidateTable(t schema.Table) error {
+func (Base) ValidateTable(t schema.Table) error {
 	return nil
 }
 
-func (*Base) SupportsAutoIncrement() bool {
+func (Base) SupportsAutoIncrement() bool {
 	return false
 }

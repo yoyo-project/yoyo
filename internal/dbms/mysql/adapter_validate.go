@@ -4,7 +4,7 @@ import (
 	"github.com/yoyo-project/yoyo/internal/datatype"
 )
 
-func (*adapter) SupportsDatatype(dt datatype.Datatype) bool {
+func (adapter) SupportsDatatype(dt datatype.Datatype) bool {
 	switch dt {
 	case datatype.Integer,
 		datatype.TinyInt,
@@ -31,6 +31,6 @@ func (*adapter) SupportsDatatype(dt datatype.Datatype) bool {
 	return false
 }
 
-func (*adapter) SupportsAutoIncrement() bool {
+func (adapter) SupportsAutoIncrement() bool {
 	return true
 }

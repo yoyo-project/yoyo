@@ -17,6 +17,9 @@ type AdapterBuilder func(host, userName, dbName, password, port string) (Adapter
 // Adapter is the yoyo interface for creating repository code
 type Adapter interface {
 	PreparedStatementPlaceholders(count int) []string
+	PreparedStatementPlaceholderDef() (string, int)
+	IdentifierQuoteRune() rune
+	StringQuoteRune() rune
 }
 
 func LoadAdapter(dia string) (adapter Adapter, err error) {
